@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "purpose": "Historical project identities mentioned across the user's work. Entries here are intentionally not assigned guessed repository URLs; confirm the repository before ingestion.",
+  "policy": "Do not merge project runtimes or data stores. A repository match is required before source ingestion.",
+  "projects": [
+    {
+      "id": "ai-creator-os",
+      "name": "AI Creator OS",
+      "status": "repository_match_required",
+      "category": "ai-platform",
+      "candidate_repositories": []
+    },
+    {
+      "id": "gscie",
+      "name": "GSCIE",
+      "status": "repository_match_required",
+      "category": "systems",
+      "candidate_repositories": []
+    },
+    {
+      "id": "iris-reality-integrity",
+      "name": "IRIS Reality Integrity",
+      "status": "repository_match_required",
+      "category": "integrity",
+      "candidate_repositories": []
+    },
+    {
+      "id": "uae-world-model",
+      "name": "UAE World Model",
+      "status": "repository_match_required",
+      "category": "world-model",
+      "candidate_repositories": [
+        "ArchOS-Repo"
+      ]
+    },
+    {
+      "id": "jarvis",
+      "name": "JARVIS",
+      "status": "repository_match_required",
+      "category": "assistant-system",
+      "candidate_repositories": [
+        "AI-mainframe",
+        "AIOS-System"
+      ]
+    },
+    {
+      "id": "ultron",
+      "name": "ULTRON",
+      "status": "repository_match_required",
+      "category": "assistant-system",
+      "candidate_repositories": [
+        "AI-mainframe",
+        "AIOS-System"
+      ]
+    },
+    {
+      "id": "securedb",
+      "name": "SecureDB",
+      "status": "repository_match_required",
+      "category": "security",
+      "candidate_repositories": [
+        "SecureOS"
+      ]
+    },
+    {
+      "id": "ai-appointment-setter-saas",
+      "name": "AI Appointment Setter SaaS",
+      "status": "repository_match_required",
+      "category": "business-automation",
+      "candidate_repositories": []
+    },
+    {
+      "id": "synthera-of",
+      "name": "Synthera OF",
+      "status": "repository_match_required",
+      "category": "automation",
+      "candidate_repositories": []
+    },
+    {
+      "id": "automated-trading-ai",
+      "name": "Automated Trading AI",
+      "status": "repository_match_required",
+      "category": "trading",
+      "candidate_repositories": [
+        "ai-trading-dashboard",
+        "ai-trading-dashboard-2",
+        "ai-trading-dashboard-3"
+      ]
+    },
+    {
+      "id": "aios",
+      "name": "AIOS",
+      "status": "repository_match_required",
+      "category": "ai-platform",
+      "candidate_repositories": [
+        "AIOS-System",
+        "AIOS-Core-Architect."
+      ]
+    },
+    {
+      "id": "archos",
+      "name": "ARCHOS",
+      "status": "repository_match_required",
+      "category": "systems",
+      "candidate_repositories": [
+        "ArchOS-Repo",
+        "archos-3"
+      ]
+    }
+  ]
+}
