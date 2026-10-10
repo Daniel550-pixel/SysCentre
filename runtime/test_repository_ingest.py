@@ -47,11 +47,11 @@ class RepositoryRegistryTests(unittest.TestCase):
 
     def test_blob_decoder_rejects_nul_bytes(self):
         with self.assertRaises(UnicodeDecodeError):
-            repository_ingest._decode_blob_text(b"header\\x00payload")
+            repository_ingest._decode_blob_text(b"header\x00payload")
 
     def test_blob_decoder_rejects_invalid_utf8(self):
         with self.assertRaises(UnicodeDecodeError):
-            repository_ingest._decode_blob_text(b"\\xff\\xfe")
+            repository_ingest._decode_blob_text(b"\xff\xfe")
 
     def test_source_search_rejects_short_queries(self):
         with self.assertRaises(ValueError):
