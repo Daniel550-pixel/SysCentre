@@ -242,6 +242,37 @@ def ingest_repository(project_key: str) -> dict[str, Any]:
     }
 
 
+def search_index(query: str, limit: int = 50) -> dict[str, Any]:
+    term = query.strip()
+    if len(term) < 2:
+        raise ValueError("Search query must contain at least two characters.")
+    if len(term) > 200:
+        raise ValueError("Search query must be 200 characters or fewer.")
+    bounded = max(1, min(int(limit), 100))
+    _db_executescript()
+    with server._DB_LOCK:
+        with server._database() as connection:
+            rows = connection.execute(
+                """SELECT p.project_id, p.name, p.repository_url, f.path, f.blob_sha, f.size_bytes, f.content
+                   FROM repository_files f JOIN projects p ON p.project_id = f.project_id
+                   WHERE f.file_kind = 'text' AND f.content LIKE ?
+                   ORDER BY p.name, f.path LIMIT ?""",
+                ("%" + term + "%", bounded),
+            ).fetchall()
+    results = []
+    for row in rows:
+        content = row["content"] or ""
+        position = content.lower().find(term.lower())
+        start = max(0, position - 140)
+        end = min(len(content), position + len(term) + 220)
+        excerpt = content[start:end].replace("\n", " ").replace("\r", " ")
+        results.append({
+            "project_id": row["project_id"], "project_name": row["name"],
+            "repository_url": row["repository_url"], "path": row["path"],
+            "blob_sha": row["blob_sha"], "size_bytes": row["size_bytes"], "excerpt": excerpt,
+        })
+    return {"query": term, "results": results, "count": len(results), "limit": bounded}
+
 def project_files(project_key: str, query: str = "", limit: int = 100) -> dict[str, Any]:
     item = _repo_id(project_key)
     _db_executescript()
