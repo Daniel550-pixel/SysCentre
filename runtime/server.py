@@ -168,6 +168,14 @@ class Handler(BaseHTTPRequestHandler):
             from repository_ingest import list_projects
             projects = list_projects()
             self._send_json(200, {"projects": projects, "count": len(projects)})
+        elif path == "/api/search":
+            from repository_ingest import search_index
+            params = parse_qs(parsed.query)
+            query = params.get("q", [""])[0]
+            try:
+                self._send_json(200, search_index(query, limit=int(params.get("limit", ["50"])[0])))
+            except (ValueError, TypeError) as exc:
+                self._send_json(400, {"ok": False, "error": str(exc)})
         elif path.startswith("/api/repositories/") and path.endswith("/files"):
             from repository_ingest import project_files
             project_id = unquote(path[len("/api/repositories/"):-len("/files")].strip("/"))
