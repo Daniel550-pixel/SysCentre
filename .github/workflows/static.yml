@@ -35,7 +35,28 @@ jobs:
       - name: Verify and stage fallback app and catalog
         run: |
           test -s bonus-app/index.html
-          python -c "import json; d=json.load(open('runtime/repository_catalog.json', encoding='utf-8')); assert len(d['repositories']) == 28"
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          catalog = json.loads(Path("runtime/repository_catalog.json").read_text(encoding="utf-8"))
+          repos = catalog["repositories"]
+          assert len(repos) == 28, f"Expected 28 repositories, found {len(repos)}"
+          assert len({repo["id"] for repo in repos}) == len(repos), "Duplicate repository IDs"
+          assert len({repo["name"] for repo in repos}) == len(repos), "Duplicate repository names"
+          required = {"id", "name", "url", "category", "purpose", "capabilities"}
+          for repo in repos:
+              missing = required - repo.keys()
+              assert not missing, f"{repo.get('name', '<unnamed>')} missing {sorted(missing)}"
+              assert repo["url"].startswith("https://github.com/"), f"Invalid repository URL: {repo['name']}"
+              assert isinstance(repo["capabilities"], list), f"Capabilities must be a list: {repo['name']}"
+          html = Path("bonus-app/index.html").read_text(encoding="utf-8")
+          map_groups = re.findall(r'categories:\[([^\]]+)\]', html)
+          mapped_categories = set(re.findall(r'"([^"]+)"', " ".join(map_groups)))
+          catalog_categories = {repo["category"] for repo in repos}
+          missing_categories = catalog_categories - mapped_categories
+          assert not missing_categories, f"Unmapped capability-map categories: {sorted(missing_categories)}"
+          print(f"Validated {len(repos)} unique repositories across {len(catalog_categories)} mapped categories")
+          PY
           python - <<'PY'
           from pathlib import Path
           import re
