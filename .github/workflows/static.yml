@@ -1,11 +1,12 @@
-# Deploy the standalone SysCentre continuity fallback to GitHub Pages
-name: Deploy SysCentre Continuity Fallback
+# Deploy the standalone SysCentre continuity app and its source catalog
+name: Deploy SysCentre Systems Fabric
 
 on:
   push:
     branches: ["main"]
     paths:
       - "bonus-app/**"
+      - "runtime/repository_catalog.json"
       - ".github/workflows/static.yml"
   workflow_dispatch:
 
@@ -22,7 +23,7 @@ jobs:
   deploy:
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: \${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -31,12 +32,16 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Verify and stage fallback app
+      - name: Verify and stage fallback app and catalog
         run: |
           test -s bonus-app/index.html
+          python -c "import json; d=json.load(open('runtime/repository_catalog.json', encoding='utf-8')); assert len(d['repositories']) == 28"
           mkdir -p _site
           cp bonus-app/index.html _site/index.html
+          cp runtime/repository_catalog.json _site/systems.json
           touch _site/.nojekyll
+          test -s _site/index.html
+          test -s _site/systems.json
 
       - name: Upload fallback site
         uses: actions/upload-pages-artifact@v3
