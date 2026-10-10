@@ -11,6 +11,7 @@ type RuntimeEvent = { id: string; timestamp: string; type: string; message: stri
 type CommandResponse = { ok: boolean; command: string; result?: unknown; error?: string };
 type Project = { project_id: string; name: string; repository_url: string; default_branch: string; description: string; latest_commit: string; indexed_at: string; file_count: number; text_file_count: number; skipped_file_count: number; status: string };
 type SourceResult = { project_id: string; project_name: string; repository_url: string; path: string; blob_sha: string; size_bytes: number; excerpt: string };
+type InventoryProject = { id: string; name: string; status: string; category: string; candidate_repositories: string[] };
 
 function formatUptime(seconds = 0) {
   const total = Math.max(0, Math.floor(seconds));
@@ -33,6 +34,7 @@ export default function App() {
   const [output, setOutput] = useState("Runtime console ready. Enter help to see available commands.");
   const [lastUpdated, setLastUpdated] = useState("");
   const [projects, setProjects] = useState<Project[]>([]);
+  const [inventoryProjects, setInventoryProjects] = useState<InventoryProject[]>([]);
   const [ingesting, setIngesting] = useState<string | null>(null);
   const [projectMessage, setProjectMessage] = useState("");
   const [projectSearch, setProjectSearch] = useState("");
@@ -46,11 +48,13 @@ export default function App() {
         fetch(API + "/api/status", { signal: AbortSignal.timeout(2500) }),
         fetch(API + "/api/events", { signal: AbortSignal.timeout(2500) }),
         fetch(API + "/api/repositories", { signal: AbortSignal.timeout(5000) }),
+        fetch(API + "/api/project-inventory", { signal: AbortSignal.timeout(5000) }),
       ]);
       if (!responses[0].ok || !responses[1].ok) throw new Error("Runtime API returned an error");
       const nextStatus = (await responses[0].json()) as RuntimeStatus;
       const nextEvents = (await responses[1].json()) as { events: RuntimeEvent[] };
       if (responses[2].ok) { const nextProjects = (await responses[2].json()) as { projects: Project[] }; setProjects(nextProjects.projects ?? []); }
+      if (responses[3].ok) { const inventory = (await responses[3].json()) as { projects: InventoryProject[] }; setInventoryProjects(inventory.projects ?? []); }
       setStatus(nextStatus);
       setEvents(nextEvents.events ?? []);
       setConnected(true);
@@ -197,6 +201,18 @@ export default function App() {
             </div>
             <div className="project-disclaimer"><ShieldCheck size={14} /><span>Sensitive-looking paths, generated folders, binary files, and oversized files are excluded from the text index.</span></div>
           </section>
+
+          {inventoryProjects.length > 0 && <section className="panel projects-panel inventory-panel" id="inventory-audit">
+            <div className="panel-header"><div><div className="panel-kicker">INVENTORY RECONCILIATION</div><h2>Historical projects awaiting repository match</h2></div><span className="project-count">{inventoryProjects.length} unresolved</span></div>
+            <p className="panel-description">These project identities were found in the historical project inventory but do not have a confirmed, exact repository mapping yet. Candidate repositories are suggestions only; SysCentre will not index them as these projects until the match is confirmed.</p>
+            <div className="project-list">
+              {inventoryProjects.map((project) => <article className="project-row" key={project.id}>
+                <div className="project-symbol"><FolderGit2 size={17} /></div>
+                <div className="project-main"><strong>{project.name}</strong><span>{project.category.replaceAll("-", " ")}</span><span>{project.candidate_repositories.length ? "Possible matches: " + project.candidate_repositories.join(", ") : "No candidate repository identified"}</span></div>
+                <div className="project-actions"><span className="project-status">match required</span></div>
+              </article>)}
+            </div>
+          </section>}
 
           <section className="metric-grid" aria-label="Runtime metrics">
             <article className="metric-card"><div className="metric-top"><span>Runtime status</span><span className="metric-icon purple"><Activity size={17} /></span></div><div className="metric-value status-value"><span className={"status-dot " + (connected ? "online" : "offline")} />{connected ? "Operational" : "Offline"}</div><div className="metric-foot"><span className="muted">Local API service</span><span className="metric-foot-icon"><ArrowUpRight size={14} /></span></div></article>
