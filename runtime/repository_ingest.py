@@ -10,6 +10,7 @@ import base64
 import json
 import os
 import re
+import sys
 import time
 import urllib.error
 import urllib.parse
@@ -18,7 +19,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-import server
+if Path(getattr(sys.modules.get("__main__"), "__file__", "")).name == "server.py":
+    import __main__ as server
+else:
+    import server
 
 CATALOG_PATH = Path(__file__).with_name("repository_catalog.json")
 API_ROOT = "https://api.github.com"
