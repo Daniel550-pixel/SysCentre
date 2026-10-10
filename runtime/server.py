@@ -1,21 +1,42 @@
-"""SysCentre local runtime: standard-library HTTP API with an allowlisted command surface."""
+"""SysCentre local runtime: persistent audit ledger and policy-gated command API."""
 from __future__ import annotations
 
 import json
 import os
 import platform
+import sqlite3
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from threading import Lock
 from typing import Any
 
+from policy import evaluate_command, policy_catalog
+
 HOST = os.environ.get("SYSCENTRE_HOST", "127.0.0.1")
 PORT = int(os.environ.get("SYSCENTRE_PORT", "8765"))
 STARTED_AT = time.time()
-_LEDGER: list[dict[str, Any]] = []
-_LEDGER_LOCK = Lock()
+DB_PATH = Path(os.environ.get("SYSCENTRE_DB_PATH", str(Path.home() / ".syscentre" / "syscentre.db")))
+_DB_LOCK = Lock()
 MAX_BODY_BYTES = 8_192
+
+
+def _connect() -> sqlite3.Connection:
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    connection = sqlite3.connect(DB_PATH, timeout=5)
+    connection.row_factory = sqlite3.Row
+    connection.execute("""
+        CREATE TABLE IF NOT EXISTS events (
+            id TEXT PRIMARY KEY,
+            timestamp TEXT NOT NULL,
+            type TEXT NOT NULL,
+            message TEXT NOT NULL,
+            details_json TEXT NOT NULL
+        )
+    """)
+    connection.execute("CREATE INDEX IF NOT EXISTS idx_events_timestamp ON events(timestamp)")
+    return connection
 
 
 def record_event(event_type: str, message: str, details: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -26,10 +47,33 @@ def record_event(event_type: str, message: str, details: dict[str, Any] | None =
         "message": message,
         "details": details or {},
     }
-    with _LEDGER_LOCK:
-        _LEDGER.append(event)
-        del _LEDGER[:-200]
+    with _DB_LOCK:
+        with _connect() as connection:
+            connection.execute(
+                "INSERT INTO events (id, timestamp, type, message, details_json) VALUES (?, ?, ?, ?, ?)",
+                (event["id"], event["timestamp"], event["type"], event["message"], json.dumps(event["details"], ensure_ascii=False)),
+            )
+            connection.execute("""
+                DELETE FROM events WHERE id IN (
+                    SELECT id FROM events ORDER BY timestamp DESC LIMIT -1 OFFSET 5000
+                )
+            """)
     return event
+
+
+def recent_events(limit: int = 50) -> list[dict[str, Any]]:
+    bounded_limit = max(1, min(int(limit), 100))
+    with _DB_LOCK:
+        with _connect() as connection:
+            rows = connection.execute(
+                "SELECT id, timestamp, type, message, details_json FROM events ORDER BY timestamp DESC LIMIT ?",
+                (bounded_limit,),
+            ).fetchall()
+    return [
+        {"id": row["id"], "timestamp": row["timestamp"], "type": row["type"],
+         "message": row["message"], "details": json.loads(row["details_json"])}
+        for row in rows
+    ]
 
 
 def runtime_status() -> dict[str, Any]:
@@ -42,38 +86,42 @@ def runtime_status() -> dict[str, Any]:
         "python_version": platform.python_version(),
         "platform": platform.platform(),
         "policy_gate": "enabled",
-        "event_ledger": "in-memory",
+        "event_ledger": "sqlite",
+        "event_ledger_path": str(DB_PATH),
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
 
 def execute_command(command: str) -> dict[str, Any]:
-    """Execute a known runtime command. Never forwards input to a shell."""
-    normalized = command.strip().lower()
-    allowed = {
-        "status": lambda: runtime_status(),
-        "help": lambda: {
-            "available_commands": ["status", "help", "diagnostics"],
-            "note": "Only explicitly allowlisted runtime commands are accepted.",
-        },
-        "diagnostics": lambda: {
-            "checks": [
-                {"name": "runtime", "state": "pass", "detail": "HTTP server is responding"},
-                {"name": "policy_gate", "state": "pass", "detail": "Command allowlist is active"},
-                {"name": "event_ledger", "state": "pass", "detail": "In-memory event ledger is available"},
-            ],
-        },
-    }
-    if normalized not in allowed:
-        record_event("policy.denied", "Command rejected by policy gate", {"command": command[:120]})
-        raise ValueError("Command not allowed. Use status, help, or diagnostics.")
-    result = allowed[normalized]()
-    record_event("command.accepted", f"Runtime command executed: {normalized}", {"command": normalized})
+    """Execute only explicit runtime commands; user input is never sent to a shell."""
+    decision = evaluate_command(command)
+    if not decision.allowed:
+        record_event("policy.denied", "Command rejected by policy gate", {
+            "command": decision.action, "risk": decision.risk, "reason": decision.reason,
+        })
+        raise ValueError(f"Command not allowed: {decision.reason}. Use status, help, or diagnostics.")
+    normalized = decision.action
+    if normalized == "status":
+        result: Any = runtime_status()
+    elif normalized == "help":
+        result = {
+            "available_commands": [item["command"] for item in policy_catalog()],
+            "note": "Only explicitly allowlisted runtime commands are accepted; arbitrary shell execution is disabled.",
+        }
+    else:
+        result = {"checks": [
+            {"name": "runtime", "state": "pass", "detail": "HTTP server process is responding"},
+            {"name": "policy_gate", "state": "pass", "detail": "Deterministic command policy is active"},
+            {"name": "event_ledger", "state": "pass", "detail": "SQLite event ledger is available"},
+        ]}
+    record_event("command.accepted", f"Runtime command executed: {normalized}", {
+        "command": normalized, "risk": decision.risk, "policy_reason": decision.reason,
+    })
     return {"ok": True, "command": normalized, "result": result}
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "SysCentreRuntime/0.1"
+    server_version = "SysCentreRuntime/0.2"
 
     def _send_json(self, status: int, payload: dict[str, Any]) -> None:
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
@@ -95,9 +143,10 @@ class Handler(BaseHTTPRequestHandler):
         elif self.path == "/api/status":
             self._send_json(200, runtime_status())
         elif self.path == "/api/events":
-            with _LEDGER_LOCK:
-                events = list(reversed(_LEDGER[-50:]))
-            self._send_json(200, {"events": events, "count": len(events)})
+            events = recent_events(50)
+            self._send_json(200, {"events": events, "count": len(events), "storage": "sqlite"})
+        elif self.path == "/api/policy":
+            self._send_json(200, {"enabled": True, "mode": "allowlist", "commands": policy_catalog()})
         else:
             self._send_json(404, {"ok": False, "error": "Route not found"})
 
