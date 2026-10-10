@@ -36,6 +36,15 @@ jobs:
         run: |
           test -s bonus-app/index.html
           python -c "import json; d=json.load(open('runtime/repository_catalog.json', encoding='utf-8')); assert len(d['repositories']) == 28"
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path("bonus-app/index.html").read_text(encoding="utf-8")
+          scripts = re.findall(r"<script>(.*?)</script>", html, re.S)
+          assert scripts, "No application script found"
+          Path("/tmp/syscentre-app.js").write_text(scripts[-1], encoding="utf-8")
+          PY
+          node --check /tmp/syscentre-app.js
           mkdir -p _site
           cp bonus-app/index.html _site/index.html
           cp runtime/repository_catalog.json _site/systems.json
