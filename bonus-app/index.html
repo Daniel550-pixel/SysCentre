@@ -12,6 +12,29 @@
 @media(max-width:1120px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{grid-template-columns:1fr}.hero-side{display:grid;grid-template-columns:1fr 1fr;align-items:start}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:800px){.layout{display:block}.rail{padding:13px 14px;border-right:0;border-bottom:1px solid var(--line);gap:12px}.brand{padding:0 2px}.nav-label,.rail-foot{display:none}.nav{display:flex;overflow:auto;gap:5px;padding-bottom:2px}.nav-item{white-space:nowrap;width:auto;padding:9px 11px;font-size:11px}.nav-item span{width:auto}.main{padding:0 17px 24px}.topbar{height:58px;margin-bottom:20px}.pattern-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.interface-lab{grid-template-columns:1fr}.detail-grid{grid-template-columns:1fr}}
 @media(max-width:560px){.main{padding:0 12px 22px}.topbar{align-items:flex-start;height:auto;padding:14px 0}.crumb{padding-top:6px}.top-actions{justify-content:flex-end}.health-pill{display:none}.page-head{display:block}.page-head .button{margin-top:12px}.grid,.pattern-grid,.runbook-steps,.two-col{grid-template-columns:1fr}.hero-main{padding:22px}.hero-side{display:flex;padding:17px}.metrics{gap:8px}.metric-card{padding:12px}.metric-card strong{font-size:21px}.searchbar{grid-template-columns:1fr}.layer{grid-template-columns:1fr;gap:5px}.preview-workspace{grid-template-columns:74px 1fr}.preview-kpis{gap:5px}.preview-kpi{padding:8px}.preview-kpi b{font-size:12px}.system-card{padding:15px}}
+
+/* Cross-repository capability map */
+.map-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:0 0 16px}
+.map-domain{min-width:0;padding:18px!important}
+.map-domain-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
+.map-domain-head h3{margin:0;font-size:14px;letter-spacing:-.01em}
+.map-domain-head p{margin:5px 0 0;color:var(--muted);font-size:11px;max-width:520px}
+.map-nodes{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.map-node{display:flex;flex-direction:column;align-items:flex-start;gap:3px;max-width:100%;min-width:0;padding:9px 11px;background:#0c1421;border:1px solid var(--line);border-radius:10px;text-align:left;color:var(--text);cursor:pointer}
+.map-node:hover,.map-node:focus-visible{border-color:#75e4d3;color:var(--cyan);outline:none}
+.map-node strong{font-size:11px;overflow-wrap:anywhere}
+.map-node span{font-size:9px;color:var(--muted);overflow-wrap:anywhere}
+.map-note{margin-top:10px;padding:15px 18px!important}
+.map-note b{font-size:12px}
+.map-note p{margin:5px 0 0;color:var(--muted);font-size:11px}
+.related-sources{margin-top:15px;padding-top:14px;border-top:1px solid var(--line)}
+.related-sources h3{font-size:12px;margin:0 0 9px}
+.related-actions{display:flex;flex-wrap:wrap;gap:7px}
+.related-actions button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:9px;padding:8px 10px;font-size:11px;cursor:pointer}
+.related-actions button:hover{border-color:var(--cyan);color:var(--cyan)}
+@media(max-width:900px){.map-grid{grid-template-columns:1fr}}
+@media(max-width:560px){.map-node{flex:1 1 100%}.map-domain-head{flex-direction:column}}
+
 </style>
 </head>
 <body>
@@ -80,6 +103,9 @@
 
 <section class="view" id="view-architecture">
   <div class="page-head"><div><div class="eyebrow">Integration design</div><h1>Architecture & boundaries</h1><p>The unified UI sits above the project registry as a read-only directory. Source indexing may be performed by the local SysCentre runtime; it remains distinct from runtime orchestration and action execution.</p></div></div>
+  <div class="section-head"><div><h2>Capability map</h2><p>Explore all registered repositories by declared domain. These are thematic groupings, not verified runtime dependencies.</p></div><span id="map-summary" class="tag">Loading sources…</span></div>
+  <div id="capability-map" class="map-grid"><div class="empty-state">Building source map…</div></div>
+  <div class="panel map-note"><b>Relationship semantics</b><p>Shared category or interface pattern indicates functional overlap only. SysCentre does not infer that one repository imports, calls, deploys or controls another unless that relationship is documented and verified.</p></div>
   <div class="panel"><div class="eyebrow">Logical flow</div><div class="diagram">
     <div class="layer"><b>01 · Interface shell</b><div><p>Navigation, catalog search, status labels and interface preview library.</p><small>Published static fallback · independent of local Python / React services</small></div></div><div class="down">↓</div>
     <div class="layer"><b>02 · Source registry</b><div><p>Repository identity, declared purpose, capabilities, interface path and confidence level.</p><small>runtime/repository_catalog.json → static systems.json</small></div></div><div class="down">↓</div>
@@ -147,6 +173,21 @@
     if(t.indexOf("business")>=0||t.indexOf("venture")>=0)return "◫";
     return "◇";
   };
+  var mapDomains=[
+    {id:"foundation",title:"Foundation & orchestration",description:"Agent orchestration, governed action, event state, systems architecture and world-model surfaces.",categories:["ai-platform","core-platform","systems"]},
+    {id:"intelligence",title:"Domain intelligence",description:"Financial analysis, trading, market discovery, venture validation and specialist intelligence applications.",categories:["finance-ai","trading","business-ai"]},
+    {id:"creation",title:"Creation & developer tooling",description:"Code workspaces, interactive creation environments, UI scaffolds and project editing experiences.",categories:["developer-tools"]},
+    {id:"operations",title:"Security, infrastructure & automation",description:"Trust and integrity controls, networking labs, local operations and storage-recovery tooling.",categories:["security","infrastructure","automation"]}
+  ];
+  var renderCapabilityMap=function(){
+    var registered=0;
+    byId("capability-map").innerHTML=mapDomains.map(function(group){
+      var items=systems.filter(function(s){return group.categories.indexOf(s.category)>=0;}).sort(function(a,b){return a.name.localeCompare(b.name);});
+      registered+=items.length;
+      return '<article class="panel map-domain"><div class="map-domain-head"><div><h3>'+esc(group.title)+'</h3><p>'+esc(group.description)+'</p></div><span class="tag">'+items.length+' sources</span></div><div class="map-nodes">'+items.map(function(s){return '<button class="map-node" data-map-source="'+esc(s.id)+'"><strong>'+esc(s.name)+'</strong><span>'+esc(s.interface_kind||s.category||"Source record")+'</span></button>';}).join("")+'</div></article>';
+    }).join("");
+    byId("map-summary").textContent=registered+" / "+systems.length+" sources grouped";
+  };
   var patterns=[
     {id:"command",icon:"◈",title:"Command & operations",desc:"Operational overview, approvals, event ledger, action boundaries and recovery paths.",test:function(s){var t=(s.interface_kind+" "+s.purpose+" "+s.name).toLowerCase();return /control plane|operations console|command interface|command center|operational|syscentre|bitminer|business-os/.test(t);}},
     {id:"spatial",icon:"◎",title:"Spatial & world model",desc:"Spatial views, 3D world state, connected entities and a sense of place.",test:function(s){var t=(s.interface_kind+" "+s.purpose+" "+s.name).toLowerCase();return /spatial|world model|3d|digital-twin|archos/.test(t);}},
@@ -206,14 +247,26 @@
     if(name==="systems")renderSystems();
     window.scrollTo({top:0,behavior:"smooth"});
   };
+  var relatedSystems=function(s){
+    var targetPattern=patternFor(s);
+    return systems.filter(function(item){
+      if(item.id===s.id)return false;
+      return item.category===s.category || patternFor(item)===targetPattern;
+    }).sort(function(a,b){
+      var aSame=a.category===s.category?0:1,bSame=b.category===s.category?0:1;
+      return aSame-bSame || a.name.localeCompare(b.name);
+    }).slice(0,5);
+  };
   var inspectSystem=function(id){
     var s=systems.find(function(item){return item.id===id;});if(!s)return;
     selectedId=id;
     var caps=(s.capabilities||[]).map(function(c){return '<span>'+esc(c)+'</span>';}).join("");
-    var source=s.interface_source_url?'<div class="source-line">Interface source<br><a href="'+esc(s.interface_source_url)+'" target="_blank" rel="noreferrer">'+esc(s.interface_source_url)+'</a></div>':'<div class="source-line">Interface source: none identified in the scan.</div>';
+    var source=s.interface_source_url?'<div class="source-line">Interface source<br><a href="'+esc(s.interface_source_url)+'" target="_blank" rel="noreferrer">'+esc(s.interface_source_url)+'</a></div>':'<div class="source-line">Interface source<br>None identified in the current scan.</div>';
     var project=s.external_project_url?'<a class="button primary" href="'+esc(s.external_project_url)+'" target="_blank" rel="noreferrer">Open external project ↗</a>':'';
-    var note=s.integration_boundary||"Repository content is treated as read-only source material.";
-    byId("system-detail").innerHTML='<div class="detail-grid"><div><div class="eyebrow">'+esc(categoryName(s.category))+' · '+esc(s.purpose_confidence||"Confidence not recorded")+'</div><h2>'+esc(s.name)+'</h2><p class="purpose-large">'+esc(s.purpose||"Purpose not yet documented.")+'</p><h3 style="font-size:12px;margin:16px 0 8px">Cataloged capabilities</h3><div class="capabilities">'+(caps||"<span>No capabilities recorded.</span>")+'</div><div class="note">'+esc(note)+'</div></div><div><div class="card-top"><h3 style="margin:0;font-size:13px">Interface record</h3><span class="state '+statusType(s)+'">'+esc(statusLabel(s))+'</span></div><p>'+esc(s.interface_kind||"Interface type not identified.")+'</p><p>'+esc(s.interface_status||"No interface status recorded.")+'</p>'+source+'<div class="source-line">Purpose basis<br>'+esc(s.purpose_confidence||"Not recorded")+'</div><div class="actions" style="margin-top:12px"><a class="button" href="'+esc(repoUrl(s))+'" target="_blank" rel="noreferrer">Open repository ↗</a>'+project+'</div></div></div>';
+    var note=s.integration_boundary||"Repository content is treated as read-only source material. Related-source links indicate topical overlap, not verified runtime dependencies.";
+    var related=relatedSystems(s);
+    var relatedMarkup=related.length?'<div class="related-sources"><h3>Related source records · shared domain or interface pattern</h3><div class="related-actions">'+related.map(function(item){return '<button type="button" data-map-source="'+esc(item.id)+'">'+esc(item.name)+'</button>';}).join("")+'</div></div>':'';
+    byId("system-detail").innerHTML='<div class="detail-grid"><div><div class="eyebrow">'+esc(categoryName(s.category))+' · '+esc(s.purpose_confidence||"Confidence not recorded")+'</div><h2>'+esc(s.name)+'</h2><p class="purpose-large">'+esc(s.purpose||"Purpose not yet documented.")+'</p><h3 style="font-size:12px;margin:16px 0 8px">Cataloged capabilities</h3><div class="capabilities">'+(caps||"<span>No capabilities recorded.</span>")+'</div><div class="note">'+esc(note)+'</div>'+relatedMarkup+'</div><div><div class="card-top"><h3 style="margin:0;font-size:13px">Interface record</h3><span class="state '+statusType(s)+'">'+esc(statusLabel(s))+'</span></div><p>'+esc(s.interface_kind||"Interface type not identified.")+'</p><p>'+esc(s.interface_status||"No interface status recorded.")+'</p>'+source+'<div class="source-line">Purpose basis<br>'+esc(s.purpose_confidence||"Not recorded")+'</div><div class="actions" style="margin-top:12px"><a class="button" href="'+esc(repoUrl(s))+'" target="_blank" rel="noreferrer">Open repository ↗</a>'+project+'</div></div></div>';
     byId("system-detail").classList.add("open");
     byId("system-detail").scrollIntoView({behavior:"smooth",block:"start"});
   };
@@ -286,6 +339,18 @@
     if(go){showView(go.getAttribute("data-go"));return;}
     var pat=event.target.closest("[data-pattern]");
     if(pat){openPattern(pat.getAttribute("data-pattern"));return;}
+    var mapSource=event.target.closest("[data-map-source]");
+    if(mapSource){
+      var sourceId=mapSource.getAttribute("data-map-source");
+      showView("systems");
+      byId("search").value="";
+      byId("category-filter").value="";
+      byId("status-filter").value="";
+      activePattern="";
+      renderSystems();
+      inspectSystem(sourceId);
+      return;
+    }
     var action=event.target.closest("[data-action]");
     if(action){var id=action.getAttribute("data-id");var type=action.getAttribute("data-action");if(type==="lab"){showView("interfaces");byId("preview-select").value=id;updatePreview(id);}else{inspectSystem(id);}return;}
   });
@@ -304,7 +369,7 @@
       var categories=Array.from(new Set(systems.map(function(s){return s.category||"other";}))).sort();
       byId("category-filter").innerHTML='<option value="">All domains</option>'+categories.map(function(c){return '<option value="'+esc(c)+'">'+esc(categoryName(c))+'</option>';}).join("");
       byId("preview-select").innerHTML=systems.map(function(s){return '<option value="'+esc(s.id)+'">'+esc(s.name)+'</option>';}).join("");
-      renderMetrics();renderPatternCards("overview-patterns");renderPatternCards("interface-patterns");renderFeatured();renderSystems();
+      renderMetrics();renderPatternCards("overview-patterns");renderPatternCards("interface-patterns");renderFeatured();renderSystems();renderCapabilityMap();
       var first=systems.find(function(s){return s.name==="ArchOS-Repo";})||systems[0];
       byId("preview-select").value=first.id;updatePreview(first.id);
     }catch(error){
