@@ -189,7 +189,7 @@ def ingest_repository(project_key: str) -> dict[str, Any]:
             blob = _api_json(f"{API_ROOT}/repos/{owner_repo}/git/blobs/{sha}")
             raw = base64.b64decode(blob.get("content", ""))
             text_content = raw.decode("utf-8")
-            if "\\x00" in text_content:
+            if "\x00" in text_content:
                 raise UnicodeDecodeError("utf-8", raw, 0, 1, "binary content")
             return ((item["id"], path, sha, size, "text", text_content, ""), True)
         except (UnicodeDecodeError, ValueError):
