@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 
 const API = "http://127.0.0.1:8765";
-type RuntimeStatus = { name: string; state: string; host: string; port: number; uptime_seconds: number; python_version: string; platform: string; policy_gate: string; event_ledger: string; timestamp: string };
+type RuntimeStatus = { name: string; state: string; host: string; port: number; uptime_seconds: number; python_version: string; platform: string; policy_gate: string; event_ledger: string; event_ledger_path?: string; timestamp: string };
 type RuntimeEvent = { id: string; timestamp: string; type: string; message: string; details: Record<string, unknown> };
 type CommandResponse = { ok: boolean; command: string; result?: unknown; error?: string };
 
@@ -124,7 +124,7 @@ export default function App() {
             <article className="metric-card"><div className="metric-top"><span>Runtime status</span><span className="metric-icon purple"><Activity size={17} /></span></div><div className="metric-value status-value"><span className={"status-dot " + (connected ? "online" : "offline")} />{connected ? "Operational" : "Offline"}</div><div className="metric-foot"><span className="muted">Local API service</span><span className="metric-foot-icon"><ArrowUpRight size={14} /></span></div></article>
             <article className="metric-card"><div className="metric-top"><span>Runtime uptime</span><span className="metric-icon blue"><Zap size={17} /></span></div><div className="metric-value">{uptime}</div><div className="metric-foot"><span className="muted">Current process session</span><span className="metric-foot-icon"><Activity size={14} /></span></div></article>
             <article className="metric-card"><div className="metric-top"><span>Policy gate</span><span className="metric-icon green"><LockKeyhole size={17} /></span></div><div className="metric-value">{status?.policy_gate === "enabled" ? "Enforced" : "—"}</div><div className="metric-foot"><span className="muted">Allowlisted commands only</span><span className="positive-text"><ShieldCheck size={14} /> Active</span></div></article>
-            <article className="metric-card"><div className="metric-top"><span>Ledger events</span><span className="metric-icon amber"><Layers3 size={17} /></span></div><div className="metric-value">{events.length.toString().padStart(2, "0")}<span className="value-suffix"> / 50</span></div><div className="metric-foot"><span className="muted">Recent in-memory records</span><span className="metric-foot-icon"><ArrowDownRight size={14} /></span></div></article>
+            <article className="metric-card"><div className="metric-top"><span>Ledger events</span><span className="metric-icon amber"><Layers3 size={17} /></span></div><div className="metric-value">{events.length.toString().padStart(2, "0")}<span className="value-suffix"> / 50</span></div><div className="metric-foot"><span className="muted">Recent persisted records</span><span className="metric-foot-icon"><ArrowDownRight size={14} /></span></div></article>
           </section>
 
           <div className="content-grid">
@@ -135,7 +135,7 @@ export default function App() {
                 <div className="detail-row"><span>API endpoint</span><code>127.0.0.1:{status?.port ?? 8765}</code></div>
                 <div className="detail-row"><span>Python version</span><strong>{status?.python_version ?? "Waiting for runtime"}</strong></div>
                 <div className="detail-row"><span>Operating system</span><strong className="truncate">{status?.platform ?? "—"}</strong></div>
-                <div className="detail-row"><span>Event storage</span><span className="storage-tag"><CircleDot size={11} /> In-memory</span></div>
+                <div className="detail-row"><span>Event storage</span><span className="storage-tag"><CircleDot size={11} /> {status?.event_ledger === "sqlite" ? "SQLite persistent" : "Waiting"}</span></div>
               </div>
             </section>
 
@@ -169,7 +169,7 @@ export default function App() {
             </tbody></table></div>
             <div className="events-footer"><span><span className="status-dot online" /> Event ledger {connected ? "synchronized" : "not connected"}</span><span>Auto-refresh · 5 seconds{lastUpdated ? " · Updated " + lastUpdated : ""}</span></div>
           </section>
-          <footer className="page-footer"><span>SYSCENTRE <span className="footer-version">v0.1.0 FOUNDATION</span></span><span><Wifi size={13} /> Local-first by design</span></footer>
+          <footer className="page-footer"><span>SYSCENTRE <span className="footer-version">v0.2.0 PERSISTENT RUNTIME</span></span><span><Wifi size={13} /> Local-first by design</span></footer>
         </div>
       </main>
     </div>
