@@ -62,17 +62,30 @@ def _api_json(url: str) -> dict[str, Any]:
     if token:
         headers["Authorization"] = f"Bearer {token}"
     request = urllib.request.Request(url, headers=headers)
-    try:
-        with urllib.request.urlopen(request, timeout=30) as response:
-            return json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as exc:
-        if exc.code == 403:
-            raise RuntimeError("GitHub rate limit or access restriction. Set GITHUB_TOKEN for higher limits.") from exc
-        if exc.code == 404:
-            raise RuntimeError("GitHub repository or tree was not found or is not accessible.") from exc
-        raise RuntimeError(f"GitHub API returned HTTP {exc.code}.") from exc
-    except (urllib.error.URLError, TimeoutError) as exc:
-        raise RuntimeError(f"Could not reach GitHub: {exc}") from exc
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            if exc.code == 403:
+                raise RuntimeError("GitHub rate limit or access restriction. Set GITHUB_TOKEN for higher limits.") from exc
+            if exc.code == 404:
+                raise RuntimeError("GitHub repository or tree was not found or is not accessible.") from exc
+            if exc.code in {429, 500, 502, 503, 504} and attempt < 2:
+                retry_after = exc.headers.get("Retry-After", "")
+                try:
+                    delay = min(10, max(1, int(retry_after)))
+                except (TypeError, ValueError):
+                    delay = 2 ** attempt
+                time.sleep(delay)
+                continue
+            raise RuntimeError(f"GitHub API returned HTTP {exc.code}.") from exc
+        except (urllib.error.URLError, TimeoutError) as exc:
+            if attempt < 2:
+                time.sleep(2 ** attempt)
+                continue
+            raise RuntimeError(f"Could not reach GitHub after retries: {exc}") from exc
+    raise RuntimeError("GitHub API request failed after retries.")
 
 
 def _decode_blob_text(raw: bytes) -> str:
