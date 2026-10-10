@@ -16,6 +16,8 @@ SysCentre is a standalone local-first systems control plane. It catalogs existin
 
 The dashboard Project Registry lists repositories registered in the catalog. Select **Index repo** to index one project or **Index all projects** to process the catalog sequentially. Use cross-project source search to find text inside indexed source files. GitHub API rate limits apply; set `GITHUB_TOKEN` or `GH_TOKEN` in the runtime environment for authenticated API access.
 
+Historical project identities without a confirmed exact repository mapping are tracked separately in `runtime/project_inventory.json` and shown in the dashboard under **Historical projects awaiting repository match**. Candidate names are informational only; SysCentre does not guess repository URLs or ingest a candidate under the wrong project identity. Use `GET /api/project-inventory` to retrieve this reconciliation list.
+
 The indexer deliberately excludes sensitive-looking paths (for example, `.env`, private keys, and credential files), generated/dependency directories, binary files, and individual files larger than 900 KB from the text content index. Their paths and exclusion reasons are retained as metadata. A truncated GitHub tree or failed file fetch aborts the run rather than falsely reporting a complete index. The source repository is never modified.
 
 ## Requirements
