@@ -142,6 +142,24 @@ export default function App() {
 
           {!connected && <div className="connection-alert"><WifiOff size={18} /><div><strong>Runtime not detected</strong><p>Start the Python runtime to populate live system data. The dashboard will reconnect automatically.</p></div><code>python .\runtime\server.py</code></div>}
 
+          <section className="panel projects-panel" id="projects">
+            <div className="panel-header"><div><div className="panel-kicker">PROJECT INTELLIGENCE</div><h2>Project registry</h2></div><span className="panel-icon"><FolderGit2 size={18} /></span></div>
+            <p className="panel-description">Independent repositories registered for indexing. Source remains in its own repository; indexing does not merge or execute project code.</p>
+            <div className="project-toolbar"><input className="project-filter" value={projectSearch} onChange={(event) => setProjectSearch(event.target.value)} placeholder="Filter projects..." aria-label="Filter projects" /><span className="project-count">{projects.length} registered</span></div>
+            {projectMessage && <div className="project-message" role="status">{projectMessage}</div>}
+            <div className="project-list">
+              {projects.filter((project) => project.name.toLowerCase().includes(projectSearch.toLowerCase()) || project.project_id.includes(projectSearch.toLowerCase())).map((project) => (
+                <article className="project-row" key={project.project_id}>
+                  <div className="project-symbol"><Database size={17} /></div>
+                  <div className="project-main"><strong>{project.name}</strong><a href={project.repository_url} target="_blank" rel="noreferrer">{project.repository_url.replace("https://github.com/", "")}</a><span>{project.status === "registered" ? "Registered · not indexed" : project.file_count + " files · " + project.text_file_count + " text indexed · " + project.skipped_file_count + " excluded"}</span></div>
+                  <div className="project-actions"><span className={"project-status " + (project.status === "registered" ? "" : "indexed")}>{project.status.replaceAll("_", " ")}</span><button className="secondary-button project-index-button" disabled={ingesting !== null} onClick={() => void indexProject(project.project_id, project.name)}>{ingesting === project.project_id ? "Indexing..." : project.status === "registered" ? "Index repo" : "Re-index"}</button></div>
+                </article>
+              ))}
+              {!projects.length && <div className="empty-state">Waiting for the local repository catalog...</div>}
+            </div>
+            <div className="project-disclaimer"><ShieldCheck size={14} /><span>Sensitive-looking paths, generated folders, binary files, and oversized files are excluded from the text index.</span></div>
+          </section>
+
           <section className="metric-grid" aria-label="Runtime metrics">
             <article className="metric-card"><div className="metric-top"><span>Runtime status</span><span className="metric-icon purple"><Activity size={17} /></span></div><div className="metric-value status-value"><span className={"status-dot " + (connected ? "online" : "offline")} />{connected ? "Operational" : "Offline"}</div><div className="metric-foot"><span className="muted">Local API service</span><span className="metric-foot-icon"><ArrowUpRight size={14} /></span></div></article>
             <article className="metric-card"><div className="metric-top"><span>Runtime uptime</span><span className="metric-icon blue"><Zap size={17} /></span></div><div className="metric-value">{uptime}</div><div className="metric-foot"><span className="muted">Current process session</span><span className="metric-foot-icon"><Activity size={14} /></span></div></article>
