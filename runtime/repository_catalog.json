@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "purpose": "SysCentre project registry. Repositories remain separate projects; this catalog indexes them without merging their codebases.",
+  "purpose": "Verified and qualified source catalog for SysCentre. All linked repositories remain independent; metadata and UI source references are cataloged without executing or merging project runtimes.",
   "owner": "Daniel550-pixel",
   "repositories": [
     {
@@ -8,196 +8,540 @@
       "name": "FinSight-Global-AI",
       "url": "https://github.com/Daniel550-pixel/FinSight-Global-AI",
       "default_branch": "main",
-      "category": "finance-ai"
+      "category": "finance-ai",
+      "purpose": "Financial intelligence dashboard with AI forecasting and market-analysis modules. Its README identifies a Streamlit dashboard and Docker/cloud-ready packaging.",
+      "capabilities": [
+        "AI forecasting",
+        "Financial and market analysis",
+        "Streamlit dashboard",
+        "Docker / cloud deployment scaffolding"
+      ],
+      "interface_kind": "Python / Streamlit dashboard",
+      "interface_status": "UI source present; public deployment unverified",
+      "interface_source_url": "https://github.com/Daniel550-pixel/FinSight-Global-AI/blob/main/streamlit_app.py",
+      "purpose_confidence": "README verified",
+      "integration_boundary": "Reference and index source files only. Financial data and API credentials remain in the system's own runtime."
     },
     {
       "id": "ai-trading-dashboard",
       "name": "ai-trading-dashboard",
       "url": "https://github.com/Daniel550-pixel/ai-trading-dashboard",
       "default_branch": "master",
-      "category": "trading"
+      "category": "trading",
+      "purpose": "Python trading and portfolio-analysis workspace with modules for ESG screening, FX prediction, geographic risk, liquidity, market regimes and valuation.",
+      "capabilities": [
+        "Trading dashboard",
+        "Portfolio engine",
+        "FX prediction",
+        "ESG screening",
+        "Liquidity and valuation models",
+        "Risk analysis"
+      ],
+      "interface_kind": "Python dashboard / analytics workspace",
+      "interface_status": "Dashboard source present; public deployment unverified",
+      "interface_source_url": "https://github.com/Daniel550-pixel/ai-trading-dashboard/blob/master/dashboard.py",
+      "purpose_confidence": "Repository structure inspected",
+      "integration_boundary": "Source reference only. No orders, brokerage integrations or trading actions are executed by SysCentre."
     },
     {
       "id": "ai-trading-dashboard-2",
       "name": "ai-trading-dashboard-2",
       "url": "https://github.com/Daniel550-pixel/ai-trading-dashboard-2",
       "default_branch": "main",
-      "category": "trading"
+      "category": "trading",
+      "purpose": "Repository currently has no Git objects or source files, so its intended product purpose cannot be confirmed beyond its name.",
+      "capabilities": [
+        "Repository placeholder"
+      ],
+      "interface_kind": "No interface identified",
+      "interface_status": "Empty repository",
+      "interface_source_url": "",
+      "purpose_confidence": "Name only",
+      "integration_boundary": "Catalog entry only. No source is available to index."
     },
     {
       "id": "ai-trading-dashboard-3",
       "name": "ai-trading-dashboard-3",
       "url": "https://github.com/Daniel550-pixel/ai-trading-dashboard-3",
       "default_branch": "main",
-      "category": "trading"
+      "category": "trading",
+      "purpose": "README describes this as a new generation of AI creation, but the default branch contains only that README and no runnable product code.",
+      "capabilities": [
+        "Concept / scaffold"
+      ],
+      "interface_kind": "No runnable interface identified",
+      "interface_status": "README-only scaffold",
+      "interface_source_url": "",
+      "purpose_confidence": "README verified; implementation absent",
+      "integration_boundary": "Reference only until implementation and intended role are confirmed."
     },
     {
       "id": "finsight-global-ai-2",
       "name": "FinSight-Global-AI-2",
       "url": "https://github.com/Daniel550-pixel/FinSight-Global-AI-2",
       "default_branch": "main",
-      "category": "finance-ai"
+      "category": "finance-ai",
+      "purpose": "Legacy finance/trading workspace snapshot with Python market modules and portfolio-engine files. The repository has no README, so its exact relationship to the other FinSight versions is not confirmed.",
+      "capabilities": [
+        "Finance and trading analysis",
+        "FX / ESG / geographic risk modules",
+        "Portfolio-engine code"
+      ],
+      "interface_kind": "Python source workspace; no canonical interface verified",
+      "interface_status": "Legacy snapshot; repository hygiene review recommended",
+      "interface_source_url": "https://github.com/Daniel550-pixel/FinSight-Global-AI-2",
+      "purpose_confidence": "Repository structure inspected",
+      "integration_boundary": "Read-only reference. Review the source repository independently before broader indexing; SysCentre does not import its archived workspace artifacts."
     },
     {
       "id": "finsight-global-ai-4",
       "name": "FinSight-Global-AI-4",
       "url": "https://github.com/Daniel550-pixel/FinSight-Global-AI-4",
       "default_branch": "main",
-      "category": "finance-ai"
+      "category": "finance-ai",
+      "purpose": "A FinSight-named variant whose default branch contains a Streamlit entry point and requirements file. More detailed product behavior is not documented in a README.",
+      "capabilities": [
+        "Streamlit entry point",
+        "Finance / AI dashboard variant (inferred)"
+      ],
+      "interface_kind": "Python / Streamlit app",
+      "interface_status": "Entry point present; purpose and public deployment unverified",
+      "interface_source_url": "https://github.com/Daniel550-pixel/FinSight-Global-AI-4/blob/main/streamlit_app.py",
+      "purpose_confidence": "Repository structure inspected; domain inferred from name",
+      "integration_boundary": "Source reference only. Treat as a distinct variant until lineage is verified."
     },
     {
       "id": "finsight-global-ai-dashboard",
       "name": "FinSight_Global_AI_Dashboard",
       "url": "https://github.com/Daniel550-pixel/FinSight_Global_AI_Dashboard",
       "default_branch": "master",
-      "category": "finance-ai"
+      "category": "finance-ai",
+      "purpose": "Python module collection for a global AI dashboard, including finance and ministry workflows, compliance checks, sovereign-cloud controls, air-gap mode, backup and disaster-recovery hooks, replication and alerts. A product README was not found.",
+      "capabilities": [
+        "Finance / sector workflows",
+        "Compliance checks",
+        "Sovereign-data controls",
+        "Backup and disaster recovery",
+        "Monitoring / alerts"
+      ],
+      "interface_kind": "Python service and feature modules",
+      "interface_status": "Feature modules present; no hosted UI verified",
+      "interface_source_url": "https://github.com/Daniel550-pixel/FinSight_Global_AI_Dashboard",
+      "purpose_confidence": "Repository structure inspected",
+      "integration_boundary": "Reference/index only. This catalog does not activate policy, finance, ministry or infrastructure workflows."
     },
     {
       "id": "ai-mainframe",
       "name": "AI-mainframe",
       "url": "https://github.com/Daniel550-pixel/AI-mainframe",
       "default_branch": "main",
-      "category": "ai-platform"
+      "category": "ai-platform",
+      "purpose": "Dependency-free ArchOS capability package for governed orchestration, state observation, event routing and consequential-action handoff. ArchOS remains authoritative for identity, permissions, governance and external side effects.",
+      "capabilities": [
+        "Capability registry",
+        "Event routing",
+        "State observation",
+        "Governed action handoff"
+      ],
+      "interface_kind": "Python package / integration adapter",
+      "interface_status": "Package source present; no standalone UI intended",
+      "interface_source_url": "https://github.com/Daniel550-pixel/AI-mainframe/blob/main/src/ai_mainframe/runtime.py",
+      "purpose_confidence": "README verified",
+      "integration_boundary": "Capability definitions are referenced, not executed, by the static console."
     },
     {
       "id": "ai-os-global-super-app",
       "name": "AI-OS-Global-Super-App",
       "url": "https://github.com/Daniel550-pixel/AI-OS-Global-Super-App",
       "default_branch": "main",
-      "category": "ai-platform"
+      "category": "ai-platform",
+      "purpose": "AI operating-system super-app concept. The default branch currently contains only a title README, so concrete features and a runnable interface are not confirmed.",
+      "capabilities": [
+        "AI platform concept"
+      ],
+      "interface_kind": "No runnable interface identified",
+      "interface_status": "README-only scaffold",
+      "interface_source_url": "",
+      "purpose_confidence": "Name and README only",
+      "integration_boundary": "Reference only; no inferred endpoint or behavior is exposed."
     },
     {
       "id": "ai-os-global-wealth-engine",
       "name": "AI-OS-Global-Wealth-Engine",
       "url": "https://github.com/Daniel550-pixel/AI-OS-Global-Wealth-Engine",
       "default_branch": "main",
-      "category": "finance-ai"
+      "category": "finance-ai",
+      "purpose": "Repository currently has no source tree. The name suggests a wealth or finance engine, but no implementation can be verified.",
+      "capabilities": [
+        "Repository placeholder"
+      ],
+      "interface_kind": "No interface identified",
+      "interface_status": "Empty repository",
+      "interface_source_url": "",
+      "purpose_confidence": "Name only",
+      "integration_boundary": "Catalog entry only. No source is available to index."
     },
     {
       "id": "aios-system",
       "name": "AIOS-System",
       "url": "https://github.com/Daniel550-pixel/AIOS-System",
       "default_branch": "main",
-      "category": "ai-platform"
+      "category": "ai-platform",
+      "purpose": "AIOS system concept repository; its default branch contains only a title README, so runtime behavior and features remain unverified.",
+      "capabilities": [
+        "AI operating-system concept"
+      ],
+      "interface_kind": "No runnable interface identified",
+      "interface_status": "README-only scaffold",
+      "interface_source_url": "",
+      "purpose_confidence": "Name and README only",
+      "integration_boundary": "Reference only until source and intended role are confirmed."
     },
     {
       "id": "aios-core-architect",
       "name": "AIOS-Core-Architect.",
       "url": "https://github.com/Daniel550-pixel/AIOS-Core-Architect.",
       "default_branch": "main",
-      "category": "ai-platform"
+      "category": "ai-platform",
+      "purpose": "AIOS core-architecture concept with a README and requirements file. The repository currently does not expose a verifiable application interface or substantial implementation.",
+      "capabilities": [
+        "AIOS architecture concept",
+        "Python dependency scaffold"
+      ],
+      "interface_kind": "Architecture / dependency scaffold",
+      "interface_status": "Implementation and UI unverified",
+      "interface_source_url": "https://github.com/Daniel550-pixel/AIOS-Core-Architect.",
+      "purpose_confidence": "Repository structure inspected",
+      "integration_boundary": "Architecture reference only; not treated as a separate live runtime."
     },
     {
       "id": "obsidian-ai",
       "name": "Obsidian-AI",
       "url": "https://github.com/Daniel550-pixel/Obsidian-AI",
       "default_branch": "main",
-      "category": "ai-platform"
+      "category": "ai-platform",
+      "purpose": "AI Studio-generated React app whose current components include a Business Model Canvas and an ICC visualizer. The README documents a Gemini API key requirement for local operation.",
+      "capabilities": [
+        "Business Model Canvas UI",
+        "ICC visualization",
+        "Gemini-backed app scaffold"
+      ],
+      "interface_kind": "React / AI Studio project",
+      "interface_status": "Project link documented; production deployment unverified",
+      "interface_source_url": "https://github.com/Daniel550-pixel/Obsidian-AI/blob/main/src/App.tsx",
+      "external_project_url": "https://ai.studio/apps/2e3b7d75-5284-4b6e-8ab3-796a55a99476",
+      "purpose_confidence": "README and component names inspected",
+      "integration_boundary": "Opens the separate AI Studio project; secrets and model calls remain external to SysCentre."
     },
     {
       "id": "fgse",
       "name": "FGSE",
       "url": "https://github.com/Daniel550-pixel/FGSE",
       "default_branch": "main",
-      "category": "finance-ai"
+      "category": "finance-ai",
+      "purpose": "AI Studio-generated React app with a NeuralVisualizer component. The README links to its AI Studio project, but the exact product domain is not described.",
+      "capabilities": [
+        "Neural visualization",
+        "React application scaffold",
+        "Gemini-backed local setup"
+      ],
+      "interface_kind": "React / AI Studio project",
+      "interface_status": "Project link documented; production deployment unverified",
+      "interface_source_url": "https://github.com/Daniel550-pixel/FGSE/blob/main/src/App.tsx",
+      "external_project_url": "https://ai.studio/apps/50d360c9-dad9-486a-8681-39bff3702159",
+      "purpose_confidence": "README and component names inspected",
+      "integration_boundary": "Opens the separate AI Studio project; no model keys or runtime are shared with SysCentre."
     },
     {
       "id": "archos-repo",
       "name": "ArchOS-Repo",
       "url": "https://github.com/Daniel550-pixel/ArchOS-Repo",
       "default_branch": "main",
-      "category": "systems"
+      "category": "systems",
+      "purpose": "Early-stage AI operating-system architecture combining agent orchestration, governance/action gating, world-state and simulation services, multimodal experiences, and spatial intelligence.",
+      "capabilities": [
+        "JARVIS-style agent orchestration",
+        "Governed action execution",
+        "World model and causal graph",
+        "Simulation APIs",
+        "Spatial / 3D interface",
+        "Gesture-oriented interaction"
+      ],
+      "interface_kind": "React / TypeScript spatial command interface",
+      "interface_status": "UI source present; production readiness not claimed",
+      "interface_source_url": "https://github.com/Daniel550-pixel/ArchOS-Repo/blob/main/src/components/ArchOSSystemUI.tsx",
+      "purpose_confidence": "README and UI source tree inspected",
+      "integration_boundary": "Source links only. ArchOS remains an independent runtime; SysCentre does not forward actions to it."
     },
     {
       "id": "archos-3",
       "name": "archos-3",
       "url": "https://github.com/Daniel550-pixel/archos-3",
       "default_branch": "main",
-      "category": "systems"
+      "category": "systems",
+      "purpose": "Separate ArchOS-named codebase containing a client dashboard layout and a broad reusable UI component library. Its relationship to ArchOS-Repo and exact runtime purpose need confirmation.",
+      "capabilities": [
+        "Dashboard layout",
+        "Reusable React UI components",
+        "Navigation, forms and tables"
+      ],
+      "interface_kind": "React client dashboard / component system",
+      "interface_status": "Dashboard source present; live deployment unverified",
+      "interface_source_url": "https://github.com/Daniel550-pixel/archos-3/blob/main/client/src/components/DashboardLayout.tsx",
+      "purpose_confidence": "Repository structure inspected",
+      "integration_boundary": "Kept as a separate source from ArchOS-Repo until repository lineage is verified."
     },
     {
       "id": "bitminer-ai",
       "name": "BitMiner-AI",
       "url": "https://github.com/Daniel550-pixel/BitMiner-AI",
       "default_branch": "main",
-      "category": "automation"
+      "category": "automation",
+      "purpose": "AI mining/economic-intelligence system with forecasting, agent consensus, economic decision gates, durable events, deterministic replay, provenance, memory integrity and simulation.",
+      "capabilities": [
+        "Operational dashboard",
+        "Forecasting",
+        "Decision provenance",
+        "Fleet controller",
+        "Deterministic replay",
+        "What-if simulation",
+        "Obsidian knowledge graph"
+      ],
+      "interface_kind": "React operations and intelligence dashboard",
+      "interface_status": "UI source present; public deployment unverified",
+      "interface_source_url": "https://github.com/Daniel550-pixel/BitMiner-AI/blob/main/src/components/DashboardView.tsx",
+      "purpose_confidence": "Repository structure and UI components inspected",
+      "integration_boundary": "Display as an independent source; no mining, financial or execution operations are triggered from SysCentre."
     },
     {
       "id": "networklab",
       "name": "NetworkLab",
       "url": "https://github.com/Daniel550-pixel/NetworkLab",
       "default_branch": "main",
-      "category": "infrastructure"
+      "category": "infrastructure",
+      "purpose": "Local-first network and infrastructure lab for configuring, managing and monitoring interfaces, services and VirtualBox VMs; its documentation is aligned to the B1-K2-W1/W2 stage work processes.",
+      "capabilities": [
+        "Network topology",
+        "Addressing and interfaces",
+        "Connectivity diagnostics",
+        "Infrastructure services",
+        "VirtualBox VM and storage management",
+        "Evidence capture"
+      ],
+      "interface_kind": "Local browser-based infrastructure console",
+      "interface_status": "Local-only UI; not hosted by GitHub Pages",
+      "interface_source_url": "https://github.com/Daniel550-pixel/NetworkLab/tree/main/web",
+      "purpose_confidence": "README verified",
+      "integration_boundary": "Browser controls on a local network are not proxied from this static site; operate NetworkLab through its own trusted local runtime."
     },
     {
       "id": "secureos",
       "name": "SecureOS",
       "url": "https://github.com/Daniel550-pixel/SecureOS",
       "default_branch": "main",
-      "category": "security"
+      "category": "security",
+      "purpose": "Security and trust-monitoring system with telemetry, integrity baselines and diffs, event timelines, trust scoring and scenario simulation.",
+      "capabilities": [
+        "Trust core",
+        "Integrity diff matrix",
+        "Security topology",
+        "Telemetry stream",
+        "Trust-score auditing",
+        "Scenario simulator"
+      ],
+      "interface_kind": "React security intelligence workstation",
+      "interface_status": "UI source present; public deployment unverified",
+      "interface_source_url": "https://github.com/Daniel550-pixel/SecureOS/blob/main/src/App.tsx",
+      "purpose_confidence": "Repository structure and UI components inspected",
+      "integration_boundary": "Security telemetry and agent execution remain inside SecureOS; source display does not confer trust or authority."
     },
     {
       "id": "ai-venture-radar",
       "name": "AI-Venture-Radar",
       "url": "https://github.com/Daniel550-pixel/AI-Venture-Radar",
       "default_branch": "main",
-      "category": "business-ai"
+      "category": "business-ai",
+      "purpose": "Evidence-driven market-gap intelligence workflow: collect observations and signals, find unmet demand, evaluate venture hypotheses, challenge them adversarially and preserve evidence and counter-evidence.",
+      "capabilities": [
+        "Market signal analysis",
+        "Gap discovery",
+        "Opportunity scoring",
+        "Competitive and feasibility analysis",
+        "Adversarial validation",
+        "Venture thesis"
+      ],
+      "interface_kind": "Concept / workflow source",
+      "interface_status": "Purpose documented; runnable UI not identified in tree scan",
+      "interface_source_url": "",
+      "purpose_confidence": "README verified",
+      "integration_boundary": "The directory links to the source concept. No live market scanning is implied by this catalog."
     },
     {
       "id": "the-factory",
       "name": "The-Factory",
       "url": "https://github.com/Daniel550-pixel/The-Factory",
       "default_branch": "main",
-      "category": "ai-platform"
+      "category": "ai-platform",
+      "purpose": "AI-native engineering platform concept consolidating shared agent-runtime, policy-gate, event-ledger and context/memory primitives. The README states its architecture audit and extraction are still in progress.",
+      "capabilities": [
+        "Agent runtime model",
+        "Policy and authorization gate",
+        "Event ledger / replay",
+        "Context and memory",
+        "Cross-project architecture lineage"
+      ],
+      "interface_kind": "Architecture and engineering reference",
+      "interface_status": "Audit / extraction stage; no standalone UI confirmed",
+      "interface_source_url": "https://github.com/Daniel550-pixel/The-Factory",
+      "purpose_confidence": "README verified",
+      "integration_boundary": "Architecture lineage reference; this page does not merge code or establish a shared runtime."
     },
     {
       "id": "the-factory-2",
       "name": "The-Factory-2.0",
       "url": "https://github.com/Daniel550-pixel/The-Factory-2.0",
       "default_branch": "main",
-      "category": "ai-platform"
+      "category": "ai-platform",
+      "purpose": "AI-native operational control plane for governed agent execution, authorization, evidence, policy, event integrity, replay and contextual memory.",
+      "capabilities": [
+        "Command center",
+        "Agents and approvals",
+        "Executions",
+        "Policy gate",
+        "Evidence and provenance",
+        "Event ledger",
+        "Memory",
+        "Replay and recovery",
+        "Security / simulation"
+      ],
+      "interface_kind": "React control-plane operations console",
+      "interface_status": "UI source present; README cautions that production security boundaries are not yet complete",
+      "interface_source_url": "https://github.com/Daniel550-pixel/The-Factory-2.0/blob/main/src/App.tsx",
+      "purpose_confidence": "README verified",
+      "integration_boundary": "The visual system is represented through interface patterns and source links only; no execution broker is connected."
     },
     {
       "id": "the-house-of-coding",
       "name": "The-House-Of-Coding",
       "url": "https://github.com/Daniel550-pixel/The-House-Of-Coding",
       "default_branch": "main",
-      "category": "developer-tools"
+      "category": "developer-tools",
+      "purpose": "AI-native coding environment with project workspaces, an LLM router, coding/debugging/testing/review agents, language-specific execution and a bounded code-run-debug-retry loop.",
+      "capabilities": [
+        "Project explorer",
+        "AI coder",
+        "Debug / test / review agents",
+        "Multi-language runtime registry",
+        "Terminal output capture",
+        "Workspace-safe file operations"
+      ],
+      "interface_kind": "Next.js coding workbench with API",
+      "interface_status": "UI implementation documented; hosted deployment unverified",
+      "interface_source_url": "https://github.com/Daniel550-pixel/The-House-Of-Coding/tree/main/apps/web",
+      "purpose_confidence": "README verified",
+      "integration_boundary": "Code execution remains isolated in its own project. This directory does not run or edit other repositories."
     },
     {
       "id": "localhost-webapp",
       "name": "Localhost-webapp",
       "url": "https://github.com/Daniel550-pixel/Localhost-webapp",
       "default_branch": "main",
-      "category": "developer-tools"
+      "category": "developer-tools",
+      "purpose": "Next.js starter workspace. Its README describes the default framework scaffold rather than a distinct system capability, so product purpose needs confirmation.",
+      "capabilities": [
+        "Next.js app shell",
+        "Starter UI"
+      ],
+      "interface_kind": "Next.js starter interface",
+      "interface_status": "Scaffold; purpose and deployment unverified",
+      "interface_source_url": "https://github.com/Daniel550-pixel/Localhost-webapp/blob/main/app/page.tsx",
+      "purpose_confidence": "README inspected",
+      "integration_boundary": "Reference only until the app is customized and its role is confirmed."
     },
     {
       "id": "business-os",
       "name": "Business-OS",
       "url": "https://github.com/Daniel550-pixel/Business-OS",
       "default_branch": "main",
-      "category": "business-ai"
+      "category": "business-ai",
+      "purpose": "Business operating-system dashboard codebase combining executive cockpit, finance and sales views, agents and missions, command center, operations, cyber HUD, digital-twin hierarchy and spatial/3D system-flow components.",
+      "capabilities": [
+        "Executive cockpit",
+        "Finance and sales views",
+        "Agents and missions",
+        "Operations",
+        "Cyber HUD",
+        "Digital-twin hierarchy",
+        "Spatial system-flow visualizer"
+      ],
+      "interface_kind": "React operational / executive command interface",
+      "interface_status": "Rich UI source present; hosted deployment unverified",
+      "interface_source_url": "https://github.com/Daniel550-pixel/Business-OS/blob/main/src/App.tsx",
+      "purpose_confidence": "Repository structure and component names inspected",
+      "integration_boundary": "Display and source-navigation only. Business workflows, integrations and API keys are not invoked by this catalog."
     },
     {
       "id": "onedrive-cleanup-controller",
       "name": "OneDrive-Cleanup-Controller",
       "url": "https://github.com/Daniel550-pixel/OneDrive-Cleanup-Controller",
       "default_branch": "main",
-      "category": "automation"
+      "category": "automation",
+      "purpose": "Safety-focused PowerShell controller for inspecting OneDrive storage, freeing local disk space, quarantining files, restoring them and optionally deleting synced files with audit logging.",
+      "capabilities": [
+        "Storage scan",
+        "Space recovery",
+        "Quarantine and restore",
+        "Explicit permanent-delete mode",
+        "Local audit log",
+        "Storage categorization"
+      ],
+      "interface_kind": "PowerShell command-line / local tool",
+      "interface_status": "CLI only; no web UI",
+      "interface_source_url": "https://github.com/Daniel550-pixel/OneDrive-Cleanup-Controller/blob/main/README.md",
+      "purpose_confidence": "README verified",
+      "integration_boundary": "Destructive file operations are never exposed as buttons in this website; run and review scripts only in the local trusted environment."
     },
     {
       "id": "experienceengine",
       "name": "ExperienceEngine",
       "url": "https://github.com/Daniel550-pixel/ExperienceEngine",
       "default_branch": "main",
-      "category": "developer-tools"
+      "category": "developer-tools",
+      "purpose": "Interactive creation environment with an intention panel, creation/code panel, project presets and simulation components—intended to turn user intent into generated experiences and code.",
+      "capabilities": [
+        "Intention input",
+        "Generated-code workspace",
+        "Creation panel",
+        "Preset projects",
+        "Interactive simulations",
+        "Local project storage"
+      ],
+      "interface_kind": "Split-screen interactive creation workbench",
+      "interface_status": "UI source present; hosted deployment unverified",
+      "interface_source_url": "https://github.com/Daniel550-pixel/ExperienceEngine/blob/main/src/App.tsx",
+      "purpose_confidence": "Repository structure and UI components inspected",
+      "integration_boundary": "Only the interface pattern and source link are integrated; generated code is not executed by SysCentre."
     },
     {
       "id": "syscentre",
       "name": "SysCentre",
       "url": "https://github.com/Daniel550-pixel/SysCentre",
       "default_branch": "main",
-      "category": "core-platform"
+      "category": "core-platform",
+      "purpose": "Local-first systems catalog and source indexer. Its runtime uses a deterministic allowlist, SQLite event ledger and repository ingestion that treats imported files as data rather than executable instructions.",
+      "capabilities": [
+        "Project registry",
+        "Repository metadata and source indexing",
+        "Cross-project source search",
+        "Policy gate",
+        "SQLite audit ledger",
+        "Static continuity fallback"
+      ],
+      "interface_kind": "Systems control plane and independent static fallback",
+      "interface_status": "Static fallback deployed through GitHub Pages; local API availability must be checked on the same computer",
+      "interface_source_url": "https://github.com/Daniel550-pixel/SysCentre/blob/main/bonus-app/index.html",
+      "purpose_confidence": "README and runtime catalog inspected",
+      "integration_boundary": "Repositories remain independent. Indexing does not run repository code or merge runtimes."
     }
   ]
 }
