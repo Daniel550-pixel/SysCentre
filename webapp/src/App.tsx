@@ -41,10 +41,12 @@ export default function App() {
       const responses = await Promise.all([
         fetch(API + "/api/status", { signal: AbortSignal.timeout(2500) }),
         fetch(API + "/api/events", { signal: AbortSignal.timeout(2500) }),
+        fetch(API + "/api/repositories", { signal: AbortSignal.timeout(5000 }),
       ]);
       if (!responses[0].ok || !responses[1].ok) throw new Error("Runtime API returned an error");
       const nextStatus = (await responses[0].json()) as RuntimeStatus;
       const nextEvents = (await responses[1].json()) as { events: RuntimeEvent[] };
+      if (responses[2].ok) { const nextProjects = (await responses[2].json()) as { projects: Project[] }; setProjects(nextProjects.projects ?? []); }
       setStatus(nextStatus);
       setEvents(nextEvents.events ?? []);
       setConnected(true);
@@ -97,6 +99,7 @@ export default function App() {
         <div className="workspace-label">WORKSPACE</div>
         <nav className="nav-list" aria-label="Main navigation">
           <a className="nav-item active" href="#overview"><Gauge size={17} /><span>Overview</span><ChevronRight className="nav-chevron" size={15} /></a>
+          <a className="nav-item" href="#projects"><FolderGit2 size={17} /><span>Project registry</span></a>
           <a className="nav-item" href="#runtime"><Cpu size={17} /><span>Runtime</span></a>
           <a className="nav-item" href="#console"><TerminalSquare size={17} /><span>Command console</span></a>
           <a className="nav-item" href="#security"><ShieldCheck size={17} /><span>Policy & security</span></a>
