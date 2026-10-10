@@ -41,6 +41,18 @@ class RepositoryRegistryTests(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertFalse(repository_ingest._is_sensitive(path))
 
+
+    def test_blob_decoder_accepts_utf8_source(self):
+        self.assertEqual(repository_ingest._decode_blob_text(b"print('syscentre')"), "print('syscentre')")
+
+    def test_blob_decoder_rejects_nul_bytes(self):
+        with self.assertRaises(UnicodeDecodeError):
+            repository_ingest._decode_blob_text(b"header\\x00payload")
+
+    def test_blob_decoder_rejects_invalid_utf8(self):
+        with self.assertRaises(UnicodeDecodeError):
+            repository_ingest._decode_blob_text(b"\\xff\\xfe")
+
     def test_source_search_rejects_short_queries(self):
         with self.assertRaises(ValueError):
             repository_ingest.search_index("x")
