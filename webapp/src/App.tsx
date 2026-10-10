@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import {
   Activity, ArrowDownRight, ArrowUpRight, Bot, Check, ChevronRight,
-  CircleDot, Command, Cpu, Gauge, Layers3, LockKeyhole, RefreshCw,
+  CircleDot, Command, Cpu, Database, FolderGit2, Gauge, Layers3, LockKeyhole, RefreshCw,
   Send, ShieldCheck, TerminalSquare, Wifi, WifiOff, Zap,
 } from "lucide-react";
 
