@@ -170,39 +170,38 @@ def ingest_repository(project_key: str) -> dict[str, Any]:
     if len(entries) > MAX_FILES_PER_REPO:
         raise RuntimeError(f"Repository has {len(entries)} files; safety limit is {MAX_FILES_PER_REPO} per ingestion run.")
 
-    files_indexed = 0
-    files_skipped = 0
-    rows: list[tuple[Any, ...]] = []
-    for node in entries:
+    # Fetch blobs concurrently: one request per file is otherwise too slow for
+    # repositories with thousands of tracked files. Keep concurrency bounded to
+    # avoid overwhelming GitHub and preserve deterministic result ordering.
+    from concurrent.futures import ThreadPoolExecutor
+
+    def index_node(node: dict[str, Any]) -> tuple[tuple[Any, ...], bool]:
         path = node.get("path", "")
         size = int(node.get("size", 0) or 0)
         sha = node.get("sha", "")
         if _is_sensitive(path):
-            rows.append((item["id"], path, sha, size, "excluded", None, "sensitive-looking path"))
-            files_skipped += 1
-            continue
+            return ((item["id"], path, sha, size, "excluded", None, "sensitive-looking path"), False)
         if _is_ignored(path):
-            rows.append((item["id"], path, sha, size, "excluded", None, "generated/dependency directory"))
-            files_skipped += 1
-            continue
+            return ((item["id"], path, sha, size, "excluded", None, "generated/dependency directory"), False)
         if size > MAX_TEXT_BYTES:
-            rows.append((item["id"], path, sha, size, "excluded", None, "file exceeds text indexing limit"))
-            files_skipped += 1
-            continue
+            return ((item["id"], path, sha, size, "excluded", None, "file exceeds text indexing limit"), False)
         try:
             blob = _api_json(f"{API_ROOT}/repos/{owner_repo}/git/blobs/{sha}")
             raw = base64.b64decode(blob.get("content", ""))
             text_content = raw.decode("utf-8")
-            if "\x00" in text_content:
+            if "\\x00" in text_content:
                 raise UnicodeDecodeError("utf-8", raw, 0, 1, "binary content")
-            rows.append((item["id"], path, sha, size, "text", text_content, ""))
-            files_indexed += 1
+            return ((item["id"], path, sha, size, "text", text_content, ""), True)
         except (UnicodeDecodeError, ValueError):
-            rows.append((item["id"], path, sha, size, "binary", None, "not UTF-8 text"))
-            files_skipped += 1
+            return ((item["id"], path, sha, size, "binary", None, "not UTF-8 text"), False)
         except RuntimeError as exc:
-            # Keep ingestion failure explicit instead of silently claiming completeness.
             raise RuntimeError(f"Failed indexing {path}: {exc}") from exc
+
+    with ThreadPoolExecutor(max_workers=6, thread_name_prefix="syscentre-index") as pool:
+        indexed_results = list(pool.map(index_node, entries))
+    rows = [result[0] for result in indexed_results]
+    files_indexed = sum(1 for _, is_text in indexed_results if is_text)
+    files_skipped = len(rows) - files_indexed
 
     finished = datetime.now(timezone.utc).isoformat()
     description = repo_data.get("description") or ""
