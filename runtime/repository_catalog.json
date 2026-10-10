@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "purpose": "SysCentre project registry. Repositories remain separate projects; this catalog indexes them without merging their codebases.",
+  "owner": "Daniel550-pixel",
+  "repositories": [
+    {
+      "id": "finsight-global-ai",
+      "name": "FinSight-Global-AI",
+      "url": "https://github.com/Daniel550-pixel/FinSight-Global-AI",
+      "default_branch": "main",
+      "category": "finance-ai"
+    },
+    {
+      "id": "ai-trading-dashboard",
+      "name": "ai-trading-dashboard",
+      "url": "https://github.com/Daniel550-pixel/ai-trading-dashboard",
+      "default_branch": "master",
+      "category": "trading"
+    },
+    {
+      "id": "ai-trading-dashboard-2",
+      "name": "ai-trading-dashboard-2",
+      "url": "https://github.com/Daniel550-pixel/ai-trading-dashboard-2",
+      "default_branch": "main",
+      "category": "trading"
+    },
+    {
+      "id": "ai-trading-dashboard-3",
+      "name": "ai-trading-dashboard-3",
+      "url": "https://github.com/Daniel550-pixel/ai-trading-dashboard-3",
+      "default_branch": "main",
+      "category": "trading"
+    },
+    {
+      "id": "finsight-global-ai-2",
+      "name": "FinSight-Global-AI-2",
+      "url": "https://github.com/Daniel550-pixel/FinSight-Global-AI-2",
+      "default_branch": "main",
+      "category": "finance-ai"
+    },
+    {
+      "id": "finsight-global-ai-4",
+      "name": "FinSight-Global-AI-4",
+      "url": "https://github.com/Daniel550-pixel/FinSight-Global-AI-4",
+      "default_branch": "main",
+      "category": "finance-ai"
+    },
+    {
+      "id": "finsight-global-ai-dashboard",
+      "name": "FinSight_Global_AI_Dashboard",
+      "url": "https://github.com/Daniel550-pixel/FinSight_Global_AI_Dashboard",
+      "default_branch": "master",
+      "category": "finance-ai"
+    },
+    {
+      "id": "ai-mainframe",
+      "name": "AI-mainframe",
+      "url": "https://github.com/Daniel550-pixel/AI-mainframe",
+      "default_branch": "main",
+      "category": "ai-platform"
+    },
+    {
+      "id": "ai-os-global-super-app",
+      "name": "AI-OS-Global-Super-App",
+      "url": "https://github.com/Daniel550-pixel/AI-OS-Global-Super-App",
+      "default_branch": "main",
+      "category": "ai-platform"
+    },
+    {
+      "id": "ai-os-global-wealth-engine",
+      "name": "AI-OS-Global-Wealth-Engine",
+      "url": "https://github.com/Daniel550-pixel/AI-OS-Global-Wealth-Engine",
+      "default_branch": "main",
+      "category": "finance-ai"
+    },
+    {
+      "id": "aios-system",
+      "name": "AIOS-System",
+      "url": "https://github.com/Daniel550-pixel/AIOS-System",
+      "default_branch": "main",
+      "category": "ai-platform"
+    },
+    {
+      "id": "aios-core-architect",
+      "name": "AIOS-Core-Architect.",
+      "url": "https://github.com/Daniel550-pixel/AIOS-Core-Architect.",
+      "default_branch": "main",
+      "category": "ai-platform"
+    },
+    {
+      "id": "obsidian-ai",
+      "name": "Obsidian-AI",
+      "url": "https://github.com/Daniel550-pixel/Obsidian-AI",
+      "default_branch": "main",
+      "category": "ai-platform"
+    },
+    {
+      "id": "fgse",
+      "name": "FGSE",
+      "url": "https://github.com/Daniel550-pixel/FGSE",
+      "default_branch": "main",
+      "category": "finance-ai"
+    },
+    {
+      "id": "archos-repo",
+      "name": "ArchOS-Repo",
+      "url": "https://github.com/Daniel550-pixel/ArchOS-Repo",
+      "default_branch": "main",
+      "category": "systems"
+    },
+    {
+      "id": "archos-3",
+      "name": "archos-3",
+      "url": "https://github.com/Daniel550-pixel/archos-3",
+      "default_branch": "main",
+      "category": "systems"
+    },
+    {
+      "id": "bitminer-ai",
+      "name": "BitMiner-AI",
+      "url": "https://github.com/Daniel550-pixel/BitMiner-AI",
+      "default_branch": "main",
+      "category": "automation"
+    },
+    {
+      "id": "networklab",
+      "name": "NetworkLab",
+      "url": "https://github.com/Daniel550-pixel/NetworkLab",
+      "default_branch": "main",
+      "category": "infrastructure"
+    },
+    {
+      "id": "secureos",
+      "name": "SecureOS",
+      "url": "https://github.com/Daniel550-pixel/SecureOS",
+      "default_branch": "main",
+      "category": "security"
+    },
+    {
+      "id": "ai-venture-radar",
+      "name": "AI-Venture-Radar",
+      "url": "https://github.com/Daniel550-pixel/AI-Venture-Radar",
+      "default_branch": "main",
+      "category": "business-ai"
+    },
+    {
+      "id": "the-factory",
+      "name": "The-Factory",
+      "url": "https://github.com/Daniel550-pixel/The-Factory",
+      "default_branch": "main",
+      "category": "ai-platform"
+    },
+    {
+      "id": "the-factory-2",
+      "name": "The-Factory-2.0",
+      "url": "https://github.com/Daniel550-pixel/The-Factory-2.0",
+      "default_branch": "main",
+      "category": "ai-platform"
+    },
+    {
+      "id": "the-house-of-coding",
+      "name": "The-House-Of-Coding",
+      "url": "https://github.com/Daniel550-pixel/The-House-Of-Coding",
+      "default_branch": "main",
+      "category": "developer-tools"
+    },
+    {
+      "id": "localhost-webapp",
+      "name": "Localhost-webapp",
+      "url": "https://github.com/Daniel550-pixel/Localhost-webapp",
+      "default_branch": "main",
+      "category": "developer-tools"
+    },
+    {
+      "id": "business-os",
+      "name": "Business-OS",
+      "url": "https://github.com/Daniel550-pixel/Business-OS",
+      "default_branch": "main",
+      "category": "business-ai"
+    },
+    {
+      "id": "onedrive-cleanup-controller",
+      "name": "OneDrive-Cleanup-Controller",
+      "url": "https://github.com/Daniel550-pixel/OneDrive-Cleanup-Controller",
+      "default_branch": "main",
+      "category": "automation"
+    },
+    {
+      "id": "experienceengine",
+      "name": "ExperienceEngine",
+      "url": "https://github.com/Daniel550-pixel/ExperienceEngine",
+      "default_branch": "main",
+      "category": "developer-tools"
+    },
+    {
+      "id": "syscentre",
+      "name": "SysCentre",
+      "url": "https://github.com/Daniel550-pixel/SysCentre",
+      "default_branch": "main",
+      "category": "core-platform"
+    }
+  ]
+}
