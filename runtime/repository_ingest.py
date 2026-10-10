@@ -22,7 +22,7 @@ import server
 
 CATALOG_PATH = Path(__file__).with_name("repository_catalog.json")
 API_ROOT = "https://api.github.com"
-MAX_TEXT_BYTES = 1_500_000
+MAX_TEXT_BYTES = 900_000
 MAX_FILES_PER_REPO = 10_000
 SENSITIVE_PARTS = {
     ".env", ".env.local", ".env.production", "secrets", "secret", "credentials",
@@ -74,7 +74,7 @@ def _api_json(url: str) -> dict[str, Any]:
 def _is_sensitive(path: str) -> bool:
     parts = [part.lower() for part in path.split("/")]
     filename = parts[-1] if parts else ""
-    if any(part in SENSITIVE_PARTS for part in parts):
+    if filename.startswith(".env") or any(part in SENSITIVE_PARTS for part in parts):
         return True
     if filename.endswith(SENSITIVE_SUFFIXES):
         return True
