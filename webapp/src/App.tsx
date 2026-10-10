@@ -9,6 +9,7 @@ const API = "http://127.0.0.1:8765";
 type RuntimeStatus = { name: string; state: string; host: string; port: number; uptime_seconds: number; python_version: string; platform: string; policy_gate: string; event_ledger: string; event_ledger_path?: string; timestamp: string };
 type RuntimeEvent = { id: string; timestamp: string; type: string; message: string; details: Record<string, unknown> };
 type CommandResponse = { ok: boolean; command: string; result?: unknown; error?: string };
+type Project = { project_id: string; name: string; repository_url: string; default_branch: string; description: string; latest_commit: string; indexed_at: string; file_count: number; text_file_count: number; skipped_file_count: number; status: string };
 
 function formatUptime(seconds = 0) {
   const total = Math.max(0, Math.floor(seconds));
@@ -30,6 +31,10 @@ export default function App() {
   const [command, setCommand] = useState("");
   const [output, setOutput] = useState("Runtime console ready. Enter help to see available commands.");
   const [lastUpdated, setLastUpdated] = useState("");
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [ingesting, setIngesting] = useState<string | null>(null);
+  const [projectMessage, setProjectMessage] = useState("");
+  const [projectSearch, setProjectSearch] = useState("");
 
   const refresh = useCallback(async () => {
     try {
