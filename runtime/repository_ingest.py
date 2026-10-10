@@ -75,6 +75,14 @@ def _api_json(url: str) -> dict[str, Any]:
         raise RuntimeError(f"Could not reach GitHub: {exc}") from exc
 
 
+def _decode_blob_text(raw: bytes) -> str:
+    """Decode UTF-8 source and reject binary blobs containing NUL bytes."""
+    text_content = raw.decode("utf-8")
+    if "\x00" in text_content:
+        raise UnicodeDecodeError("utf-8", raw, 0, min(1, len(raw)), "binary content")
+    return text_content
+
+
 def _is_sensitive(path: str) -> bool:
     parts = [part.lower() for part in path.split("/")]
     filename = parts[-1] if parts else ""
@@ -188,9 +196,7 @@ def ingest_repository(project_key: str) -> dict[str, Any]:
         try:
             blob = _api_json(f"{API_ROOT}/repos/{owner_repo}/git/blobs/{sha}")
             raw = base64.b64decode(blob.get("content", ""))
-            text_content = raw.decode("utf-8")
-            if "\x00" in text_content:
-                raise UnicodeDecodeError("utf-8", raw, 0, 1, "binary content")
+            text_content = _decode_blob_text(raw)
             return ((item["id"], path, sha, size, "text", text_content, ""), True)
         except (UnicodeDecodeError, ValueError):
             return ((item["id"], path, sha, size, "binary", None, "not UTF-8 text"), False)
