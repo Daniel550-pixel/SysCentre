@@ -101,6 +101,25 @@ export default function App() {
     finally { setIngesting(null); }
   }
 
+  async function indexAllProjects() {
+    if (ingesting || !projects.length) return;
+    setIngesting("ALL");
+    let completed = 0;
+    const failures: string[] = [];
+    for (const project of projects) {
+      setProjectMessage("Indexing project " + (completed + 1) + " of " + projects.length + ": " + project.name);
+      try {
+        const response = await fetch(API + "/api/repositories/ingest", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ project_id: project.project_id }), signal: AbortSignal.timeout(300000) });
+        const data = await response.json() as { ok?: boolean; error?: string };
+        if (!response.ok || !data.ok) throw new Error(data.error ?? "indexing failed");
+        completed += 1;
+      } catch (error) { failures.push(project.name + ": " + (error instanceof Error ? error.message : "unknown error")); }
+    }
+    await refresh();
+    setProjectMessage("Bulk indexing finished. Successful: " + completed + " of " + projects.length + ". " + (failures.length ? "Failed: " + failures.join(" | ") : "No failures."));
+    setIngesting(null);
+  }
+
   const uptime = status ? formatUptime(status.uptime_seconds) : "—";
 
   return (
