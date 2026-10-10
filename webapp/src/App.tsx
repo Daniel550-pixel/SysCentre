@@ -41,7 +41,7 @@ export default function App() {
       const responses = await Promise.all([
         fetch(API + "/api/status", { signal: AbortSignal.timeout(2500) }),
         fetch(API + "/api/events", { signal: AbortSignal.timeout(2500) }),
-        fetch(API + "/api/repositories", { signal: AbortSignal.timeout(5000 }),
+        fetch(API + "/api/repositories", { signal: AbortSignal.timeout(5000) }),
       ]);
       if (!responses[0].ok || !responses[1].ok) throw new Error("Runtime API returned an error");
       const nextStatus = (await responses[0].json()) as RuntimeStatus;
@@ -85,6 +85,20 @@ export default function App() {
     } finally {
       setBusy(false);
     }
+  }
+
+  async function indexProject(projectId: string, projectName: string) {
+    if (ingesting) return;
+    setIngesting(projectId);
+    setProjectMessage("Indexing " + projectName + " from GitHub. Larger repositories can take several minutes.");
+    try {
+      const response = await fetch(API + "/api/repositories/ingest", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ project_id: projectId }), signal: AbortSignal.timeout(300000) });
+      const data = await response.json() as { ok?: boolean; files_seen?: number; files_indexed?: number; files_skipped?: number; error?: string };
+      if (!response.ok || !data.ok) throw new Error(data.error ?? "Repository indexing failed");
+      setProjectMessage(projectName + " indexed: " + data.files_indexed + " text files stored, " + data.files_skipped + " excluded out of " + data.files_seen + " files.");
+      await refresh();
+    } catch (error) { setProjectMessage("Indexing failed for " + projectName + ": " + (error instanceof Error ? error.message : "unknown error")); }
+    finally { setIngesting(null); }
   }
 
   const uptime = status ? formatUptime(status.uptime_seconds) : "—";
