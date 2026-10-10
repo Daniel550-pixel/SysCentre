@@ -162,7 +162,7 @@ export default function App() {
           {!connected && <div className="connection-alert"><WifiOff size={18} /><div><strong>Runtime not detected</strong><p>Start the Python runtime to populate live system data. The dashboard will reconnect automatically.</p></div><code>python .\runtime\server.py</code></div>}
 
           <section className="panel projects-panel" id="projects">
-            <div className="panel-header"><div><div className="panel-kicker">PROJECT INTELLIGENCE</div><h2>Project registry</h2></div><span className="panel-icon"><FolderGit2 size={18} /></span></div>
+            <div className="panel-header"><div><div className="panel-kicker">PROJECT INTELLIGENCE</div><h2>Project registry</h2></div><button className="secondary-button project-index-button" disabled={ingesting !== null || projects.length === 0} onClick={() => void indexAllProjects()}>{ingesting === "ALL" ? "Indexing all..." : "Index all projects"}</button></div>
             <p className="panel-description">Independent repositories registered for indexing. Source remains in its own repository; indexing does not merge or execute project code.</p>
             <div className="project-toolbar"><input className="project-filter" value={projectSearch} onChange={(event) => setProjectSearch(event.target.value)} placeholder="Filter projects..." aria-label="Filter projects" /><span className="project-count">{projects.length} registered</span></div>
             {projectMessage && <div className="project-message" role="status">{projectMessage}</div>}
