@@ -6,6 +6,7 @@ import os
 import platform
 import sqlite3
 import time
+from urllib.parse import parse_qs, unquote, urlsplit
 from datetime import datetime, timezone
 from contextlib import contextmanager
 from pathlib import Path
@@ -78,7 +79,7 @@ def record_event(event_type: str, message: str, details: dict[str, Any] | None =
 def recent_events(limit: int = 50) -> list[dict[str, Any]]:
     bounded_limit = max(1, min(int(limit), 100))
     with _DB_LOCK:
-        with _connect() as connection:
+        with _database() as connection:
             rows = connection.execute(
                 "SELECT id, timestamp, type, message, details_json FROM events ORDER BY timestamp DESC LIMIT ?",
                 (bounded_limit,),
@@ -152,20 +153,36 @@ class Handler(BaseHTTPRequestHandler):
         self._send_json(200, {"ok": True})
 
     def do_GET(self) -> None:
-        if self.path == "/api/health":
+        parsed = urlsplit(self.path)
+        path = parsed.path
+        if path == "/api/health":
             self._send_json(200, {"ok": True, "service": "syscentre-runtime"})
-        elif self.path == "/api/status":
+        elif path == "/api/status":
             self._send_json(200, runtime_status())
-        elif self.path == "/api/events":
+        elif path == "/api/events":
             events = recent_events(50)
             self._send_json(200, {"events": events, "count": len(events), "storage": "sqlite"})
-        elif self.path == "/api/policy":
+        elif path == "/api/policy":
             self._send_json(200, {"enabled": True, "mode": "allowlist", "commands": policy_catalog()})
+        elif path == "/api/repositories":
+            from repository_ingest import list_projects
+            projects = list_projects()
+            self._send_json(200, {"projects": projects, "count": len(projects)})
+        elif path.startswith("/api/repositories/") and path.endswith("/files"):
+            from repository_ingest import project_files
+            project_id = unquote(path[len("/api/repositories/"):-len("/files")].strip("/"))
+            params = parse_qs(parsed.query)
+            query = params.get("path", [""])[0]
+            try:
+                self._send_json(200, project_files(project_id, query=query, limit=int(params.get("limit", ["100"])[0])))
+            except (ValueError, TypeError) as exc:
+                self._send_json(400, {"ok": False, "error": str(exc)})
         else:
             self._send_json(404, {"ok": False, "error": "Route not found"})
 
     def do_POST(self) -> None:
-        if self.path != "/api/command":
+        parsed = urlsplit(self.path)
+        if parsed.path not in {"/api/command", "/api/repositories/ingest"}:
             self._send_json(404, {"ok": False, "error": "Route not found"})
             return
         try:
@@ -173,11 +190,23 @@ class Handler(BaseHTTPRequestHandler):
             if length <= 0 or length > MAX_BODY_BYTES:
                 raise ValueError("Request body must be between 1 and 8192 bytes.")
             payload = json.loads(self.rfile.read(length).decode("utf-8"))
-            if not isinstance(payload, dict) or not isinstance(payload.get("command"), str):
-                raise ValueError("JSON body must contain a string 'command'.")
-            self._send_json(200, execute_command(payload["command"]))
+            if not isinstance(payload, dict):
+                raise ValueError("Request body must be a JSON object.")
+            if parsed.path == "/api/command":
+                if not isinstance(payload.get("command"), str):
+                    raise ValueError("JSON body must contain a string 'command'.")
+                self._send_json(200, execute_command(payload["command"]))
+            else:
+                project_id = payload.get("project_id")
+                if not isinstance(project_id, str) or not project_id.strip():
+                    raise ValueError("JSON body must contain a string 'project_id'.")
+                from repository_ingest import ingest_repository
+                self._send_json(200, ingest_repository(project_id))
         except (ValueError, UnicodeDecodeError, json.JSONDecodeError) as exc:
             self._send_json(400, {"ok": False, "error": str(exc)})
+        except RuntimeError as exc:
+            record_event("repository.ingest_failed", "Repository ingestion failed", {"error": str(exc)})
+            self._send_json(502, {"ok": False, "error": str(exc)})
 
     def log_message(self, fmt: str, *args: Any) -> None:
         print(f"[SysCentre] {self.log_date_time_string()} {fmt % args}")
