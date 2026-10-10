@@ -14,9 +14,9 @@ SysCentre is a standalone local-first systems control plane. It catalogs existin
 
 ## Repository ingestion
 
-The dashboard Project Registry lists repositories registered in the catalog. Select **Index repo** to index one project from its configured GitHub URL. GitHub API rate limits apply; set `GITHUB_TOKEN` or `GH_TOKEN` in the runtime environment for authenticated API access.
+The dashboard Project Registry lists repositories registered in the catalog. Select **Index repo** to index one project or **Index all projects** to process the catalog sequentially. Use cross-project source search to find text inside indexed source files. GitHub API rate limits apply; set `GITHUB_TOKEN` or `GH_TOKEN` in the runtime environment for authenticated API access.
 
-The indexer deliberately excludes sensitive-looking paths (for example, `.env`, private keys, and credential files), generated/dependency directories, binary files, and individual files larger than 1.5 MB from the text content index. Their paths and exclusion reasons are retained as metadata. A truncated GitHub tree or failed file fetch aborts the run rather than falsely reporting a complete index. The source repository is never modified.
+The indexer deliberately excludes sensitive-looking paths (for example, `.env`, private keys, and credential files), generated/dependency directories, binary files, and individual files larger than 900 KB from the text content index. Their paths and exclusion reasons are retained as metadata. A truncated GitHub tree or failed file fetch aborts the run rather than falsely reporting a complete index. The source repository is never modified.
 
 ## Requirements
 
@@ -43,6 +43,7 @@ Open **http://127.0.0.1:5173**. The runtime API is **http://127.0.0.1:8765**.
 - `GET /api/policy` — current allowlisted command catalog
 - `GET /api/repositories` — catalog plus indexing status
 - `GET /api/repositories/{project_id}/files?path=term&limit=100` — indexed file records and source text (maximum 200 per response)
+- `GET /api/search?q=policy&limit=50` — search indexed source across projects (maximum 100 matches)
 - `POST /api/repositories/ingest` with `{"project_id":"networklab"}` — index one catalogued repository
 - `POST /api/command` — accepts only `status`, `help`, or `diagnostics`
 
@@ -50,6 +51,7 @@ Example PowerShell calls:
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:8765/api/repositories
+Invoke-RestMethod 'http://127.0.0.1:8765/api/search?q=policy&limit=20'
 Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8765/api/repositories/ingest -ContentType 'application/json' -Body '{"project_id":"networklab"}'
 Invoke-RestMethod 'http://127.0.0.1:8765/api/repositories/networklab/files?limit=10'
 ```
