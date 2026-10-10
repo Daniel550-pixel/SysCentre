@@ -10,6 +10,7 @@ type RuntimeStatus = { name: string; state: string; host: string; port: number; 
 type RuntimeEvent = { id: string; timestamp: string; type: string; message: string; details: Record<string, unknown> };
 type CommandResponse = { ok: boolean; command: string; result?: unknown; error?: string };
 type Project = { project_id: string; name: string; repository_url: string; default_branch: string; description: string; latest_commit: string; indexed_at: string; file_count: number; text_file_count: number; skipped_file_count: number; status: string };
+type SourceResult = { project_id: string; project_name: string; repository_url: string; path: string; blob_sha: string; size_bytes: number; excerpt: string };
 
 function formatUptime(seconds = 0) {
   const total = Math.max(0, Math.floor(seconds));
@@ -35,6 +36,9 @@ export default function App() {
   const [ingesting, setIngesting] = useState<string | null>(null);
   const [projectMessage, setProjectMessage] = useState("");
   const [projectSearch, setProjectSearch] = useState("");
+  const [sourceQuery, setSourceQuery] = useState("");
+  const [sourceResults, setSourceResults] = useState<SourceResult[]>([]);
+  const [sourceSearching, setSourceSearching] = useState(false);
 
   const refresh = useCallback(async () => {
     try {
@@ -99,6 +103,19 @@ export default function App() {
       await refresh();
     } catch (error) { setProjectMessage("Indexing failed for " + projectName + ": " + (error instanceof Error ? error.message : "unknown error")); }
     finally { setIngesting(null); }
+  }
+
+  async function searchSource(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (sourceQuery.trim().length < 2 || sourceSearching) return;
+    setSourceSearching(true);
+    try {
+      const response = await fetch(API + "/api/search?q=" + encodeURIComponent(sourceQuery.trim()) + "&limit=50", { signal: AbortSignal.timeout(15000) });
+      const data = await response.json() as { results?: SourceResult[]; error?: string };
+      if (!response.ok) throw new Error(data.error ?? "Search failed");
+      setSourceResults(data.results ?? []);
+    } catch (error) { setProjectMessage("Source search failed: " + (error instanceof Error ? error.message : "unknown error")); }
+    finally { setSourceSearching(false); }
   }
 
   async function indexAllProjects() {
@@ -166,6 +183,8 @@ export default function App() {
             <p className="panel-description">Independent repositories registered for indexing. Source remains in its own repository; indexing does not merge or execute project code.</p>
             <div className="project-toolbar"><input className="project-filter" value={projectSearch} onChange={(event) => setProjectSearch(event.target.value)} placeholder="Filter projects..." aria-label="Filter projects" /><span className="project-count">{projects.length} registered</span></div>
             {projectMessage && <div className="project-message" role="status">{projectMessage}</div>}
+            <form className="source-search" onSubmit={searchSource}><input value={sourceQuery} onChange={(event) => setSourceQuery(event.target.value)} placeholder="Search indexed source across projects..." aria-label="Search indexed source" /><button className="secondary-button project-index-button" type="submit" disabled={sourceSearching || sourceQuery.trim().length < 2}>{sourceSearching ? "Searching..." : "Search source"}</button></form>
+            {sourceResults.length > 0 && <div className="source-results"><div className="source-results-heading">{sourceResults.length} source matches</div>{sourceResults.map((result, index) => <article className="source-result" key={result.project_id + result.path + index}><div><strong>{result.project_name}</strong><span>{result.path}</span></div><pre>{result.excerpt}</pre><a href={result.repository_url + "/blob/" + (projects.find((project) => project.project_id === result.project_id)?.default_branch ?? "main") + "/" + result.path} target="_blank" rel="noreferrer">Open source on GitHub</a></article>)}</div>}
             <div className="project-list">
               {projects.filter((project) => project.name.toLowerCase().includes(projectSearch.toLowerCase()) || project.project_id.includes(projectSearch.toLowerCase())).map((project) => (
                 <article className="project-row" key={project.project_id}>
