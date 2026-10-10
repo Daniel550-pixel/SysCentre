@@ -15,6 +15,18 @@ class RepositoryRegistryTests(unittest.TestCase):
         self.assertIn("networklab", ids)
         self.assertIn("experienceengine", ids)
 
+    def test_unmatched_historical_projects_are_not_given_guessed_urls(self):
+        from pathlib import Path
+        import json
+        inventory_path = Path(repository_ingest.__file__).with_name("project_inventory.json")
+        with inventory_path.open("r", encoding="utf-8") as handle:
+            inventory = json.load(handle)
+        projects = inventory["projects"]
+        self.assertGreaterEqual(len(projects), 10)
+        self.assertTrue(all(item["status"] == "repository_match_required" for item in projects))
+        self.assertTrue(all("url" not in item for item in projects))
+        self.assertEqual(len({item["id"] for item in projects}), len(projects))
+
     def test_unknown_project_cannot_be_ingested(self):
         with self.assertRaises(ValueError):
             repository_ingest._repo_id("unknown-project")
