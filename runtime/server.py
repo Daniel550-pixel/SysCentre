@@ -168,6 +168,12 @@ class Handler(BaseHTTPRequestHandler):
             from repository_ingest import list_projects
             projects = list_projects()
             self._send_json(200, {"projects": projects, "count": len(projects)})
+        elif path == "/api/project-inventory":
+            inventory_path = Path(__file__).with_name("project_inventory.json")
+            with inventory_path.open("r", encoding="utf-8") as handle:
+                inventory = json.load(handle)
+            projects = inventory.get("projects", [])
+            self._send_json(200, {"projects": projects, "count": len(projects), "status": "repository_match_required"})
         elif path == "/api/search":
             from repository_ingest import search_index
             params = parse_qs(parsed.query)
