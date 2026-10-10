@@ -47,7 +47,7 @@ if (-not $RuntimeListener) {
 $WebListener = Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue
 if (-not $WebListener) {
     Write-Host "[3/3] Starting SysCentre webapp on 127.0.0.1:5173..." -ForegroundColor Cyan
-    Start-Process -FilePath $Npm.Source -ArgumentList ('--prefix "' + $WebRoot + '" run dev') -WorkingDirectory $ProjectRoot
+    Start-Process -FilePath $env:ComSpec -ArgumentList ('/c npm --prefix "' + $WebRoot + '" run dev') -WorkingDirectory $ProjectRoot
 } else {
     Write-Host "[3/3] Port 5173 already has a listener; webapp startup skipped." -ForegroundColor DarkGray
 }
