@@ -7,6 +7,7 @@ import platform
 import sqlite3
 import time
 from datetime import datetime, timezone
+from contextlib import contextmanager
 from pathlib import Path
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from threading import Lock
@@ -39,6 +40,19 @@ def _connect() -> sqlite3.Connection:
     return connection
 
 
+@contextmanager
+def _database():
+    connection = _connect()
+    try:
+        yield connection
+        connection.commit()
+    except Exception:
+        connection.rollback()
+        raise
+    finally:
+        connection.close()
+
+
 def record_event(event_type: str, message: str, details: dict[str, Any] | None = None) -> dict[str, Any]:
     event = {
         "id": f"evt-{time.time_ns()}",
@@ -48,7 +62,7 @@ def record_event(event_type: str, message: str, details: dict[str, Any] | None =
         "details": details or {},
     }
     with _DB_LOCK:
-        with _connect() as connection:
+        with _database() as connection:
             connection.execute(
                 "INSERT INTO events (id, timestamp, type, message, details_json) VALUES (?, ?, ?, ?, ?)",
                 (event["id"], event["timestamp"], event["type"], event["message"], json.dumps(event["details"], ensure_ascii=False)),
