@@ -29,6 +29,10 @@ class RepositoryRegistryTests(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertFalse(repository_ingest._is_sensitive(path))
 
+    def test_source_search_rejects_short_queries(self):
+        with self.assertRaises(ValueError):
+            repository_ingest.search_index("x")
+
     def test_generated_and_dependency_folders_are_ignored(self):
         self.assertTrue(repository_ingest._is_ignored("webapp/node_modules/react/index.js"))
         self.assertTrue(repository_ingest._is_ignored("dist/assets/app.js"))
