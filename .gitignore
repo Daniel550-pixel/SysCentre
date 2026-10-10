@@ -226,3 +226,6 @@ node_modules/
 .vite/
 *.tsbuildinfo
 npm-debug.log*
+
+# Local SysCentre runtime database
+.syscentre/
