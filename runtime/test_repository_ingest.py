@@ -1,4 +1,5 @@
 import unittest
+import base64
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
@@ -59,6 +60,55 @@ class RepositoryRegistryTests(unittest.TestCase):
     def test_source_search_rejects_short_queries(self):
         with self.assertRaises(ValueError):
             repository_ingest.search_index("x")
+
+    def test_interrupted_ingest_resumes_from_saved_file_checkpoints(self):
+        with tempfile.TemporaryDirectory() as directory:
+            db_path = Path(directory) / "syscentre-test.db"
+            nodes = [
+                {"type": "blob", "path": f"src/file-{index:03}.py", "sha": f"blob-{index:03}", "size": 12}
+                for index in range(51)
+            ]
+            failed_once = {"value": False}
+            blob_calls = {}
+
+            def fake_api(url):
+                if url.endswith("/repos/Daniel550-pixel/SysCentre"):
+                    return {"default_branch": "main", "description": "test", "private": False}
+                if url.endswith("/commits/main"):
+                    return {"sha": "commit-test"}
+                if url.endswith("/git/trees/commit-test?recursive=1"):
+                    return {"truncated": False, "sha": "tree-test", "tree": nodes}
+                if "/git/blobs/" in url:
+                    blob_sha = url.rsplit("/", 1)[-1]
+                    blob_calls[blob_sha] = blob_calls.get(blob_sha, 0) + 1
+                    if blob_sha == "blob-050" and not failed_once["value"]:
+                        failed_once["value"] = True
+                        raise RuntimeError("simulated transient fetch failure")
+                    return {"content": base64.b64encode(b"print('indexed')").decode("ascii")}
+                raise AssertionError("Unexpected GitHub URL: " + url)
+
+            with patch.object(repository_ingest.server, "DB_PATH", db_path), patch.object(repository_ingest, "_api_json", side_effect=fake_api):
+                with self.assertRaisesRegex(RuntimeError, "simulated transient"):
+                    repository_ingest.ingest_repository("syscentre")
+
+                progress = repository_ingest.ingest_status("syscentre")["jobs"][0]
+                self.assertEqual(progress["status"], "failed")
+                self.assertEqual(progress["files_processed"], 50)
+
+                result = repository_ingest.ingest_repository("syscentre")
+                self.assertTrue(result["resumed"])
+                self.assertEqual(result["files_processed"], 51)
+                self.assertEqual(blob_calls["blob-000"], 1)
+                self.assertEqual(blob_calls["blob-049"], 1)
+                self.assertEqual(blob_calls["blob-050"], 2)
+
+                with repository_ingest.server._DB_LOCK:
+                    with repository_ingest.server._database() as connection:
+                        count = connection.execute(
+                            "SELECT COUNT(*) FROM repository_files WHERE project_id = 'syscentre'"
+                        ).fetchone()[0]
+                self.assertEqual(count, 51)
+                self.assertEqual(repository_ingest.ingest_status("syscentre")["jobs"][0]["status"], "indexed")
 
     def test_ingest_status_is_persisted_and_empty_registry_is_valid(self):
         with tempfile.TemporaryDirectory() as directory:
