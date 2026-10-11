@@ -1,0 +1,1830 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-11",
+  "purpose": "Evidence-backed architecture inventory for the 28 repositories known to SysCentre. Summaries are derived from the default-branch source tree, selected entrypoints, README files and dependency manifests. Architecture documentation never implies deployment or runtime health.",
+  "owner": "Daniel550-pixel",
+  "scan_method": {
+    "source": "GitHub recursive tree API plus selected README, dependency-manifest and application-entrypoint files",
+    "snapshot_policy": "Each record stores the exact source commit SHA used for the recursive tree scan; repos with empty trees have a null commit.",
+    "status_definitions": {
+      "source-verified": "Tracked application source and at least one implementation boundary/entrypoint were found.",
+      "source-limited": "Some executable source exists, but key configuration/entrypoint evidence is missing or the product remains a scaffold.",
+      "documentation-only": "The scanned default branch contains documentation but no runnable application implementation.",
+      "empty": "GitHub reports an empty repository."
+    },
+    "verification_limits": [
+      "No app was started by this inventory scan.",
+      "No deployment URL or production health was inferred.",
+      "Integration names from dependencies or README may indicate declared/intentional integrations, not proven live connections.",
+      "Evidence paths are source references, not runtime guarantees."
+    ]
+  },
+  "repositories": [
+    {
+      "project_id": "finsight-global-ai",
+      "name": "FinSight-Global-AI",
+      "repository_url": "https://github.com/Daniel550-pixel/FinSight-Global-AI",
+      "default_branch": "main",
+      "architecture_status": "source-verified",
+      "architecture_summary": "Python finance dashboard repository with a Streamlit UI entrypoint, additional app/dashboard modules, and data/ML dependencies. The checked-in Streamlit entrypoint itself is currently a minimal title/welcome screen; the dependency list alone does not prove model features are wired in.",
+      "technology_stack": [
+        "Python",
+        "Streamlit",
+        "FastAPI and Uvicorn dependencies (usage not confirmed in the inspected entrypoint)",
+        "Pandas / NumPy / scikit-learn / TensorFlow / PyTorch dependencies",
+        "Dockerfile present"
+      ],
+      "entrypoints": [
+        "streamlit_app.py",
+        "app.py",
+        "dashboard.py"
+      ],
+      "layers": [
+        {
+          "name": "UI",
+          "role": "Streamlit browser dashboard",
+          "components": "streamlit_app.py",
+          "evidence_paths": [
+            "streamlit_app.py",
+            "requirements.txt"
+          ]
+        },
+        {
+          "name": "Application modules",
+          "role": "Python app and dashboard modules exist; deeper runtime linkage needs inspection",
+          "components": "app.py, dashboard.py, src/my_module.py",
+          "evidence_paths": [
+            "app.py",
+            "dashboard.py",
+            "src/my_module.py"
+          ]
+        },
+        {
+          "name": "Packaging",
+          "role": "Container build scaffold",
+          "components": "Docker image configuration",
+          "evidence_paths": [
+            "Dockerfile"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "No persistent datastore configuration verified from inspected files."
+      ],
+      "external_integrations": [
+        "Listed requirements include financial-data and ML libraries; actual live data/model behavior is not verified."
+      ],
+      "evidence_paths": [
+        "README.md",
+        "streamlit_app.py",
+        "app.py",
+        "dashboard.py",
+        "src/my_module.py",
+        "requirements.txt",
+        "Dockerfile"
+      ],
+      "source_snapshot": {
+        "commit": "db006841c3369938a126449e30f708052ec6d21d",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "Dependency breadth exceeds the currently visible entrypoint implementation; treat advertised analytics as unverified until traced through source."
+      ]
+    },
+    {
+      "project_id": "ai-trading-dashboard",
+      "name": "ai-trading-dashboard",
+      "repository_url": "https://github.com/Daniel550-pixel/ai-trading-dashboard",
+      "default_branch": "master",
+      "architecture_status": "source-verified",
+      "architecture_summary": "Python financial analysis project with a FastAPI service entrypoint and a separate dashboard script; pinned dependencies also include Streamlit and market-data/scikit-learn libraries.",
+      "technology_stack": [
+        "Python",
+        "FastAPI",
+        "Uvicorn",
+        "Streamlit dependency",
+        "Pandas / NumPy / scikit-learn / joblib / yfinance"
+      ],
+      "entrypoints": [
+        "main.py",
+        "dashboard.py"
+      ],
+      "layers": [
+        {
+          "name": "API",
+          "role": "FastAPI app exposes GET / and POST /run",
+          "components": "Root endpoint and model trigger placeholder",
+          "evidence_paths": [
+            "main.py"
+          ]
+        },
+        {
+          "name": "Dashboard",
+          "role": "Separate dashboard module; UI framework inferred from pinned Streamlit dependency, source not fully inspected here",
+          "components": "dashboard.py",
+          "evidence_paths": [
+            "dashboard.py",
+            "requirements.txt"
+          ]
+        },
+        {
+          "name": "Analytics",
+          "role": "Python analysis/model modules in repository tree",
+          "components": "Models / data processing",
+          "evidence_paths": [
+            "requirements.txt"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "No durable datastore was verified from the inspected entrypoint."
+      ],
+      "external_integrations": [
+        "yfinance dependency indicates market data access capability; live connectivity not tested."
+      ],
+      "evidence_paths": [
+        "main.py",
+        "dashboard.py",
+        "requirements.txt"
+      ],
+      "source_snapshot": {
+        "commit": "7f9f2055744719bbc28cca7de5de1c11ae838fa9",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "The /run endpoint currently returns a simple success result; do not treat it as proof a real model was executed."
+      ]
+    },
+    {
+      "project_id": "ai-trading-dashboard-2",
+      "name": "ai-trading-dashboard-2",
+      "repository_url": "https://github.com/Daniel550-pixel/ai-trading-dashboard-2",
+      "default_branch": "main",
+      "architecture_status": "empty",
+      "architecture_summary": "GitHub reports an empty repository with no Git tree, source files, manifests, or entrypoint to analyze.",
+      "technology_stack": [
+        "No stack confirmed"
+      ],
+      "entrypoints": [],
+      "layers": [],
+      "state_and_data": [],
+      "external_integrations": [],
+      "evidence_paths": [],
+      "source_snapshot": {
+        "commit": null,
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "Repository has no Git objects / source tree; architecture remains unassessed."
+      ]
+    },
+    {
+      "project_id": "ai-trading-dashboard-3",
+      "name": "ai-trading-dashboard-3",
+      "repository_url": "https://github.com/Daniel550-pixel/ai-trading-dashboard-3",
+      "default_branch": "main",
+      "architecture_status": "documentation-only",
+      "architecture_summary": "README-only concept repository. No app code, dependency manifest, or runnable entrypoint is present in the scanned default-branch tree.",
+      "technology_stack": [
+        "No implementation stack confirmed"
+      ],
+      "entrypoints": [
+        "README.md"
+      ],
+      "layers": [
+        {
+          "name": "Documentation",
+          "role": "Concept description only",
+          "components": "README",
+          "evidence_paths": [
+            "README.md"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "No application state layer implemented."
+      ],
+      "external_integrations": [],
+      "evidence_paths": [
+        "README.md"
+      ],
+      "source_snapshot": {
+        "commit": "fc602daca1e43d10091244d595765c93bdda1a47",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "Any intended architecture is a concept, not an implemented application."
+      ]
+    },
+    {
+      "project_id": "finsight-global-ai-2",
+      "name": "FinSight-Global-AI-2",
+      "repository_url": "https://github.com/Daniel550-pixel/FinSight-Global-AI-2",
+      "default_branch": "main",
+      "architecture_status": "source-verified",
+      "architecture_summary": "Legacy Python finance workspace with FastAPI/Streamlit dependencies and two app entrypoints. Its current Streamlit page describes itself as a generated placeholder; deeper module behavior should not be inferred from the repo name.",
+      "technology_stack": [
+        "Python",
+        "FastAPI / Uvicorn dependencies",
+        "Streamlit",
+        "Pandas / NumPy / scikit-learn / yfinance"
+      ],
+      "entrypoints": [
+        "main.py",
+        "streamlit_app.py"
+      ],
+      "layers": [
+        {
+          "name": "API / core",
+          "role": "Python service entrypoint present; route behavior should be inspected before operational use",
+          "components": "main.py",
+          "evidence_paths": [
+            "main.py",
+            "requirements.txt"
+          ]
+        },
+        {
+          "name": "UI",
+          "role": "Streamlit placeholder dashboard",
+          "components": "Default generated dashboard message",
+          "evidence_paths": [
+            "streamlit_app.py"
+          ]
+        },
+        {
+          "name": "Analytics modules",
+          "role": "Python source tree contains multiple modules",
+          "components": "Legacy model / finance modules",
+          "evidence_paths": [
+            "requirements.txt"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "No persistence implementation confirmed in inspected manifest/entrypoint."
+      ],
+      "external_integrations": [
+        "Market-data dependency is declared; live upstream integrations unverified."
+      ],
+      "evidence_paths": [
+        "main.py",
+        "streamlit_app.py",
+        "requirements.txt"
+      ],
+      "source_snapshot": {
+        "commit": "121a6ba2e90e7b173feefe438f84e793df742d0d",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "Legacy lineage versus other FinSight repositories is not confirmed."
+      ]
+    },
+    {
+      "project_id": "finsight-global-ai-4",
+      "name": "FinSight-Global-AI-4",
+      "repository_url": "https://github.com/Daniel550-pixel/FinSight-Global-AI-4",
+      "default_branch": "main",
+      "architecture_status": "source-verified",
+      "architecture_summary": "Minimal Python Streamlit app variant with only two tracked files in the recursive tree: requirements and Streamlit entrypoint.",
+      "technology_stack": [
+        "Python",
+        "Streamlit",
+        "Financial data dependencies declared in requirements"
+      ],
+      "entrypoints": [
+        "streamlit_app.py"
+      ],
+      "layers": [
+        {
+          "name": "UI / application",
+          "role": "Streamlit entrypoint",
+          "components": "Single-page dashboard scaffold",
+          "evidence_paths": [
+            "streamlit_app.py"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "No persistence layer or backend API found in the scanned two-file tree."
+      ],
+      "external_integrations": [],
+      "evidence_paths": [
+        "streamlit_app.py",
+        "requirements.txt"
+      ],
+      "source_snapshot": {
+        "commit": "a081dd0fa4a33efa6c20cea6416e65a28f7a57cc",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "The repo tree is very small and has no README; product purpose beyond the entrypoint is not established."
+      ]
+    },
+    {
+      "project_id": "finsight-global-ai-dashboard",
+      "name": "FinSight_Global_AI_Dashboard",
+      "repository_url": "https://github.com/Daniel550-pixel/FinSight_Global_AI_Dashboard",
+      "default_branch": "master",
+      "architecture_status": "source-verified",
+      "architecture_summary": "Python finance/operations module collection with 37 tracked files and Streamlit/plotting/market-data dependencies. A canonical entrypoint and module wiring were not verified.",
+      "technology_stack": [
+        "Python",
+        "Streamlit dependency",
+        "Pandas / NumPy / Plotly / yfinance"
+      ],
+      "entrypoints": [],
+      "layers": [
+        {
+          "name": "Domain modules",
+          "role": "Finance/dashboard-related source modules and operational scripts exist",
+          "components": "Domain logic and support modules",
+          "evidence_paths": [
+            "requirements.txt"
+          ]
+        },
+        {
+          "name": "Presentation",
+          "role": "Streamlit dependency is declared; an entrypoint was not confirmed in the scanned tree",
+          "components": "No canonical UI entrypoint identified",
+          "evidence_paths": [
+            "requirements.txt"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "Persistent store not confirmed from manifest/tree scan."
+      ],
+      "external_integrations": [
+        "yfinance dependency is declared; external API use unverified."
+      ],
+      "evidence_paths": [
+        "requirements.txt"
+      ],
+      "source_snapshot": {
+        "commit": "f1a8aed0429cb9a96be62bfa25fbfd6b700e0c17",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "No README or canonical UI entrypoint surfaced in the scan; inspect module paths before running."
+      ]
+    },
+    {
+      "project_id": "ai-mainframe",
+      "name": "AI-mainframe",
+      "repository_url": "https://github.com/Daniel550-pixel/AI-mainframe",
+      "default_branch": "main",
+      "architecture_status": "source-verified",
+      "architecture_summary": "Dependency-free Python capability-registry package; it describes capabilities and delegates all consequential execution/governance to ArchOS rather than acting as a second autonomous runtime.",
+      "technology_stack": [
+        "Python standard library",
+        "Dependency-free package"
+      ],
+      "entrypoints": [
+        "src/ai_mainframe/runtime.py"
+      ],
+      "layers": [
+        {
+          "name": "Capability registry",
+          "role": "Dataclass-based catalog of governed capabilities",
+          "components": "MainframeRuntime / MainframeCapability",
+          "evidence_paths": [
+            "src/ai_mainframe/runtime.py"
+          ]
+        },
+        {
+          "name": "Integration boundary",
+          "role": "ArchOS owns policy, identity, event fabric, world state, and external side effects",
+          "components": "Capability description / governed handoff",
+          "evidence_paths": [
+            "README.md",
+            "src/ai_mainframe/runtime.py"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "In-memory static capability tuple; no database or side-effect execution implemented."
+      ],
+      "external_integrations": [
+        "Designed for ArchOS integration; README references ArchOS-Repo integration path."
+      ],
+      "evidence_paths": [
+        "README.md",
+        "src/ai_mainframe/runtime.py",
+        "src/ai_mainframe/__init__.py"
+      ],
+      "source_snapshot": {
+        "commit": "f27ba860005a32ebd5d45c49c6e2aa8b82483252",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "Not a standalone web application; no UI or network server is intended."
+      ]
+    },
+    {
+      "project_id": "ai-os-global-super-app",
+      "name": "AI-OS-Global-Super-App",
+      "repository_url": "https://github.com/Daniel550-pixel/AI-OS-Global-Super-App",
+      "default_branch": "main",
+      "architecture_status": "documentation-only",
+      "architecture_summary": "README-only AI operating-system / super-app concept with no frontend, backend, dependency manifest, or executable entrypoint in the scanned tree.",
+      "technology_stack": [
+        "No implementation stack confirmed"
+      ],
+      "entrypoints": [
+        "README.md"
+      ],
+      "layers": [
+        {
+          "name": "Documentation",
+          "role": "Title/concept README only",
+          "components": "Product intent",
+          "evidence_paths": [
+            "README.md"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "No implemented state store."
+      ],
+      "external_integrations": [],
+      "evidence_paths": [
+        "README.md"
+      ],
+      "source_snapshot": {
+        "commit": "04a19fa52cb1f5589baa4eaa81dd8c28a4d41802",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "Feature architecture and runtime behavior cannot be verified yet."
+      ]
+    },
+    {
+      "project_id": "ai-os-global-wealth-engine",
+      "name": "AI-OS-Global-Wealth-Engine",
+      "repository_url": "https://github.com/Daniel550-pixel/AI-OS-Global-Wealth-Engine",
+      "default_branch": "main",
+      "architecture_status": "empty",
+      "architecture_summary": "GitHub reports an empty repository; there are no tracked sources or manifests from which to derive an application architecture.",
+      "technology_stack": [
+        "No stack confirmed"
+      ],
+      "entrypoints": [],
+      "layers": [],
+      "state_and_data": [],
+      "external_integrations": [],
+      "evidence_paths": [],
+      "source_snapshot": {
+        "commit": null,
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "Empty Git repository; no architecture can be claimed."
+      ]
+    },
+    {
+      "project_id": "aios-system",
+      "name": "AIOS-System",
+      "repository_url": "https://github.com/Daniel550-pixel/AIOS-System",
+      "default_branch": "main",
+      "architecture_status": "documentation-only",
+      "architecture_summary": "README-only AIOS system concept; no executable product code or dependency manifest exists in the default branch tree.",
+      "technology_stack": [
+        "No implementation stack confirmed"
+      ],
+      "entrypoints": [
+        "README.md"
+      ],
+      "layers": [
+        {
+          "name": "Documentation",
+          "role": "Concept README",
+          "components": "Intended system direction",
+          "evidence_paths": [
+            "README.md"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "No implemented persistence layer."
+      ],
+      "external_integrations": [],
+      "evidence_paths": [
+        "README.md"
+      ],
+      "source_snapshot": {
+        "commit": "135156f9d7bee89002bb0748ee38ac5c37168678",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "This is not yet an app architecture backed by runnable source."
+      ]
+    },
+    {
+      "project_id": "aios-core-architect",
+      "name": "AIOS-Core-Architect.",
+      "repository_url": "https://github.com/Daniel550-pixel/AIOS-Core-Architect.",
+      "default_branch": "main",
+      "architecture_status": "source-limited",
+      "architecture_summary": "Small Python/Gradio application that reads JSON configuration, simulates module revenue in a daemon thread, and renders recent logs in a Gradio Blocks UI. The source references configs files that were not present in the scanned tree, and requirements.txt appears to mix dependency lines with non-requirements content.",
+      "technology_stack": [
+        "Python",
+        "Gradio",
+        "JSON configuration",
+        "Threading / datetime standard library"
+      ],
+      "entrypoints": [
+        "app.py"
+      ],
+      "layers": [
+        {
+          "name": "Configuration",
+          "role": "Loads system_config.json and modules.json from configs/",
+          "components": "Config-driven module list",
+          "evidence_paths": [
+            "app.py",
+            "requirements.txt"
+          ]
+        },
+        {
+          "name": "Simulation loop",
+          "role": "In-memory Module objects mutate simulated revenue and append logs",
+          "components": "Daemon thread and periodic updates",
+          "evidence_paths": [
+            "app.py"
+          ]
+        },
+        {
+          "name": "UI",
+          "role": "Gradio Blocks textbox/button refreshes logs on request",
+          "components": "Manual refresh UI",
+          "evidence_paths": [
+            "app.py"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "State exists in process memory; no database found."
+      ],
+      "external_integrations": [
+        "No real revenue system is verified; app's own code is a simulation."
+      ],
+      "evidence_paths": [
+        "app.py",
+        "requirements.txt"
+      ],
+      "source_snapshot": {
+        "commit": "4ca3b69e27dca5d1b46f8ed52abce8b411f6eafe",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "configs/system_config.json and configs/modules.json are referenced by app.py but were not in the scanned tree. Validate dependencies/config before startup."
+      ]
+    },
+    {
+      "project_id": "obsidian-ai",
+      "name": "Obsidian-AI",
+      "repository_url": "https://github.com/Daniel550-pixel/Obsidian-AI",
+      "default_branch": "main",
+      "architecture_status": "source-verified",
+      "architecture_summary": "React/TypeScript + Vite AI interface using Firebase Authentication/Firestore for user-scoped chat messages and a Gemini service for generation, grounding, and speech-related features.",
+      "technology_stack": [
+        "React 19",
+        "TypeScript",
+        "Vite",
+        "Firebase Auth / Firestore",
+        "Google GenAI SDK",
+        "Motion / Lucide"
+      ],
+      "entrypoints": [
+        "src/main.tsx",
+        "src/App.tsx",
+        "src/services/geminiService.ts"
+      ],
+      "layers": [
+        {
+          "name": "Client UI",
+          "role": "React App with command/chat UI, visuals and business model components",
+          "components": "App and feature components",
+          "evidence_paths": [
+            "src/App.tsx",
+            "src/components/ICCVisualizer.tsx",
+            "src/components/BusinessModelCanvas.tsx"
+          ]
+        },
+        {
+          "name": "Identity / user state",
+          "role": "Firebase popup sign-in and auth-state handling",
+          "components": "Firebase Auth",
+          "evidence_paths": [
+            "src/firebase.ts",
+            "src/App.tsx"
+          ]
+        },
+        {
+          "name": "Conversation persistence",
+          "role": "Firestore collection under a per-user conversation path",
+          "components": "Message write and onSnapshot read",
+          "evidence_paths": [
+            "src/App.tsx",
+            "src/firebase.ts"
+          ]
+        },
+        {
+          "name": "AI service",
+          "role": "Gemini generation / grounding / thinking and TTS helpers",
+          "components": "Gemini service module",
+          "evidence_paths": [
+            "src/services/geminiService.ts"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "Firestore stores conversation messages using server timestamps; Firebase configuration resides in src/firebase.ts."
+      ],
+      "external_integrations": [
+        "Firebase Auth, Cloud Firestore, Google GenAI."
+      ],
+      "evidence_paths": [
+        "package.json",
+        "src/main.tsx",
+        "src/App.tsx",
+        "src/firebase.ts",
+        "src/services/geminiService.ts",
+        "src/components/ICCVisualizer.tsx"
+      ],
+      "source_snapshot": {
+        "commit": "2de5c83490209ae441a91ed4aa270a58b3d57bf8",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "The repository's server dependency is declared, but no server.ts was found in the scanned tree; backend hosting model is not confirmed."
+      ]
+    },
+    {
+      "project_id": "fgse",
+      "name": "FGSE",
+      "repository_url": "https://github.com/Daniel550-pixel/FGSE",
+      "default_branch": "main",
+      "architecture_status": "source-verified",
+      "architecture_summary": "Full-stack TypeScript finance/trading app: React/Vite frontend, Express server, SQLite-backed trade access, strategy/trader modules, market-data requests and Gemini service logic.",
+      "technology_stack": [
+        "React 19",
+        "TypeScript",
+        "Vite",
+        "Express",
+        "better-sqlite3",
+        "Google GenAI SDK",
+        "Axios"
+      ],
+      "entrypoints": [
+        "server.ts",
+        "src/main.tsx",
+        "src/App.tsx"
+      ],
+      "layers": [
+        {
+          "name": "Frontend",
+          "role": "React dashboard and visualizations",
+          "components": "src tree and main entry",
+          "evidence_paths": [
+            "src/main.tsx",
+            "src/App.tsx"
+          ]
+        },
+        {
+          "name": "HTTP backend",
+          "role": "Express routes for health, GAOS scan, recursive spawn, finance and trading workflows",
+          "components": "Server starts Vite and mounts API routes",
+          "evidence_paths": [
+            "server.ts"
+          ]
+        },
+        {
+          "name": "Strategy / trading domain",
+          "role": "Signal generation, trade execution helpers, and portfolio access",
+          "components": "Strategy + trader modules",
+          "evidence_paths": [
+            "server/strategy.ts",
+            "server/trader.ts"
+          ]
+        },
+        {
+          "name": "Persistence",
+          "role": "SQLite initialization and trade reads/writes",
+          "components": "DB helper",
+          "evidence_paths": [
+            "server/db.ts"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "SQLite via better-sqlite3 (per dependency and server imports)."
+      ],
+      "external_integrations": [
+        "Google GenAI, Binance market-data endpoint via Axios; actual accounts/real trade execution not independently verified."
+      ],
+      "evidence_paths": [
+        "package.json",
+        "server.ts",
+        "server/db.ts",
+        "server/strategy.ts",
+        "server/trader.ts",
+        "src/App.tsx"
+      ],
+      "source_snapshot": {
+        "commit": "8abadadb9efaa7a7fe9237d1e37713613447701a",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "Source includes demo/mock labels and illustrative thresholds; do not treat labels such as 'deployed' as verified infrastructure state."
+      ]
+    },
+    {
+      "project_id": "archos-repo",
+      "name": "ArchOS-Repo",
+      "repository_url": "https://github.com/Daniel550-pixel/ArchOS-Repo",
+      "default_branch": "main",
+      "architecture_status": "source-verified",
+      "architecture_summary": "Large multi-layer ArchOS codebase with FastAPI backend, agent orchestration and policy/action gates, world model and simulation APIs, identity/auth, worker scheduling, event fabric, operational services, and React/TypeScript spatial experience UI.",
+      "technology_stack": [
+        "Python",
+        "FastAPI / Pydantic",
+        "React / TypeScript",
+        "Three.js / React Three Fiber (documented)",
+        "MediaPipe gesture/vision integration (documented)",
+        "Docker / GitHub Actions"
+      ],
+      "entrypoints": [
+        "backend/app/main.py",
+        "frontend entrypoint not fully enumerated in this compact scan",
+        "src/components/ArchOSSystemUI.tsx (catalog reference)"
+      ],
+      "layers": [
+        {
+          "name": "API host",
+          "role": "FastAPI application with routers for agents, world model, simulation, scenarios, causal graph, integrations, and Claude provider routes",
+          "components": "App lifecycle wires workers and service runtimes",
+          "evidence_paths": [
+            "backend/app/main.py",
+            "backend/app/api/agents.py",
+            "backend/app/api/world_model.py",
+            "backend/app/api/simulation.py"
+          ]
+        },
+        {
+          "name": "Agent and governance runtime",
+          "role": "JARVIS orchestrator, specialist/swarm runtime, action gate, evidence chains, verification",
+          "components": "Agent fabric and policy controls",
+          "evidence_paths": [
+            "backend/agents/jarvis_orchestrator.py",
+            "backend/agents/action_gate.py",
+            "backend/agents/swarm.py",
+            "backend/agents/evidence_chain.py"
+          ]
+        },
+        {
+          "name": "World state / intelligence",
+          "role": "World-model, scenario, causal graph, normalization, search and simulation services",
+          "components": "Domain services",
+          "evidence_paths": [
+            "backend/app/services/scenario_orchestrator.py",
+            "backend/app/services/scenario_verifier.py",
+            "backend/app/services/causal_graph.py"
+          ]
+        },
+        {
+          "name": "Identity / operations",
+          "role": "Identity middleware, key/session/WebAuthn components, metrics, FinOps, event fabric, schedulers",
+          "components": "Middleware and service lifetime",
+          "evidence_paths": [
+            "backend/app/middleware/identity.py",
+            "backend/app/services/event_fabric.py",
+            "backend/app/services/finops_service.py"
+          ]
+        },
+        {
+          "name": "Experience layer",
+          "role": "React/TypeScript interactive spatial UI; README documents 3D and multimodal inputs",
+          "components": "Frontend layer described by project README/catalog",
+          "evidence_paths": [
+            "README.md",
+            "src/components/ArchOSSystemUI.tsx"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "Database abstraction/model files are present; configured persistence depends on environment/settings."
+      ],
+      "external_integrations": [
+        "Model/provider integrations including Claude and Google AI appear in repository modules/docs; production credentials and operation are not verified."
+      ],
+      "evidence_paths": [
+        "README.md",
+        "backend/app/main.py",
+        "backend/agents/action_gate.py",
+        "backend/agents/jarvis_orchestrator.py",
+        "backend/agents/swarm.py",
+        "backend/app/services/event_fabric.py",
+        "backend/app/services/causal_graph.py",
+        "src/components/ArchOSSystemUI.tsx"
+      ],
+      "source_snapshot": {
+        "commit": "eb935d3a1337b469f8c29b8ec01c9200cd8ebd8e",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "Architecture combines present modules and documented direction; no claim that every integration or production security control is live."
+      ]
+    },
+    {
+      "project_id": "archos-3",
+      "name": "archos-3",
+      "repository_url": "https://github.com/Daniel550-pixel/archos-3",
+      "default_branch": "main",
+      "architecture_status": "source-verified",
+      "architecture_summary": "Separate ARCHOS 3.0 full-stack prototype: FastAPI control plane with REST/WebSocket endpoints and in-memory world entities/events, plus a React/TypeScript client organized around dashboard, map, auth, and component modules.",
+      "technology_stack": [
+        "Python",
+        "FastAPI",
+        "Pydantic",
+        "WebSockets",
+        "Prometheus text metrics",
+        "React / TypeScript client source",
+        "Docker backend"
+      ],
+      "entrypoints": [
+        "backend/main.py",
+        "client/src/App.tsx"
+      ],
+      "layers": [
+        {
+          "name": "API / control plane",
+          "role": "FastAPI endpoints for health, readiness, metrics and control-plane data; WebSocket broadcast manager",
+          "components": "HTTP and realtime API",
+          "evidence_paths": [
+            "backend/main.py",
+            "backend/requirements.txt"
+          ]
+        },
+        {
+          "name": "World model / event layer",
+          "role": "Entity models with provenance tags and in-memory maps/event log",
+          "components": "Observed/inferred/predicted/simulated records",
+          "evidence_paths": [
+            "backend/main.py",
+            "client/src/ARCHITECTURE.md"
+          ]
+        },
+        {
+          "name": "Client",
+          "role": "React app, router, DashboardLayout, map and reusable UI components",
+          "components": "Browser experience",
+          "evidence_paths": [
+            "client/src/App.tsx",
+            "client/src/app/router.tsx",
+            "client/src/components/DashboardLayout.tsx"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "World entities and event log are explicitly initialized in process memory in backend/main.py; durable database not evidenced by this file."
+      ],
+      "external_integrations": [
+        "WebSocket clients; source strings refer to upstream telemetry providers (BMS/Open-Meteo) but connected live adapters are not verified."
+      ],
+      "evidence_paths": [
+        "backend/main.py",
+        "backend/requirements.txt",
+        "client/src/App.tsx",
+        "client/src/ARCHITECTURE.md",
+        "client/src/components/DashboardLayout.tsx"
+      ],
+      "source_snapshot": {
+        "commit": "0616406be6678231b29f8c9fc7f2e5f7e7e37fe3",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "Recursive tree did not show client/package.json at the expected path; client build/package wiring needs a separate check."
+      ]
+    },
+    {
+      "project_id": "bitminer-ai",
+      "name": "BitMiner-AI",
+      "repository_url": "https://github.com/Daniel550-pixel/BitMiner-AI",
+      "default_branch": "main",
+      "architecture_status": "source-verified",
+      "architecture_summary": "React/Vite operations UI with an Express TypeScript server and a large domain layer for agentic mining decisions, consensus, memory, temporal/canonical ledgers, economic gates, forecasting, replay, verification and fleet proposals.",
+      "technology_stack": [
+        "React 19",
+        "TypeScript",
+        "Vite",
+        "Express",
+        "Google GenAI SDK (optional via GEMINI_API_KEY)",
+        "esbuild build pipeline"
+      ],
+      "entrypoints": [
+        "server.ts",
+        "src/main.tsx",
+        "src/App.tsx"
+      ],
+      "layers": [
+        {
+          "name": "Presentation",
+          "role": "Dashboard and feature views for fleets, agent memory, provenance, simulation, verification, white-label reports",
+          "components": "React component layer",
+          "evidence_paths": [
+            "src/App.tsx",
+            "src/components/DashboardView.tsx",
+            "src/components/FleetControllerView.tsx"
+          ]
+        },
+        {
+          "name": "HTTP / provider",
+          "role": "Express server, request bounds, optional Gemini client, API handlers",
+          "components": "Node runtime",
+          "evidence_paths": [
+            "server.ts"
+          ]
+        },
+        {
+          "name": "Agent and decision engine",
+          "role": "Agent cycles, arbitration, economic gate, execution proposals",
+          "components": "Domain services",
+          "evidence_paths": [
+            "src/server/agenticMiningEngine.ts",
+            "src/server/agentConsensus.ts",
+            "src/server/economicDecisionGate.ts",
+            "src/server/executionEngine.ts"
+          ]
+        },
+        {
+          "name": "State integrity",
+          "role": "Canonical event store, temporal ledger/state, deterministic replay, provenance and verification certificates",
+          "components": "Audit/replay mechanisms",
+          "evidence_paths": [
+            "src/server/canonicalEventStore.ts",
+            "src/server/temporalLedger.ts",
+            "src/server/deterministicReplay.ts",
+            "src/server/verificationCertificateChain.ts"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "Canonical and temporal stores are implemented as TypeScript modules; exact persistence backing/config should be verified against each store implementation."
+      ],
+      "external_integrations": [
+        "Google GenAI; web fetching guarded by scraper allowlist and consensus helpers."
+      ],
+      "evidence_paths": [
+        "package.json",
+        "server.ts",
+        "src/App.tsx",
+        "src/server/agenticMiningEngine.ts",
+        "src/server/canonicalEventStore.ts",
+        "src/server/executionEngine.ts",
+        "src/server/verificationHarness.ts"
+      ],
+      "source_snapshot": {
+        "commit": "5616d8c8f7a6d32dabed426b1eafdb3c18b83146",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "Module names evidence intended controls; do not assume the complete mining, economic, or fleet pipeline is live in production."
+      ]
+    },
+    {
+      "project_id": "networklab",
+      "name": "NetworkLab",
+      "repository_url": "https://github.com/Daniel550-pixel/NetworkLab",
+      "default_branch": "main",
+      "architecture_status": "source-verified",
+      "architecture_summary": "Local-only infrastructure lab: Python standard-library HTTP server serves HTML/CSS/JavaScript UI and JSON API backed by service modules for network, VM, storage, health, evidence and PowerShell command orchestration.",
+      "technology_stack": [
+        "Python standard library",
+        "HTML / CSS / JavaScript",
+        "PowerShell",
+        "JSON",
+        "VirtualBox host tooling"
+      ],
+      "entrypoints": [
+        "app/server.py",
+        "web/index.html",
+        "web/app.js"
+      ],
+      "layers": [
+        {
+          "name": "Web host/API",
+          "role": "ThreadingHTTPServer bound by default to 127.0.0.1:8501 and serves static files / JSON routes",
+          "components": "No Streamlit dependency required",
+          "evidence_paths": [
+            "app/server.py",
+            "web/index.html",
+            "web/app.js"
+          ]
+        },
+        {
+          "name": "Services",
+          "role": "Network and virtual network, VM topology/runtime, storage/ISO, health/evidence",
+          "components": "Service modules",
+          "evidence_paths": [
+            "app/services/network_service.py",
+            "app/services/virtualization_service.py",
+            "app/services/vm_service.py",
+            "app/services/storage_service.py"
+          ]
+        },
+        {
+          "name": "Host integration",
+          "role": "PowerShell subprocess/host inspection layer",
+          "components": "Windows host operations and safety checks",
+          "evidence_paths": [
+            "app/core/powershell.py",
+            "app/core/config.py"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "Configuration and lab state use structured JSON / host and VirtualBox observations; no database requirement in requirements.txt."
+      ],
+      "external_integrations": [
+        "VirtualBox via host commands and PowerShell; app is intended for localhost only."
+      ],
+      "evidence_paths": [
+        "README.md",
+        "app/server.py",
+        "app/services/health_service.py",
+        "app/services/network_service.py",
+        "app/services/vm_service.py",
+        "app/services/storage_service.py",
+        "web/index.html",
+        "web/app.js",
+        "requirements.txt"
+      ],
+      "source_snapshot": {
+        "commit": "8f0bf60bd63b52bbbe397b5f0fbeb8ebd192284a",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "Documented target topology values are not the same as a live VM/network health check."
+      ]
+    },
+    {
+      "project_id": "secureos",
+      "name": "SecureOS",
+      "repository_url": "https://github.com/Daniel550-pixel/SecureOS",
+      "default_branch": "main",
+      "architecture_status": "source-verified",
+      "architecture_summary": "React/Vite security-integrity workstation with an Express backend, deterministic baseline comparison and trust-scoring modules, scenario simulation, telemetry normalization and an event ledger; Gemini is an optional analysis provider.",
+      "technology_stack": [
+        "React 19",
+        "TypeScript",
+        "Vite",
+        "Express",
+        "Google GenAI SDK",
+        "Motion / Lucide",
+        "esbuild server bundling"
+      ],
+      "entrypoints": [
+        "server.ts",
+        "src/main.tsx",
+        "src/App.tsx"
+      ],
+      "layers": [
+        {
+          "name": "UI",
+          "role": "Security workstation, trust dashboards, telemetry, scenario simulator and topology panels",
+          "components": "React components",
+          "evidence_paths": [
+            "src/App.tsx",
+            "src/components/IntelligenceWorkstation.tsx",
+            "src/components/SecurityTopology.tsx"
+          ]
+        },
+        {
+          "name": "API / telemetry",
+          "role": "Express parses telemetry and manages scenario state",
+          "components": "Server entry",
+          "evidence_paths": [
+            "server.ts"
+          ]
+        },
+        {
+          "name": "Deterministic integrity engine",
+          "role": "Baseline comparison, normalized telemetry, trust scoring and scenario model",
+          "components": "Engine modules",
+          "evidence_paths": [
+            "src/engine/baseline.ts",
+            "src/engine/telemetryNormalizer.ts",
+            "src/engine/trustEngine.ts",
+            "src/engine/scenarios.ts"
+          ]
+        },
+        {
+          "name": "Audit trail",
+          "role": "Event ledger appends telemetry/trust/lifecycle records and exposes verification helpers",
+          "components": "Ledger module",
+          "evidence_paths": [
+            "src/engine/eventLedger.ts"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "Active scenario/system state is currently initialized in process memory; event-ledger persistence characteristics require implementation-level verification."
+      ],
+      "external_integrations": [
+        "Google GenAI via server-side key when configured."
+      ],
+      "evidence_paths": [
+        "package.json",
+        "server.ts",
+        "src/App.tsx",
+        "src/engine/baseline.ts",
+        "src/engine/eventLedger.ts",
+        "src/engine/trustEngine.ts",
+        "src/engine/telemetryNormalizer.ts"
+      ],
+      "source_snapshot": {
+        "commit": "b3afc717d0ba45445e9c0f730a6dda4ec96ffb87",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "This architecture records code boundaries; runtime protection of an actual host is not established by this scan."
+      ]
+    },
+    {
+      "project_id": "ai-venture-radar",
+      "name": "AI-Venture-Radar",
+      "repository_url": "https://github.com/Daniel550-pixel/AI-Venture-Radar",
+      "default_branch": "main",
+      "architecture_status": "documentation-only",
+      "architecture_summary": "README documents an intended signal-to-opportunity pipeline, but the scanned default branch contains only README.md and no runnable engine, UI, manifest or data adapters.",
+      "technology_stack": [
+        "No implementation stack confirmed"
+      ],
+      "entrypoints": [
+        "README.md (design description only)"
+      ],
+      "layers": [
+        {
+          "name": "Documented pipeline",
+          "role": "World data → observations/signals → gap discovery → opportunity hypothesis → adversarial validation → venture thesis",
+          "components": "Architecture described in prose/diagrams, not backed by tracked implementation",
+          "evidence_paths": [
+            "README.md"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "No data store or pipeline code currently in the scanned tree."
+      ],
+      "external_integrations": [
+        "News/research/company/market/regulatory sources are described as intended sources, not verified integrations."
+      ],
+      "evidence_paths": [
+        "README.md"
+      ],
+      "source_snapshot": {
+        "commit": "9519620d74164ae2a610bd3f6a75dbb4364f4672",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "Recorded as documented architecture, not implemented app behavior."
+      ]
+    },
+    {
+      "project_id": "the-factory",
+      "name": "The-Factory",
+      "repository_url": "https://github.com/Daniel550-pixel/The-Factory",
+      "default_branch": "main",
+      "architecture_status": "source-limited",
+      "architecture_summary": "Python package metadata and an architecture/audit README define a proposed systems kernel of agent runtime, policy gate, event ledger and context/memory. README explicitly says extraction/audit is in progress and the kernel is not final.",
+      "technology_stack": [
+        "Python >=3.11",
+        "setuptools",
+        "pytest / Ruff / mypy configuration"
+      ],
+      "entrypoints": [
+        "No canonical runnable server entrypoint verified in inspected key files"
+      ],
+      "layers": [
+        {
+          "name": "Architecture target",
+          "role": "Agent runtime → policy gate → event ledger → context/memory",
+          "components": "Documented kernel hypothesis",
+          "evidence_paths": [
+            "README.md"
+          ]
+        },
+        {
+          "name": "Package / quality tooling",
+          "role": "Python distribution metadata and static/test configuration",
+          "components": "Packaging and validation setup",
+          "evidence_paths": [
+            "pyproject.toml"
+          ]
+        },
+        {
+          "name": "Audit/extraction",
+          "role": "Project lineage and planned domains documented; no single implemented runtime entrypoint confirmed",
+          "components": "Migration/audit stage",
+          "evidence_paths": [
+            "README.md"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "No verified persistent runtime store exposed by the inspected project metadata."
+      ],
+      "external_integrations": [
+        "Several sibling repositories are described as source lineages; no assumption that their code has been merged."
+      ],
+      "evidence_paths": [
+        "README.md",
+        "pyproject.toml"
+      ],
+      "source_snapshot": {
+        "commit": "4420c7c9853d1621ccb3c66abaeeffb6ba39e4b5",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "Keep 'planned kernel architecture' separate from implemented runtime components."
+      ]
+    },
+    {
+      "project_id": "the-factory-2",
+      "name": "The-Factory-2.0",
+      "repository_url": "https://github.com/Daniel550-pixel/The-Factory-2.0",
+      "default_branch": "main",
+      "architecture_status": "source-verified",
+      "architecture_summary": "React/Vite control plane with TypeScript/Express server and explicit kernel modules for policy/security, agent runtime, execution brokerage/lifecycle, durable event ledger, evidence/provenance, replay/recovery, memory and knowledge adapters.",
+      "technology_stack": [
+        "React 19",
+        "TypeScript",
+        "Vite",
+        "Express",
+        "Google GenAI SDK",
+        "Vitest",
+        "Docker"
+      ],
+      "entrypoints": [
+        "server-entry.ts",
+        "server.ts",
+        "src/main.tsx",
+        "src/App.tsx"
+      ],
+      "layers": [
+        {
+          "name": "UI / control plane",
+          "role": "Operational views for agents, approvals, arbitration, execution, ledger, provenance, memory, policy, replay, security and settings",
+          "components": "React view/component layer",
+          "evidence_paths": [
+            "src/App.tsx",
+            "src/views/ApprovalsView.tsx",
+            "src/views/EventLedgerView.tsx",
+            "src/views/PolicyGateView.tsx"
+          ]
+        },
+        {
+          "name": "HTTP / API",
+          "role": "Express server with knowledge, Ox Alpha and runtime routes",
+          "components": "Node entrypoints",
+          "evidence_paths": [
+            "server.ts",
+            "server-entry.ts"
+          ]
+        },
+        {
+          "name": "Kernel / execution",
+          "role": "Policy/security logic, agent runtime, execution broker and lifecycle / receipts",
+          "components": "Governed command path",
+          "evidence_paths": [
+            "server/kernel.ts",
+            "server/security.ts",
+            "server/execution-broker.ts",
+            "server/execution-lifecycle.test.ts"
+          ]
+        },
+        {
+          "name": "Evidence / durable state",
+          "role": "Durable ledger, execution replay store, event/provenance and knowledge adapters",
+          "components": "Persistence and recovery modules",
+          "evidence_paths": [
+            "server/durable-ledger.ts",
+            "server/execution-replay-store.ts",
+            "server/execution-receipt.ts",
+            "server/knowledge-adapters.ts"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "Durable ledger/replay adapters are present; their operational guarantees depend on backing implementation/config."
+      ],
+      "external_integrations": [
+        "Google GenAI optional provider; knowledge adapters have own route and transaction modules."
+      ],
+      "evidence_paths": [
+        "README.md",
+        "package.json",
+        "server-entry.ts",
+        "server.ts",
+        "server/kernel.ts",
+        "server/security.ts",
+        "server/execution-broker.ts",
+        "server/durable-ledger.ts",
+        "server/execution-replay-store.ts",
+        "src/App.tsx"
+      ],
+      "source_snapshot": {
+        "commit": "087f09265c2581e3910f5cb6f3d04e4c15c8d2a0",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "Repository README explicitly cautions that production security boundaries are not yet complete."
+      ]
+    },
+    {
+      "project_id": "the-house-of-coding",
+      "name": "The-House-Of-Coding",
+      "repository_url": "https://github.com/Daniel550-pixel/The-House-Of-Coding",
+      "default_branch": "main",
+      "architecture_status": "source-verified",
+      "architecture_summary": "npm-workspaces monorepo: Next.js/React web application and a separate Express 5 TypeScript API, with routes for code, execution, review, language discovery, search, sessions and agents; OpenAI-backed API is declared.",
+      "technology_stack": [
+        "Node.js / TypeScript",
+        "npm workspaces",
+        "Next.js 16 / React 19",
+        "Express 5",
+        "OpenAI SDK",
+        "Zod"
+      ],
+      "entrypoints": [
+        "apps/web/src/app/page.tsx",
+        "apps/api/src/server.ts"
+      ],
+      "layers": [
+        {
+          "name": "Web experience",
+          "role": "Next.js App Router pages/components, agent workspace and route handlers",
+          "components": "Browser app",
+          "evidence_paths": [
+            "apps/web/package.json",
+            "apps/web/src/app/page.tsx",
+            "apps/web/src/app/agent-workspace/page.tsx"
+          ]
+        },
+        {
+          "name": "API service",
+          "role": "Express server with modular route and service files",
+          "components": "Code, execute, review, search, session and agent routes",
+          "evidence_paths": [
+            "apps/api/src/server.ts",
+            "apps/api/src/routes/code.ts",
+            "apps/api/src/routes/execute.ts",
+            "apps/api/src/routes/review.ts"
+          ]
+        },
+        {
+          "name": "Agent/session services",
+          "role": "Session manager and house services with schema validation",
+          "components": "Backend domain services",
+          "evidence_paths": [
+            "apps/api/src/services/agent-sessions.ts",
+            "apps/api/src/services/house.ts"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "No datastore confirmed from checked package manifests; source-level storage behavior should be verified."
+      ],
+      "external_integrations": [
+        "OpenAI SDK declared in API dependencies; live provider credentials/runtime unverified."
+      ],
+      "evidence_paths": [
+        "package.json",
+        "apps/web/package.json",
+        "apps/api/package.json",
+        "apps/api/src/server.ts",
+        "apps/api/src/routes/execute.ts",
+        "apps/api/src/services/agent-sessions.ts"
+      ],
+      "source_snapshot": {
+        "commit": "7d3bc97168ceba585c51f61f78b72ccc2166c962",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "Build/deployment success is not verified from tree inspection alone."
+      ]
+    },
+    {
+      "project_id": "localhost-webapp",
+      "name": "Localhost-webapp",
+      "repository_url": "https://github.com/Daniel550-pixel/Localhost-webapp",
+      "default_branch": "main",
+      "architecture_status": "source-limited",
+      "architecture_summary": "Next.js App Router scaffold. The inspected page is the stock Next starter template; no actual product workflow or backend API was visible in the scanned source.",
+      "technology_stack": [
+        "Next.js 16",
+        "React 19",
+        "TypeScript",
+        "Tailwind CSS"
+      ],
+      "entrypoints": [
+        "src/app/page.tsx",
+        "src/app/layout.tsx"
+      ],
+      "layers": [
+        {
+          "name": "Web shell",
+          "role": "Next.js App Router page/layout and static assets",
+          "components": "Starter page",
+          "evidence_paths": [
+            "src/app/page.tsx",
+            "src/app/layout.tsx",
+            "package.json"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "No persistence/API layer found in the scanned entrypoint and tracked key paths."
+      ],
+      "external_integrations": [],
+      "evidence_paths": [
+        "package.json",
+        "src/app/page.tsx",
+        "src/app/layout.tsx"
+      ],
+      "source_snapshot": {
+        "commit": "24aa5206d971ccfc5e1ce6b84459d16ac74ecf0e",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "Currently a starter scaffold rather than a verified functional product."
+      ]
+    },
+    {
+      "project_id": "business-os",
+      "name": "Business-OS",
+      "repository_url": "https://github.com/Daniel550-pixel/Business-OS",
+      "default_branch": "main",
+      "architecture_status": "source-verified",
+      "architecture_summary": "Rich React/Vite workspace with Express bootstrap/server, Gemini-driven prompt/runtime services, action execution boundary and multiple business/security/visualization panels including Three.js-based world and flow views.",
+      "technology_stack": [
+        "React 19",
+        "TypeScript",
+        "Vite",
+        "Express",
+        "Google GenAI SDK",
+        "Three.js",
+        "Motion"
+      ],
+      "entrypoints": [
+        "server/bootstrap.ts",
+        "server.ts",
+        "src/main.tsx",
+        "src/App.tsx"
+      ],
+      "layers": [
+        {
+          "name": "Web experience",
+          "role": "Executive cockpit, finance, sales, operations, agents, missions and spatial world views",
+          "components": "React component modules",
+          "evidence_paths": [
+            "src/App.tsx",
+            "src/components/ExecutiveCockpit.tsx",
+            "src/components/BusinessWorld.tsx",
+            "src/components/LivingSystemFlow3D.tsx"
+          ]
+        },
+        {
+          "name": "Request and prompt runtime",
+          "role": "Bootstrap increases Express JSON body limit before importing server; server prompt/response runtimes process requests",
+          "components": "Server boundary",
+          "evidence_paths": [
+            "server/bootstrap.ts",
+            "server/promptRuntime.ts",
+            "server/responseRuntime.ts"
+          ]
+        },
+        {
+          "name": "Action and security layer",
+          "role": "Action runtime, security kernel, security incidents/events/provenance",
+          "components": "Gated server operations",
+          "evidence_paths": [
+            "server/actionRuntime.ts",
+            "server/security/securityKernel.ts",
+            "server/security/securityEvents.ts",
+            "server/security/provenance.ts"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "Persistent store not confirmed from checked manifest/files."
+      ],
+      "external_integrations": [
+        "Google GenAI; optional provider behavior depends on local server environment/config."
+      ],
+      "evidence_paths": [
+        "package.json",
+        "server/bootstrap.ts",
+        "server.ts",
+        "server/promptRuntime.ts",
+        "server/actionRuntime.ts",
+        "server/security/securityKernel.ts",
+        "src/App.tsx"
+      ],
+      "source_snapshot": {
+        "commit": "f2e32c34f743080f1b905cad424d6900b83ddbbc",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "A rich UI is not evidence that backend actions are deployed or safe in a production environment."
+      ]
+    },
+    {
+      "project_id": "onedrive-cleanup-controller",
+      "name": "OneDrive-Cleanup-Controller",
+      "repository_url": "https://github.com/Daniel550-pixel/OneDrive-Cleanup-Controller",
+      "default_branch": "main",
+      "architecture_status": "source-verified",
+      "architecture_summary": "PowerShell CLI/controller for inspecting OneDrive storage, freeing local disk space, safely quarantining/deleting synced files, restoring quarantined files and writing local audit logs. It has no web UI.",
+      "technology_stack": [
+        "Windows PowerShell",
+        "PowerShell scripts",
+        "JSON configuration"
+      ],
+      "entrypoints": [
+        "scripts/Initialize.ps1",
+        "scripts/Status.ps1",
+        "scripts/Scan.ps1",
+        "scripts/FreeUpSpace.ps1",
+        "scripts/Cleanup.ps1",
+        "scripts/Restore.ps1 (README names)"
+      ],
+      "layers": [
+        {
+          "name": "Command-line operations",
+          "role": "Task-specific PowerShell scripts call shared safety/util functions",
+          "components": "Initialize/status/scan/free-space/cleanup/restore",
+          "evidence_paths": [
+            "README.md"
+          ]
+        },
+        {
+          "name": "Safety / policy",
+          "role": "OneDrive-root confinement, quarantine-by-default, explicit permanent deletion flag",
+          "components": "Safety rules documented in README",
+          "evidence_paths": [
+            "README.md"
+          ]
+        },
+        {
+          "name": "Configuration and audit",
+          "role": "Config template and local ignored configuration; local audit logging",
+          "components": "Local-only runtime data",
+          "evidence_paths": [
+            "README.md"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "Local config file and audit log; personal OneDrive file contents intentionally excluded from the repository."
+      ],
+      "external_integrations": [
+        "Windows OneDrive client / local filesystem; destructive sync deletion can propagate to cloud and devices."
+      ],
+      "evidence_paths": [
+        "README.md"
+      ],
+      "source_snapshot": {
+        "commit": "fed42c719b8fe42e7dca5f687720bd3ed52bcdbd",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "Architecture is inferred primarily from README; source scripts should be inspected to verify exact enforcement."
+      ]
+    },
+    {
+      "project_id": "experienceengine",
+      "name": "ExperienceEngine",
+      "repository_url": "https://github.com/Daniel550-pixel/ExperienceEngine",
+      "default_branch": "main",
+      "architecture_status": "source-verified",
+      "architecture_summary": "React/Vite split-screen creation/code workspace served through an Express TypeScript process; code generation uses Google GenAI, a shared language library, prompt normalization/chunking and a code cache.",
+      "technology_stack": [
+        "React 19",
+        "TypeScript",
+        "Vite",
+        "Express",
+        "Google GenAI SDK",
+        "Motion"
+      ],
+      "entrypoints": [
+        "server.ts",
+        "src/main.tsx",
+        "src/App.tsx"
+      ],
+      "layers": [
+        {
+          "name": "Web editor",
+          "role": "Intention and creation panels, status bar, language presets and simulations",
+          "components": "React UI",
+          "evidence_paths": [
+            "src/App.tsx",
+            "src/components/IntentionPanel.tsx",
+            "src/components/CreationPanel.tsx",
+            "src/utils/projectGenerator.ts"
+          ]
+        },
+        {
+          "name": "AI generation service",
+          "role": "Server-side Gemini client, prompt validation/normalization, large prompt chunking and code cache",
+          "components": "Express server",
+          "evidence_paths": [
+            "server.ts",
+            "src/data/codeLanguageLibrary.ts"
+          ]
+        },
+        {
+          "name": "Client state / presets",
+          "role": "Preset projects, code language definitions and local storage helpers",
+          "components": "Browser state utilities",
+          "evidence_paths": [
+            "src/data/presetProjects.ts",
+            "src/utils/storage.ts"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "Browser local storage helper exists; server code cache is in-memory. Durable server-side project storage was not confirmed."
+      ],
+      "external_integrations": [
+        "Google GenAI API key is read from server environment; external generation requires a valid key."
+      ],
+      "evidence_paths": [
+        "package.json",
+        "server.ts",
+        "src/App.tsx",
+        "src/components/CreationPanel.tsx",
+        "src/utils/projectGenerator.ts",
+        "src/utils/storage.ts"
+      ],
+      "source_snapshot": {
+        "commit": "b89acf7c56b6d3ccc2427c99959fef545f056f9a",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "Build is declared as Vite bundle and lint/type check; runtime and provider quotas not tested by this architecture scan."
+      ]
+    },
+    {
+      "project_id": "syscentre",
+      "name": "SysCentre",
+      "repository_url": "https://github.com/Daniel550-pixel/SysCentre",
+      "default_branch": "main",
+      "architecture_status": "source-verified",
+      "architecture_summary": "Local-first React/Vite control plane backed by a Python standard-library HTTP runtime. It keeps project catalog/intake/runtime-adapter records, indexes GitHub trees and text into SQLite, exposes read-only search and records policy-gated commands/audit events.",
+      "technology_stack": [
+        "Python 3.11+ standard library",
+        "React 18",
+        "TypeScript",
+        "Vite",
+        "SQLite",
+        "GitHub REST API"
+      ],
+      "entrypoints": [
+        "runtime/server.py",
+        "webapp/src/main.tsx",
+        "webapp/src/App.tsx",
+        "bonus-app/index.html"
+      ],
+      "layers": [
+        {
+          "name": "Web control plane",
+          "role": "React UI for portfolio, project registry, intake, runtime adapters, command console, policy and event ledger",
+          "components": "Vite browser bundle",
+          "evidence_paths": [
+            "webapp/src/main.tsx",
+            "webapp/src/App.tsx",
+            "webapp/src/styles.css"
+          ]
+        },
+        {
+          "name": "Local runtime API",
+          "role": "ThreadingHTTPServer on 127.0.0.1:8765 with health/status/events/policy/project/search/ingestion routes",
+          "components": "Read-only metadata endpoints and bounded actions",
+          "evidence_paths": [
+            "runtime/server.py",
+            "runtime/policy.py"
+          ]
+        },
+        {
+          "name": "Repository ingestion",
+          "role": "GitHub tree/contents import, path filters, checkpoints and full-text source search",
+          "components": "External read-only repository scanning",
+          "evidence_paths": [
+            "runtime/repository_ingest.py"
+          ]
+        },
+        {
+          "name": "State and audit",
+          "role": "SQLite event ledger/index and JSON catalogs/registries",
+          "components": "Local persistent state + configuration",
+          "evidence_paths": [
+            "runtime/server.py",
+            "runtime/repository_catalog.json",
+            "runtime/project_inventory.json",
+            "runtime/project_runtime_registry.json"
+          ]
+        },
+        {
+          "name": "Architecture inventory",
+          "role": "New JSON snapshot and GET API expose evidence-backed layers per project; no source is executed",
+          "components": "This feature",
+          "evidence_paths": [
+            "runtime/repository_architectures.json",
+            "runtime/server.py"
+          ]
+        }
+      ],
+      "state_and_data": [
+        "SQLite at ~/.syscentre/syscentre.db; catalogs/registry remain JSON files in the repository."
+      ],
+      "external_integrations": [
+        "GitHub API reads; no repository code is run. Runtime adapters default to unconfigured pending explicit verification."
+      ],
+      "evidence_paths": [
+        "README.md",
+        "runtime/server.py",
+        "runtime/repository_ingest.py",
+        "runtime/policy.py",
+        "webapp/src/App.tsx",
+        "webapp/package.json",
+        "runtime/repository_catalog.json",
+        "runtime/project_runtime_registry.json"
+      ],
+      "source_snapshot": {
+        "commit": "be8a349b8063ccf0c0e8c9d477ace225619bdcb8",
+        "tree_api": "GitHub recursive git tree",
+        "deployment_verified": false,
+        "runtime_health_verified": false
+      },
+      "limitations": [
+        "This architecture inventory is a static source-tree snapshot; it does not verify build/deploy/live health for the linked repositories."
+      ]
+    }
+  ]
+}
