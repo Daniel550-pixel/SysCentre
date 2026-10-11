@@ -8,9 +8,11 @@ SysCentre is a standalone local-first systems control plane. It catalogs existin
 - **Runtime:** Python standard-library HTTP API on `127.0.0.1:8765`.
 - **Policy engine:** deterministic explicit allowlist; unknown commands are denied and recorded.
 - **Event ledger:** SQLite database at `~/.syscentre/syscentre.db`, with up to 5,000 recent audit events.
-- **Project registry:** `runtime/repository_catalog.json` records the 28 projects known to SysCentre, including executive portfolio metadata. `bonus-app/systems.json` mirrors this catalog for the static GitHub Pages application.
+- **Project registry:** `runtime/repository_catalog.json` records the 28 projects known to SysCentre, including executive portfolio metadata. `bonus-app/systems.json` mirrors this catalog for the static GitHub Pages application. `runtime/project_inventory.json` tracks historical/new project identities that still need exact repository reconciliation.
 - **Executive control plane:** portfolio-wide grouping by business-model hypothesis, system type, sector, and market category, with an executive register that combines all four filters, searches target markets and portfolio roles, and surfaces market-validation, lifecycle, and monetization-evidence gaps. Each repository remains individually inspectable with source links and classification basis.
 - **Repository indexer:** `runtime/repository_ingest.py` imports repository metadata, commit/tree identity, file paths, blob hashes, file sizes, and readable UTF-8 source/documentation content.
+- **Runtime adapter registry:** `runtime/project_runtime_registry.json` has an explicit, initially unconfigured adapter profile for every one of the 28 repositories. The dashboard shows readiness and does not pretend unconfigured projects are runnable. `GET /api/runtime-projects` exposes this read-only registry.
+- **Extensible project intake:** the dashboard and `POST /api/project-inventory` can register future project identities with validation, duplicate protection, persistence, and an audit event. Registration does not confirm a repository mapping or enable execution.
 - **Project isolation:** indexed source is data, not executable instructions. Repositories are not merged and indexing does not run their code.
 
 ## Repository ingestion
@@ -47,7 +49,7 @@ Open **http://127.0.0.1:5173**. The runtime API is **http://127.0.0.1:8765**.
 - `GET /api/events` — persisted audit events
 - `GET /api/policy` — current allowlisted command catalog
 - `GET /api/repositories` — catalog plus indexing status
-- `GET /api/ingest-status?project_id=syscentre` — persisted per-project ingestion progress, including interrupted runs and checkpoint counts
+- `GET /api/ingest-status?project_id=syscentre` — persisted per-project ingestion progress, including interrupted runs and checkpoint counts\n- `GET /api/runtime-projects` — runtime adapter configuration/readiness for all registered repository records
 - `GET /api/repositories/{project_id}/files?path=term&limit=100` — indexed file records and source text (maximum 200 per response)
 - `GET /api/search?q=policy&limit=50` — search indexed source across projects (maximum 100 matches)
 - `POST /api/repositories/ingest` with `{"project_id":"networklab"}` — index one catalogued repository
@@ -68,7 +70,7 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8765/api/repositories/inges
 Invoke-RestMethod 'http://127.0.0.1:8765/api/repositories/networklab/files?limit=10'
 ```
 
-## Development checks
+## Google AI Studio app prompt\n\nThe full master prompt for building a separate Google AI Studio full-stack control plane is in [`docs/GOOGLE_AI_STUDIO_CONTROL_PLANE_PROMPT.md`](docs/GOOGLE_AI_STUDIO_CONTROL_PLANE_PROMPT.md). Supply that prompt together with `runtime/repository_catalog.json`, `runtime/project_inventory.json`, and `runtime/project_runtime_registry.json`. The prompt requires real adapter configuration and honest readiness labels; it does not assume that registering a repository makes its application runnable.\n\n## Development checks
 
 ```powershell
 python -m unittest discover -s runtime -p "test_*.py" -v
@@ -84,4 +86,4 @@ Each repository is classified by `business_model`, `system_type`, `sector`, `mar
 
 Business models and target markets are planning hypotheses inferred from repository evidence, not verified market research. Pricing, customers, revenue, commercial traction, TAM/SAM/SOM, and geographic reach are not claimed unless independently evidenced. Every catalog record explicitly carries a monetization status and market-validation status. Empty repositories and scaffolds remain classified as unvalidated. Keep the canonical runtime catalog and the static mirror synchronized when updating portfolio metadata.
 
-The executive register is a decision-support view, not a financial forecast: portfolio counts are computed from catalog fields, and evidence-gap totals do not imply commercial performance. The project registry and source index remain foundations for cross-project discovery. Automated dependency mapping, project-level semantic search, agent orchestration, approval workflows, and execution adapters are subsequent capabilities. Keep credentials out of the repository and do not treat policy allowlisting as a complete OS sandbox.
+The executive register is a decision-support view, not a financial forecast: portfolio counts are computed from catalog fields, and evidence-gap totals do not imply commercial performance. The project registry and source index remain foundations for cross-project discovery. Automated dependency mapping, project-level semantic search, agent orchestration, approval workflows, and executable lifecycle adapters remain subsequent capabilities. The registry describes the required adapter slots but does not execute unverified project launch commands. Keep credentials out of the repository and do not treat policy allowlisting as a complete OS sandbox.
