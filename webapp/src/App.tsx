@@ -30,6 +30,7 @@ type ArchitectureAnalysis = {
     functions_detected: number; classes_detected: number; routes_detected: number; entrypoints: string[];
     framework_signals: Array<{ name: string; evidence_count: number }>;
     api_routes: Array<{ method: string; path: string; source: string }>;
+    outbound_api_calls: Array<{ client: string; target: string; source: string; evidence: string }>;
     data_store_signals: Array<{ name: string; source: string; evidence: string }>;
     modules: Array<{ path: string; language: string; lines: number; imports: number; role: string }>;
     dependency_edges: Array<{ from: string; to: string; kind: string }>;
@@ -482,6 +483,7 @@ export default function App() {
                         <article><strong>Entry points</strong>{architectureAnalyses[item.project_id].analysis.entrypoints.length ? architectureAnalyses[item.project_id].analysis.entrypoints.map((path) => <a key={path} href={item.repository_url + "/blob/" + (architectureAnalyses[item.project_id].project.indexed_commit || item.default_branch) + "/" + path} target="_blank" rel="noreferrer">{path}</a>) : <span>No conventional entrypoint identified</span>}</article>
                         <article><strong>Data-store signals</strong>{architectureAnalyses[item.project_id].analysis.data_store_signals.length ? architectureAnalyses[item.project_id].analysis.data_store_signals.slice(0, 12).map((signal, index) => <span key={signal.name + signal.source + index}>{signal.name} <small>· {signal.source}</small></span>) : <span>No supported data-store patterns detected</span>}</article>
                         <article><strong>API / route patterns</strong>{architectureAnalyses[item.project_id].analysis.api_routes.length ? architectureAnalyses[item.project_id].analysis.api_routes.slice(0, 20).map((route, index) => <span key={route.method + route.path + route.source + index}><code>{route.method}</code> {route.path} <small>· {route.source}</small></span>) : <span>No supported route patterns detected</span>}</article>
+                        <article><strong>Outbound API calls</strong>{architectureAnalyses[item.project_id].analysis.outbound_api_calls.length ? architectureAnalyses[item.project_id].analysis.outbound_api_calls.slice(0, 20).map((call, index) => <span key={call.client + call.target + call.source + index}><code>{call.client}</code> {call.target} <small>· {call.source}</small></span>) : <span>No supported outbound HTTP-client targets detected</span>}</article>
                       </div>
                       <details className="architecture-module-details"><summary>Module inventory ({architectureAnalyses[item.project_id].analysis.modules.length}) and dependency edges ({architectureAnalyses[item.project_id].analysis.dependency_edges.length})</summary>
                         <div className="architecture-module-list">{architectureAnalyses[item.project_id].analysis.modules.slice(0, 80).map((module) => <div key={module.path}><code>{module.path}</code><span>{module.role} · {module.lines} lines · {module.imports} imports</span></div>)}</div>
