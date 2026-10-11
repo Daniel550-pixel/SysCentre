@@ -192,6 +192,14 @@ class Handler(BaseHTTPRequestHandler):
             from repository_ingest import list_projects
             projects = list_projects()
             self._send_json(200, {"projects": projects, "count": len(projects)})
+        elif path == "/api/ingest-status":
+            from repository_ingest import ingest_status
+            params = parse_qs(parsed.query)
+            project_id = params.get("project_id", [""])[0].strip()
+            try:
+                self._send_json(200, ingest_status(project_id or None))
+            except ValueError as exc:
+                self._send_json(400, {"ok": False, "error": str(exc)})
         elif path == "/api/project-inventory":
             inventory_path = Path(__file__).with_name("project_inventory.json")
             with inventory_path.open("r", encoding="utf-8") as handle:
