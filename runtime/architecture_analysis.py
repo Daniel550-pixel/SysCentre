@@ -59,7 +59,6 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
     for path in sorted(paths):
         candidate = PurePosixPath(path)
         paths_by_stem.setdefault(candidate.stem, []).append(path)
-        path_by_stem.setdefault(candidate.stem, path)
 
     imports: list[dict[str, str]] = []
     routes: list[dict[str, str]] = []
