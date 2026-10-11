@@ -2,11 +2,12 @@
 
 ## How to use this prompt
 
-In Google AI Studio, start a full-stack app and provide this prompt together with these three source files from the SysCentre repository:
+In Google AI Studio, start a full-stack app and provide this prompt together with these four source files from the SysCentre repository:
 
 1. `runtime/repository_catalog.json` — canonical metadata for the 28 registered GitHub repositories.
 2. `runtime/project_inventory.json` — additional project identities from our prior work that still need exact repository reconciliation.
 3. `runtime/project_runtime_registry.json` — per-project execution adapter slots and safety defaults for the 28 repositories.
+4. `runtime/repository_architectures.json` — source-backed architecture evidence for every catalog repository, including observed technologies, application layers, entrypoints, data/state boundaries, integrations, snapshot commit hashes, and known gaps.
 
 Use the complete prompt below. Do not replace missing deployment data with guesses.
 
@@ -31,6 +32,7 @@ The app is the portfolio and orchestration layer. It is not a replacement reposi
 Build a complete, responsive full-stack application with:
 - A premium executive dashboard and consistent professional UI/UX.
 - A durable project catalog seeded from the supplied JSON files.
+- A searchable **Application architectures** explorer driven by `repository_architectures.json`, with source links and per-repository layers, entrypoints, stack, data/state, integrations and gaps.
 - Runtime adapter configuration and an honest run-readiness view for every project.
 - A typed orchestration backend for supported runtime adapters.
 - Live health/telemetry polling, lifecycle actions, logs, event history, and failure diagnostics.
@@ -71,6 +73,8 @@ The catalog file is authoritative if display names or capitalization differ from
 These repositories are heterogeneous and are not all currently deployed or known to be runnable. A web app cannot execute arbitrary GitHub repositories just because their URLs are registered. Build a system that can manage all 28, but only reports a project as **Runnable** after its adapter, target, health check, allowed actions, and required secrets/configuration have been explicitly configured and verified.
 
 For projects that are not yet configured, show **Setup required**, identify the missing information, and provide a guided setup workflow. Never label a project “running,” “healthy,” “deployed,” or “tested” without evidence from its adapter.
+
+Architecture records are not runtime telemetry. Preserve their source commit SHA and evidence paths, and show separate labels for source-verified, source-limited, documentation-only and empty repositories. Do not infer that a file path, dependency declaration, README architecture diagram, or provider import proves a feature or integration is active.
 
 Support these typed adapter kinds:
 1. **HTTP deployment** — check a configured health URL; open the configured app URL; invoke only explicitly declared, authenticated lifecycle endpoints.
