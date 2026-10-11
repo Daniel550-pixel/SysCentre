@@ -62,6 +62,7 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
 
     imports: list[dict[str, str]] = []
     routes: list[dict[str, str]] = []
+    outbound_api_calls: list[dict[str, str]] = []
     storage: list[dict[str, str]] = []
     entrypoints: list[dict[str, str]] = []
     manifest_findings: list[dict[str, str]] = []
@@ -126,6 +127,24 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
                 routes.append({"method": match.group(1).upper(), "path": match.group(2), "source": path})
             if PurePosixPath(path).name in {"main.ts", "main.tsx", "index.ts", "index.tsx", "index.js", "index.jsx", "App.tsx", "App.jsx"}:
                 entrypoints.append({"path": path, "reason": "Conventional frontend/application entrypoint filename"})
+
+        outbound_pattern = r"""\b(fetch|axios\.(?:get|post|put|patch|delete)|requests\.(?:get|post|put|patch|delete)|httpx\.(?:get|post|put|patch|delete)|urlopen)\s*\(\s*[fFrRuUbB]*['"]([^'"]+)['"]"""
+        for match in re.finditer(outbound_pattern, text, re.I):
+            outbound_api_calls.append({
+                "client": match.group(1),
+                "target": match.group(2),
+                "source": path,
+                "evidence": "Static HTTP-client call target; runtime request is not verified",
+            })
+        base_url_pattern = r"""\b(?:API_BASE_URL|BASE_URL|API_URL)\s*[:=]\s*['"]([^'"]+)['"]"""
+        for match in re.finditer(base_url_pattern, text, re.I):
+            outbound_api_calls.append({
+                "client": "base-url configuration",
+                "target": match.group(1),
+                "source": path,
+                "evidence": "Static API base URL configuration; runtime request is not verified",
+            })
+
         if PurePosixPath(path).name in {"package.json", "requirements.txt", "pyproject.toml", "Pipfile", "Cargo.toml", "go.mod", "pom.xml", "Gemfile", "composer.json"}:
             manifest_findings.append({"path": path, "kind": PurePosixPath(path).name, "evidence": "Dependency or build manifest is present"})
             lower = text.lower()
@@ -220,6 +239,7 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
             "framework_signals": frameworks,
             "dependency_manifest_evidence": manifest_findings[:200],
             "api_routes": unique_routes[:250],
+            "outbound_api_calls": _dedupe_api_calls(outbound_api_calls)[:250],
             "data_store_signals": _dedupe_records(storage)[:100],
             "modules": modules[:300],
             "dependency_edges": local_edges[:500],
@@ -288,6 +308,18 @@ def _role_for_path(path: str, text: str) -> str:
     if PurePosixPath(path).name in {"main.py", "app.py", "server.py", "index.ts", "index.js", "main.ts", "main.tsx", "streamlit_app.py"}:
         return "Application entrypoint"
     return "Application / supporting module"
+
+
+
+def _dedupe_api_calls(records: list[dict[str, str]]) -> list[dict[str, str]]:
+    seen: set[tuple[str, str, str]] = set()
+    result = []
+    for record in records:
+        key = (record["client"], record["target"], record["source"])
+        if key not in seen:
+            seen.add(key)
+            result.append(record)
+    return result
 
 
 def _dedupe_records(records: list[dict[str, str]]) -> list[dict[str, str]]:
