@@ -152,6 +152,29 @@ def _db_executescript() -> None:
                     files_skipped INTEGER NOT NULL DEFAULT 0,
                     error TEXT NOT NULL DEFAULT ''
                 );
+                CREATE TABLE IF NOT EXISTS ingest_progress (
+                    project_id TEXT PRIMARY KEY,
+                    target_commit TEXT NOT NULL,
+                    branch TEXT NOT NULL,
+                    started_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    files_seen INTEGER NOT NULL DEFAULT 0,
+                    files_processed INTEGER NOT NULL DEFAULT 0,
+                    files_indexed INTEGER NOT NULL DEFAULT 0,
+                    files_skipped INTEGER NOT NULL DEFAULT 0,
+                    error TEXT NOT NULL DEFAULT ''
+                );
+                CREATE TABLE IF NOT EXISTS ingest_checkpoint_files (
+                    project_id TEXT NOT NULL,
+                    path TEXT NOT NULL,
+                    blob_sha TEXT NOT NULL DEFAULT '',
+                    size_bytes INTEGER NOT NULL DEFAULT 0,
+                    file_kind TEXT NOT NULL,
+                    content TEXT,
+                    skip_reason TEXT NOT NULL DEFAULT '',
+                    PRIMARY KEY (project_id, path)
+                );
             """)
 
 
@@ -175,6 +198,7 @@ def list_projects() -> list[dict[str, Any]]:
 
 
 def ingest_repository(project_key: str) -> dict[str, Any]:
+    """Index a repository with SQLite checkpoints so interrupted runs can resume."""
     item = _repo_id(project_key)
     _db_executescript()
     started = datetime.now(timezone.utc).isoformat()
@@ -191,9 +215,54 @@ def ingest_repository(project_key: str) -> dict[str, Any]:
     if len(entries) > MAX_FILES_PER_REPO:
         raise RuntimeError(f"Repository has {len(entries)} files; safety limit is {MAX_FILES_PER_REPO} per ingestion run.")
 
-    # Fetch blobs concurrently: one request per file is otherwise too slow for
-    # repositories with thousands of tracked files. Keep concurrency bounded to
-    # avoid overwhelming GitHub and preserve deterministic result ordering.
+    now = datetime.now(timezone.utc).isoformat()
+    with server._DB_LOCK:
+        with server._database() as connection:
+            progress = connection.execute(
+                "SELECT target_commit FROM ingest_progress WHERE project_id = ?", (item["id"],)
+            ).fetchone()
+            if progress is None or progress["target_commit"] != commit_sha:
+                connection.execute("DELETE FROM ingest_checkpoint_files WHERE project_id = ?", (item["id"],))
+                connection.execute(
+                    """INSERT INTO ingest_progress
+                       (project_id, target_commit, branch, started_at, updated_at, status, files_seen, files_processed, files_indexed, files_skipped, error)
+                       VALUES (?, ?, ?, ?, ?, 'running', ?, 0, 0, 0, '')
+                       ON CONFLICT(project_id) DO UPDATE SET
+                       target_commit=excluded.target_commit, branch=excluded.branch,
+                       started_at=excluded.started_at, updated_at=excluded.updated_at,
+                       status='running', files_seen=excluded.files_seen, files_processed=0,
+                       files_indexed=0, files_skipped=0, error='' """,
+                    (item["id"], commit_sha, branch, started, now, len(entries)),
+                )
+            else:
+                connection.execute(
+                    """UPDATE ingest_progress SET branch = ?, updated_at = ?, status = 'running',
+                       files_seen = ?, error = '' WHERE project_id = ?""",
+                    (branch, now, len(entries), item["id"]),
+                )
+            cached_rows = connection.execute(
+                "SELECT path, blob_sha, file_kind, content, skip_reason FROM ingest_checkpoint_files WHERE project_id = ?",
+                (item["id"],),
+            ).fetchall()
+    cached = {row["path"]: dict(row) for row in cached_rows}
+    node_by_path = {node.get("path", ""): node for node in entries}
+    reusable = {
+        path for path, node in node_by_path.items()
+        if path in cached and cached[path]["blob_sha"] == node.get("sha", "")
+    }
+    stale_paths = set(cached) - reusable
+    if stale_paths:
+        with server._DB_LOCK:
+            with server._database() as connection:
+                connection.executemany(
+                    "DELETE FROM ingest_checkpoint_files WHERE project_id = ? AND path = ?",
+                    [(item["id"], path) for path in stale_paths],
+                )
+    files_indexed = sum(1 for path in reusable if cached[path]["file_kind"] == "text")
+    files_skipped = len(reusable) - files_indexed
+    files_processed = len(reusable)
+    finished = datetime.now(timezone.utc).isoformat()
+
     from concurrent.futures import ThreadPoolExecutor
 
     def index_node(node: dict[str, Any]) -> tuple[tuple[Any, ...], bool]:
@@ -216,52 +285,141 @@ def ingest_repository(project_key: str) -> dict[str, Any]:
         except RuntimeError as exc:
             raise RuntimeError(f"Failed indexing {path}: {exc}") from exc
 
-    with ThreadPoolExecutor(max_workers=6, thread_name_prefix="syscentre-index") as pool:
-        indexed_results = list(pool.map(index_node, entries))
-    rows = [result[0] for result in indexed_results]
-    files_indexed = sum(1 for _, is_text in indexed_results if is_text)
-    files_skipped = len(rows) - files_indexed
+    def save_batch(batch: list[tuple[tuple[Any, ...], bool]]) -> None:
+        nonlocal files_processed, files_indexed, files_skipped
+        if not batch:
+            return
+        with server._DB_LOCK:
+            with server._database() as connection:
+                connection.executemany(
+                    """INSERT INTO ingest_checkpoint_files
+                       (project_id, path, blob_sha, size_bytes, file_kind, content, skip_reason)
+                       VALUES (?, ?, ?, ?, ?, ?, ?)
+                       ON CONFLICT(project_id, path) DO UPDATE SET
+                       blob_sha=excluded.blob_sha, size_bytes=excluded.size_bytes,
+                       file_kind=excluded.file_kind, content=excluded.content,
+                       skip_reason=excluded.skip_reason""",
+                    [row for row, _ in batch],
+                )
+                files_processed += len(batch)
+                files_indexed += sum(1 for _, is_text in batch if is_text)
+                files_skipped += sum(1 for _, is_text in batch if not is_text)
+                connection.execute(
+                    """UPDATE ingest_progress SET updated_at = ?, files_processed = ?,
+                       files_indexed = ?, files_skipped = ?, status = 'running'
+                       WHERE project_id = ?""",
+                    (datetime.now(timezone.utc).isoformat(), files_processed, files_indexed, files_skipped, item["id"]),
+                )
 
-    finished = datetime.now(timezone.utc).isoformat()
-    description = repo_data.get("description") or ""
-    status = "indexed_with_exclusions" if files_skipped else "indexed"
+    try:
+        pending = [node for node in entries if node.get("path", "") not in reusable]
+        with ThreadPoolExecutor(max_workers=6, thread_name_prefix="syscentre-index") as pool:
+            batch: list[tuple[tuple[Any, ...], bool]] = []
+            for result in pool.map(index_node, pending):
+                batch.append(result)
+                if len(batch) >= 50:
+                    save_batch(batch)
+                    batch = []
+            save_batch(batch)
+
+        finished = datetime.now(timezone.utc).isoformat()
+        description = repo_data.get("description") or ""
+        status = "indexed_with_exclusions" if files_skipped else "indexed"
+        with server._DB_LOCK:
+            with server._database() as connection:
+                connection.execute("DELETE FROM repository_files WHERE project_id = ?", (item["id"],))
+                connection.execute(
+                    """INSERT INTO repository_files
+                       (project_id, path, blob_sha, size_bytes, file_kind, content, skip_reason)
+                       SELECT project_id, path, blob_sha, size_bytes, file_kind, content, skip_reason
+                       FROM ingest_checkpoint_files WHERE project_id = ?""",
+                    (item["id"],),
+                )
+                connection.execute(
+                    """INSERT INTO projects
+                       (project_id, name, repository_url, default_branch, description, latest_commit, indexed_at,
+                        file_count, text_file_count, skipped_file_count, status, metadata_json)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                       ON CONFLICT(project_id) DO UPDATE SET
+                       name=excluded.name, repository_url=excluded.repository_url, default_branch=excluded.default_branch,
+                       description=excluded.description, latest_commit=excluded.latest_commit, indexed_at=excluded.indexed_at,
+                       file_count=excluded.file_count, text_file_count=excluded.text_file_count,
+                       skipped_file_count=excluded.skipped_file_count, status=excluded.status, metadata_json=excluded.metadata_json""",
+                    (item["id"], item["name"], item["url"], branch, description, commit_sha, finished,
+                     len(entries), files_indexed, files_skipped, status, json.dumps({
+                         "private": repo_data.get("private", False),
+                         "language": repo_data.get("language"),
+                         "topics": repo_data.get("topics", []),
+                         "stars": repo_data.get("stargazers_count", 0),
+                         "updated_at": repo_data.get("updated_at"),
+                         "tree_sha": tree.get("sha", ""),
+                     })),
+                )
+                connection.execute(
+                    """INSERT INTO ingest_runs
+                       (run_id, project_id, started_at, finished_at, status, files_seen, files_indexed, files_skipped, error)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, '')
+                    """,
+                    (run_id, item["id"], started, finished, status, len(entries), files_indexed, files_skipped),
+                )
+                connection.execute("DELETE FROM ingest_checkpoint_files WHERE project_id = ?", (item["id"],))
+                connection.execute(
+                    """UPDATE ingest_progress SET updated_at = ?, status = ?, files_seen = ?,
+                       files_processed = ?, files_indexed = ?, files_skipped = ?, error = ''
+                       WHERE project_id = ?""",
+                    (finished, status, len(entries), files_processed, files_indexed, files_skipped, item["id"]),
+                )
+        server.record_event("repository.indexed", f"Indexed repository {item['name']}", {
+            "project_id": item["id"], "commit": commit_sha, "files_seen": len(entries),
+            "files_indexed": files_indexed, "files_skipped": files_skipped, "status": status,
+        })
+        return {
+            "ok": True, "project_id": item["id"], "name": item["name"], "repository_url": item["url"],
+            "commit": commit_sha, "branch": branch, "files_seen": len(entries),
+            "files_processed": files_processed, "files_indexed": files_indexed,
+            "files_skipped": files_skipped, "status": status,
+            "resumed": bool(reusable), "note": "Source files were indexed locally. Interrupted runs checkpoint completed files and reuse them on retry. Sensitive-looking paths, generated/dependency directories, binary files, and oversized files are recorded as exclusions.",
+        }
+    except Exception as exc:
+        failed_at = datetime.now(timezone.utc).isoformat()
+        with server._DB_LOCK:
+            with server._database() as connection:
+                connection.execute(
+                    """UPDATE ingest_progress SET updated_at = ?, status = 'failed',
+                       files_processed = ?, files_indexed = ?, files_skipped = ?, error = ?
+                       WHERE project_id = ?""",
+                    (failed_at, files_processed, files_indexed, files_skipped, str(exc)[:1000], item["id"]),
+                )
+                connection.execute(
+                    """INSERT INTO ingest_runs
+                       (run_id, project_id, started_at, finished_at, status, files_seen, files_indexed, files_skipped, error)
+                       VALUES (?, ?, ?, ?, 'failed', ?, ?, ?, ?)""",
+                    (run_id, item["id"], started, failed_at, len(entries), files_indexed, files_skipped, str(exc)[:1000]),
+                )
+        raise
+
+
+def ingest_status(project_key: str | None = None) -> dict[str, Any]:
+    """Return persisted ingestion progress for one project or the full registry."""
+    _db_executescript()
     with server._DB_LOCK:
         with server._database() as connection:
-            connection.execute("DELETE FROM repository_files WHERE project_id = ?", (item["id"],))
-            connection.executemany(
-                "INSERT INTO repository_files (project_id, path, blob_sha, size_bytes, file_kind, content, skip_reason) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                rows,
-            )
-            connection.execute("""
-                INSERT INTO projects (project_id, name, repository_url, default_branch, description, latest_commit, indexed_at, file_count, text_file_count, skipped_file_count, status, metadata_json)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ON CONFLICT(project_id) DO UPDATE SET
-                    name=excluded.name, repository_url=excluded.repository_url, default_branch=excluded.default_branch,
-                    description=excluded.description, latest_commit=excluded.latest_commit, indexed_at=excluded.indexed_at,
-                    file_count=excluded.file_count, text_file_count=excluded.text_file_count,
-                    skipped_file_count=excluded.skipped_file_count, status=excluded.status, metadata_json=excluded.metadata_json
-            """, (item["id"], item["name"], item["url"], branch, description, commit_sha, finished, len(entries), files_indexed, files_skipped, status, json.dumps({
-                "private": repo_data.get("private", False),
-                "language": repo_data.get("language"),
-                "topics": repo_data.get("topics", []),
-                "stars": repo_data.get("stargazers_count", 0),
-                "updated_at": repo_data.get("updated_at"),
-                "tree_sha": tree.get("sha", ""),
-            })))
-            connection.execute(
-                "INSERT INTO ingest_runs (run_id, project_id, started_at, finished_at, status, files_seen, files_indexed, files_skipped) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                (run_id, item["id"], started, finished, status, len(entries), files_indexed, files_skipped),
-            )
-    server.record_event("repository.indexed", f"Indexed repository {item['name']}", {
-        "project_id": item["id"], "commit": commit_sha, "files_seen": len(entries),
-        "files_indexed": files_indexed, "files_skipped": files_skipped, "status": status,
-    })
-    return {
-        "ok": True, "project_id": item["id"], "name": item["name"], "repository_url": item["url"],
-        "commit": commit_sha, "branch": branch, "files_seen": len(entries),
-        "files_indexed": files_indexed, "files_skipped": files_skipped, "status": status,
-        "note": "Source files were indexed locally. Sensitive-looking paths, generated/dependency directories, binary files, and oversized files are recorded as exclusions.",
-    }
+            if project_key:
+                item = _repo_id(project_key)
+                rows = connection.execute(
+                    """SELECT project_id, target_commit, branch, started_at, updated_at, status,
+                       files_seen, files_processed, files_indexed, files_skipped, error
+                       FROM ingest_progress WHERE project_id = ?""",
+                    (item["id"],),
+                ).fetchall()
+            else:
+                rows = connection.execute(
+                    """SELECT project_id, target_commit, branch, started_at, updated_at, status,
+                       files_seen, files_processed, files_indexed, files_skipped, error
+                       FROM ingest_progress ORDER BY updated_at DESC"""
+                ).fetchall()
+    return {"jobs": [dict(row) for row in rows], "count": len(rows)}
+
 
 
 def search_index(query: str, limit: int = 50) -> dict[str, Any]:
