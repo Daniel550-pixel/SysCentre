@@ -6,6 +6,7 @@ from unittest.mock import Mock, patch
 
 import server
 from policy import evaluate_command, policy_catalog
+from repository_ingest import load_catalog
 
 
 class RuntimeTests(unittest.TestCase):
@@ -15,6 +16,8 @@ class RuntimeTests(unittest.TestCase):
         project_ids = [item["project_id"] for item in projects]
         self.assertEqual(len(projects), 28)
         self.assertEqual(len(project_ids), len(set(project_ids)))
+        catalog_ids = {item["id"] for item in load_catalog()}
+        self.assertEqual(set(project_ids), catalog_ids, "Every catalogued repository must have exactly one architecture record.")
         self.assertIn("archos-repo", project_ids)
         self.assertIn("networklab", project_ids)
         allowed_statuses = {"source-verified", "source-limited", "documentation-only", "empty"}
