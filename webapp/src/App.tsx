@@ -53,6 +53,20 @@ const portfolioDimensions: Array<{ key: PortfolioDimension; label: string }> = [
 function dimensionValue(project: Project, dimension: PortfolioDimension) {
   return project[dimension]?.trim() || "Not classified";
 }
+function architectureSearchText(item: RepositoryArchitecture) {
+  return [
+    item.name,
+    item.architecture_summary,
+    item.technology_stack.join(" "),
+    item.entrypoints.join(" "),
+    item.layers.map((layer) => [layer.name, layer.role, layer.components, layer.evidence_paths.join(" ")].join(" ")).join(" "),
+    item.state_and_data.join(" "),
+    item.external_integrations.join(" "),
+    item.evidence_paths.join(" "),
+    item.limitations.join(" "),
+    JSON.stringify(item.repository_hygiene_findings ?? []),
+  ].join(" ").toLowerCase();
+}
 function architectureStatusLabel(status: string) {
   const labels: Record<string, string> = {
     "source-verified": "Source verified",
@@ -393,7 +407,7 @@ export default function App() {
               <article><span>Empty repositories</span><strong>{architectures.filter((item) => item.architecture_status === "empty").length}</strong><small>No Git tree available</small></article>
             </div>
             <div className="architecture-toolbar">
-              <input className="project-filter" value={architectureSearch} onChange={(event) => setArchitectureSearch(event.target.value)} placeholder="Search app, stack, component or path..." aria-label="Search application architectures" />
+              <input className="project-filter" value={architectureSearch} onChange={(event) => setArchitectureSearch(event.target.value)} placeholder="Search layers, integrations, data, components or paths..." aria-label="Search application architectures" />
               <select className="architecture-status-filter" value={architectureStatusFilter} onChange={(event) => setArchitectureStatusFilter(event.target.value)} aria-label="Filter architecture status">
                 <option value="all">All source states</option>
                 <option value="source-verified">Source verified</option>
@@ -401,10 +415,10 @@ export default function App() {
                 <option value="documentation-only">Documentation only</option>
                 <option value="empty">Empty repository</option>
               </select>
-              <span className="project-count">{architectures.filter((item) => (architectureStatusFilter === "all" || item.architecture_status === architectureStatusFilter) && (item.name + " " + item.architecture_summary + " " + item.technology_stack.join(" ") + " " + item.entrypoints.join(" ") + " " + item.evidence_paths.join(" ") + " " + JSON.stringify(item.repository_hygiene_findings ?? [])).toLowerCase().includes(architectureSearch.toLowerCase())).length} shown</span>
+              <span className="project-count">{architectures.filter((item) => (architectureStatusFilter === "all" || item.architecture_status === architectureStatusFilter) && architectureSearchText(item).includes(architectureSearch.toLowerCase())).length} shown</span>
             </div>
             <div className="architecture-list">
-              {architectures.filter((item) => (architectureStatusFilter === "all" || item.architecture_status === architectureStatusFilter) && (item.name + " " + item.architecture_summary + " " + item.technology_stack.join(" ") + " " + item.entrypoints.join(" ") + " " + item.evidence_paths.join(" ") + " " + JSON.stringify(item.repository_hygiene_findings ?? [])).toLowerCase().includes(architectureSearch.toLowerCase())).map((item) => (
+              {architectures.filter((item) => (architectureStatusFilter === "all" || item.architecture_status === architectureStatusFilter) && architectureSearchText(item).includes(architectureSearch.toLowerCase())).map((item) => (
                 <details className="architecture-card" key={item.project_id}>
                   <summary>
                     <div className="architecture-identity"><strong>{item.name}</strong><span>{item.default_branch} · {item.layers.length} architecture layers</span></div>
@@ -417,14 +431,14 @@ export default function App() {
                     <div className="architecture-detail-grid">
                       {item.layers.map((layer) => <article className="architecture-layer" key={layer.name}>
                         <span>{layer.name}</span><strong>{layer.role}</strong><p>{layer.components}</p>
-                        {layer.evidence_paths.length > 0 && <div className="architecture-paths">{layer.evidence_paths.map((path) => <a key={path} href={item.repository_url + "/blob/" + item.default_branch + "/" + path} target="_blank" rel="noreferrer">{path}</a>)}</div>}
+                        {layer.evidence_paths.length > 0 && <div className="architecture-paths">{layer.evidence_paths.map((path) => <a key={path} href={item.repository_url + "/blob/" + (item.source_snapshot.commit ?? item.default_branch) + "/" + path} target="_blank" rel="noreferrer">{path}</a>)}</div>}
                       </article>)}
                     </div>
                     <div className="architecture-metadata-grid">
-                      <article><strong>Application entrypoints</strong>{item.entrypoints.length ? item.entrypoints.map((path) => <a key={path} href={item.repository_url + "/blob/" + item.default_branch + "/" + path} target="_blank" rel="noreferrer">{path}</a>) : <span>None verified</span>}</article>
+                      <article><strong>Application entrypoints</strong>{item.entrypoints.length ? item.entrypoints.map((path) => <a key={path} href={item.repository_url + "/blob/" + (item.source_snapshot.commit ?? item.default_branch) + "/" + path} target="_blank" rel="noreferrer">{path}</a>) : <span>None verified</span>}</article>
                       <article><strong>State and data</strong>{item.state_and_data.length ? item.state_and_data.map((value) => <span key={value}>{value}</span>) : <span>Not confirmed from the inspected source</span>}</article>
                       <article><strong>External integrations</strong>{item.external_integrations.length ? item.external_integrations.map((value) => <span key={value}>{value}</span>) : <span>No integration verified</span>}</article>
-                      <article><strong>Evidence files</strong>{item.evidence_paths.slice(0, 10).map((path) => <a key={path} href={item.repository_url + "/blob/" + item.default_branch + "/" + path} target="_blank" rel="noreferrer">{path}</a>)}</article>
+                      <article><strong>Evidence files</strong>{item.evidence_paths.slice(0, 10).map((path) => <a key={path} href={item.repository_url + "/blob/" + (item.source_snapshot.commit ?? item.default_branch) + "/" + path} target="_blank" rel="noreferrer">{path}</a>)}</article>
                     </div>
                     <div className="architecture-snapshot">
                       <span>Source commit: <code>{item.source_snapshot.commit ? item.source_snapshot.commit.slice(0, 12) : "No Git commit"}</code></span>
@@ -440,7 +454,7 @@ export default function App() {
                         {item.repository_hygiene_findings.map((finding, index) => <article className={"architecture-hygiene-finding severity-" + finding.severity} key={finding.category + finding.title + index}>
                           <div className="architecture-hygiene-title"><span className={"hygiene-severity severity-" + finding.severity}>{finding.severity}</span><strong>{finding.title}</strong><span className="hygiene-category">{finding.category.replaceAll("-", " ")}</span></div>
                           <p>{finding.description}</p>
-                          {finding.evidence_paths.length > 0 && <div className="architecture-paths">{finding.evidence_paths.map((path) => <a key={path} href={item.repository_url + "/blob/" + item.default_branch + "/" + path} target="_blank" rel="noreferrer">{path}</a>)}</div>}
+                          {finding.evidence_paths.length > 0 && <div className="architecture-paths">{finding.evidence_paths.map((path) => <a key={path} href={item.repository_url + "/blob/" + (item.source_snapshot.commit ?? item.default_branch) + "/" + path} target="_blank" rel="noreferrer">{path}</a>)}</div>}
                           <div className="hygiene-recommendation"><strong>Recommended action:</strong> {finding.recommended_action}</div>
                         </article>)}
                       </div>
@@ -450,7 +464,7 @@ export default function App() {
                 </details>
               ))}
               {!architectures.length && <div className="empty-state">Architecture inventory unavailable. Pull the latest SysCentre changes and restart the local runtime.</div>}
-              {architectures.length > 0 && !architectures.some((item) => (architectureStatusFilter === "all" || item.architecture_status === architectureStatusFilter) && (item.name + " " + item.architecture_summary + " " + item.technology_stack.join(" ") + " " + item.entrypoints.join(" ") + " " + item.evidence_paths.join(" ") + " " + JSON.stringify(item.repository_hygiene_findings ?? [])).toLowerCase().includes(architectureSearch.toLowerCase())) && <div className="empty-state">No application architecture matches this filter.</div>}
+              {architectures.length > 0 && !architectures.some((item) => (architectureStatusFilter === "all" || item.architecture_status === architectureStatusFilter) && architectureSearchText(item).includes(architectureSearch.toLowerCase())) && <div className="empty-state">No application architecture matches this filter.</div>}
             </div>
             <div className="project-disclaimer"><ShieldCheck size={14} /><span>Snapshot-based architecture is not a live health check. Empty and README-only repositories remain explicitly unimplemented; integration declarations are not proof of active connections.</span></div>
           </section>
