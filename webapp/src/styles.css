@@ -99,3 +99,16 @@
 @media(max-width:1200px){.register-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.register-search{grid-column:1/-1}.register-reset{justify-self:start}}
 @media(max-width:850px){.executive-register-row{grid-template-columns:1fr}.register-project-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.register-validation{flex-direction:row;align-items:center;flex-wrap:wrap}.register-validation p{flex-basis:100%}}
 @media(max-width:560px){.executive-register-heading{flex-direction:column}.register-filters{grid-template-columns:1fr}.register-search{grid-column:auto}.register-summary{grid-template-columns:1fr}.register-project-fields{grid-template-columns:1fr 1fr}}
+
+
+/* Extensible project intake */
+.project-intake-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:14px;border:1px solid #2a3141;border-radius:10px;background:#101722}
+.project-intake-form label{display:grid;gap:6px;min-width:0}
+.project-intake-form label>span{font-size:9px;color:#95a1b7}
+.project-intake-form input,.project-intake-form textarea{width:100%;box-sizing:border-box;min-width:0;border:1px solid #30394b;border-radius:7px;background:#0c121c;color:#e3e8f3;padding:10px 11px;font:inherit;font-size:11px;outline:none}
+.project-intake-form input:focus,.project-intake-form textarea:focus{border-color:#8b7cf6;box-shadow:0 0 0 2px #8b7cf61c}
+.project-intake-form textarea{resize:vertical;line-height:1.5}
+.project-intake-form .intake-wide{grid-column:1/-1}
+.intake-actions{grid-column:1/-1;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.intake-actions>span{font-size:9px;line-height:1.5;color:#7f8ba2;flex:1 1 240px}
+@media(max-width:650px){.project-intake-form{grid-template-columns:1fr}.project-intake-form .intake-wide{grid-column:auto}.intake-actions{align-items:flex-start;flex-direction:column}}
