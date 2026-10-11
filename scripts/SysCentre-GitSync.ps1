@@ -16,6 +16,29 @@ function Invoke-Git {
     }
 }
 
+# Capture native stdout/stderr without letting PowerShell 5.1's
+# ErrorActionPreference turn ordinary Git messages into terminating errors.
+function Invoke-GitCapture {
+    param([Parameter(Mandatory = $true)][string[]]$GitArgs)
+
+    $previousPreference = $ErrorActionPreference
+    $output = @()
+    $exitCode = 1
+    try {
+        $ErrorActionPreference = "Continue"
+        $output = @(& git @GitArgs 2>&1 | ForEach-Object { $_.ToString() })
+        $exitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousPreference
+    }
+
+    return [pscustomobject]@{
+        ExitCode = [int]$exitCode
+        Output = [string[]]$output
+        Command = "git $($GitArgs -join ' ')"
+    }
+}
+
 if (-not (Get-Command git.exe -ErrorAction SilentlyContinue)) {
     throw "Git is not installed or git.exe is not on PATH."
 }
@@ -31,7 +54,7 @@ if ($LASTEXITCODE -ne 0 -or $insideRepo -ne "true") {
 }
 
 $branch = (& git branch --show-current).Trim()
-if ($branch -ne "main") {
+if ($LASTEXITCODE -ne 0 -or $branch -ne "main") {
     throw "Current branch is '$branch', not 'main'. Switch to main before using this sync helper."
 }
 
@@ -67,31 +90,34 @@ function Sync-SysCentre {
         }
     }
 
-    # Another computer or sync process can update origin/main between pull and push.
-    # Retry only a rejected/stale push after fetching and rebasing again. Never force-push.
+    # The remote may change between pull and push. Always rebase first,
+    # and retry only stale/non-fast-forward pushes. Never force-push.
     $maxPushAttempts = 4
     for ($attempt = 1; $attempt -le $maxPushAttempts; $attempt++) {
-        & git pull --rebase origin main
-        if ($LASTEXITCODE -ne 0) {
+        $pull = Invoke-GitCapture -GitArgs @("pull", "--rebase", "origin", "main")
+        foreach ($line in $pull.Output) {
+            Write-Host $line
+        }
+        if ($pull.ExitCode -ne 0) {
             Write-Host "Pull/rebase stopped. Resolve the Git issue manually; no push was attempted." -ForegroundColor Red
-            throw "Pull/rebase failed. Check for conflicts or a rebase in progress."
+            throw "Pull/rebase failed with exit code $($pull.ExitCode). Check for conflicts or a rebase in progress."
         }
 
-        $pushOutput = @(& git push origin main 2>&1)
-        $pushExitCode = $LASTEXITCODE
-        foreach ($line in $pushOutput) {
-            Write-Host ([string]$line)
+        $push = Invoke-GitCapture -GitArgs @("push", "origin", "main")
+        foreach ($line in $push.Output) {
+            Write-Host $line
         }
 
-        if ($pushExitCode -eq 0) {
+        # Git reports success for both a real push and 'Everything up-to-date'.
+        if ($push.ExitCode -eq 0) {
             Write-Host "Sync complete." -ForegroundColor Green
             return
         }
 
-        $pushText = $pushOutput -join "`n"
+        $pushText = $push.Output -join "`n"
         $isRemoteRace = $pushText -match "(?i)(\[rejected\]|non-fast-forward|fetch first|failed to push some refs|stale info)"
         if (-not $isRemoteRace) {
-            throw "git push failed for a reason other than a remote-update race. Review the output above. No force-push was attempted."
+            throw "git push failed with exit code $($push.ExitCode). Review the output above. No force-push was attempted."
         }
 
         if ($attempt -ge $maxPushAttempts) {
