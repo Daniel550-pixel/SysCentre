@@ -1,4 +1,7 @@
 import unittest
+import tempfile
+from pathlib import Path
+from unittest.mock import patch
 
 import repository_ingest
 
@@ -56,6 +59,21 @@ class RepositoryRegistryTests(unittest.TestCase):
     def test_source_search_rejects_short_queries(self):
         with self.assertRaises(ValueError):
             repository_ingest.search_index("x")
+
+    def test_ingest_status_is_persisted_and_empty_registry_is_valid(self):
+        with tempfile.TemporaryDirectory() as directory:
+            db_path = Path(directory) / "syscentre-test.db"
+            with patch.object(repository_ingest.server, "DB_PATH", db_path):
+                status = repository_ingest.ingest_status()
+                self.assertEqual(status, {"jobs": [], "count": 0})
+                self.assertTrue(db_path.exists())
+
+    def test_ingest_status_rejects_unknown_project(self):
+        with tempfile.TemporaryDirectory() as directory:
+            db_path = Path(directory) / "syscentre-test.db"
+            with patch.object(repository_ingest.server, "DB_PATH", db_path):
+                with self.assertRaises(ValueError):
+                    repository_ingest.ingest_status("not-a-real-project")
 
     def test_generated_and_dependency_folders_are_ignored(self):
         self.assertTrue(repository_ingest._is_ignored("webapp/node_modules/react/index.js"))
