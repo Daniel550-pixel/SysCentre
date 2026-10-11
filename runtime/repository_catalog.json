@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "purpose": "Verified and qualified source catalog for SysCentre. All linked repositories remain independent; metadata and UI source references are cataloged without executing or merging project runtimes.",
   "owner": "Daniel550-pixel",
   "repositories": [
@@ -20,7 +20,22 @@
       "interface_status": "UI source present; public deployment unverified",
       "interface_source_url": "https://github.com/Daniel550-pixel/FinSight-Global-AI/blob/main/streamlit_app.py",
       "purpose_confidence": "README verified",
-      "integration_boundary": "Reference and index source files only. Financial data and API credentials remain in the system's own runtime."
+      "integration_boundary": "Reference and index source files only. Financial data and API credentials remain in the system's own runtime.",
+      "business_model": "B2B financial intelligence software (hypothesis)",
+      "system_type": "Financial intelligence & forecasting",
+      "sector": "Financial Services & FinTech",
+      "target_market": "Finance teams, fintech builders, and investment research workflows",
+      "market_segments": [
+        "Financial research",
+        "Fintech product teams",
+        "Corporate finance"
+      ],
+      "portfolio_role": "Vertical intelligence product",
+      "lifecycle_stage": "Prototype / early build",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "README verified",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "ai-trading-dashboard",
@@ -41,7 +56,22 @@
       "interface_status": "Dashboard source present; public deployment unverified",
       "interface_source_url": "https://github.com/Daniel550-pixel/ai-trading-dashboard/blob/master/dashboard.py",
       "purpose_confidence": "Repository structure inspected",
-      "integration_boundary": "Source reference only. No orders, brokerage integrations or trading actions are executed by SysCentre."
+      "integration_boundary": "Source reference only. No orders, brokerage integrations or trading actions are executed by SysCentre.",
+      "business_model": "Specialist analytics software (hypothesis)",
+      "system_type": "Trading & portfolio analytics",
+      "sector": "Financial Services & FinTech",
+      "target_market": "Quantitative researchers, portfolio analysts, and trading teams",
+      "market_segments": [
+        "Portfolio analytics",
+        "Quant research",
+        "FX and risk analysis"
+      ],
+      "portfolio_role": "Vertical intelligence product",
+      "lifecycle_stage": "Prototype / early build",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "Repository structure inspected",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "ai-trading-dashboard-2",
@@ -57,7 +87,20 @@
       "interface_status": "Empty repository",
       "interface_source_url": "",
       "purpose_confidence": "Name only",
-      "integration_boundary": "Catalog entry only. No source is available to index."
+      "integration_boundary": "Catalog entry only. No source is available to index.",
+      "business_model": "Unclassified — repository has no source",
+      "system_type": "Unclassified scaffold / placeholder",
+      "sector": "Unvalidated",
+      "target_market": "Not classifiable until purpose and implementation are verified",
+      "market_segments": [
+        "Unclassified"
+      ],
+      "portfolio_role": "Unassessed repository",
+      "lifecycle_stage": "Empty repository",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "Name only",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "ai-trading-dashboard-3",
@@ -73,7 +116,20 @@
       "interface_status": "README-only scaffold",
       "interface_source_url": "",
       "purpose_confidence": "README verified; implementation absent",
-      "integration_boundary": "Reference only until implementation and intended role are confirmed."
+      "integration_boundary": "Reference only until implementation and intended role are confirmed.",
+      "business_model": "Concept-stage product; monetization undefined",
+      "system_type": "AI creation concept",
+      "sector": "AI Software & Developer Tools (tentative)",
+      "target_market": "Not validated; README-only concept",
+      "market_segments": [
+        "Concept validation required"
+      ],
+      "portfolio_role": "Exploratory concept",
+      "lifecycle_stage": "README-only scaffold",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "README verified; implementation absent",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "finsight-global-ai-2",
@@ -91,7 +147,22 @@
       "interface_status": "Legacy snapshot; repository hygiene review recommended",
       "interface_source_url": "https://github.com/Daniel550-pixel/FinSight-Global-AI-2",
       "purpose_confidence": "Repository structure inspected",
-      "integration_boundary": "Read-only reference. Review the source repository independently before broader indexing; SysCentre does not import its archived workspace artifacts."
+      "integration_boundary": "Read-only reference. Review the source repository independently before broader indexing; SysCentre does not import its archived workspace artifacts.",
+      "business_model": "Financial analytics software (hypothesis)",
+      "system_type": "Legacy finance & trading modules",
+      "sector": "Financial Services & FinTech",
+      "target_market": "Finance analytics and portfolio-engine developers",
+      "market_segments": [
+        "FX and risk analytics",
+        "Portfolio analysis",
+        "Legacy system reuse"
+      ],
+      "portfolio_role": "Legacy capability / reuse candidate",
+      "lifecycle_stage": "Legacy snapshot — lineage unverified",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "Repository structure inspected",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "finsight-global-ai-4",
@@ -108,7 +179,21 @@
       "interface_status": "Entry point present; purpose and public deployment unverified",
       "interface_source_url": "https://github.com/Daniel550-pixel/FinSight-Global-AI-4/blob/main/streamlit_app.py",
       "purpose_confidence": "Repository structure inspected; domain inferred from name",
-      "integration_boundary": "Source reference only. Treat as a distinct variant until lineage is verified."
+      "integration_boundary": "Source reference only. Treat as a distinct variant until lineage is verified.",
+      "business_model": "B2B financial dashboard (hypothesis)",
+      "system_type": "Financial AI dashboard variant",
+      "sector": "Financial Services & FinTech",
+      "target_market": "Finance teams evaluating AI dashboard workflows",
+      "market_segments": [
+        "Financial dashboards",
+        "AI-assisted analysis"
+      ],
+      "portfolio_role": "Vertical product variant",
+      "lifecycle_stage": "Early app scaffold",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "Repository structure inspected; domain inferred from name",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "finsight-global-ai-dashboard",
@@ -128,7 +213,22 @@
       "interface_status": "Feature modules present; no hosted UI verified",
       "interface_source_url": "https://github.com/Daniel550-pixel/FinSight_Global_AI_Dashboard",
       "purpose_confidence": "Repository structure inspected",
-      "integration_boundary": "Reference/index only. This catalog does not activate policy, finance, ministry or infrastructure workflows."
+      "integration_boundary": "Reference/index only. This catalog does not activate policy, finance, ministry or infrastructure workflows.",
+      "business_model": "Enterprise finance operations platform (hypothesis)",
+      "system_type": "Finance operations, compliance & resilience",
+      "sector": "Financial Services & Public-Sector Technology",
+      "target_market": "Enterprise finance operators and regulated-sector technology teams",
+      "market_segments": [
+        "Compliance workflows",
+        "Sovereign data operations",
+        "Business continuity"
+      ],
+      "portfolio_role": "Shared sector capability",
+      "lifecycle_stage": "Feature modules / deployment unverified",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "Repository structure inspected",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "ai-mainframe",
@@ -147,7 +247,22 @@
       "interface_status": "Package source present; no standalone UI intended",
       "interface_source_url": "https://github.com/Daniel550-pixel/AI-mainframe/blob/main/src/ai_mainframe/runtime.py",
       "purpose_confidence": "README verified",
-      "integration_boundary": "Capability definitions are referenced, not executed, by the static console."
+      "integration_boundary": "Capability definitions are referenced, not executed, by the static console.",
+      "business_model": "Platform licensing or internal shared capability (unverified)",
+      "system_type": "AI orchestration & capability runtime",
+      "sector": "AI Infrastructure & Platforms",
+      "target_market": "AI platform engineers and teams building governed agent runtimes",
+      "market_segments": [
+        "Agent orchestration",
+        "Event routing",
+        "Governed action handoff"
+      ],
+      "portfolio_role": "Shared platform capability",
+      "lifecycle_stage": "Package / integration adapter",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "README verified",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "ai-os-global-super-app",
@@ -163,7 +278,20 @@
       "interface_status": "README-only scaffold",
       "interface_source_url": "",
       "purpose_confidence": "Name and README only",
-      "integration_boundary": "Reference only; no inferred endpoint or behavior is exposed."
+      "integration_boundary": "Reference only; no inferred endpoint or behavior is exposed.",
+      "business_model": "Platform concept; monetization undefined",
+      "system_type": "AI operating-system / super-app concept",
+      "sector": "AI Software & Platforms",
+      "target_market": "Not validated; intended audience and features are undocumented",
+      "market_segments": [
+        "Concept validation required"
+      ],
+      "portfolio_role": "Exploratory concept",
+      "lifecycle_stage": "README-only scaffold",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "Name and README only",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "ai-os-global-wealth-engine",
@@ -179,7 +307,20 @@
       "interface_status": "Empty repository",
       "interface_source_url": "",
       "purpose_confidence": "Name only",
-      "integration_boundary": "Catalog entry only. No source is available to index."
+      "integration_boundary": "Catalog entry only. No source is available to index.",
+      "business_model": "Finance platform concept; monetization undefined",
+      "system_type": "Wealth / finance engine concept",
+      "sector": "Financial Services & FinTech",
+      "target_market": "Not validated; no implementation available",
+      "market_segments": [
+        "Wealth technology (name-inferred only)"
+      ],
+      "portfolio_role": "Unassessed concept",
+      "lifecycle_stage": "Empty repository",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "Name only",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "aios-system",
@@ -195,7 +336,21 @@
       "interface_status": "README-only scaffold",
       "interface_source_url": "",
       "purpose_confidence": "Name and README only",
-      "integration_boundary": "Reference only until source and intended role are confirmed."
+      "integration_boundary": "Reference only until source and intended role are confirmed.",
+      "business_model": "Internal platform concept; no commercial model documented",
+      "system_type": "AI operating-system concept",
+      "sector": "AI Infrastructure & Platforms",
+      "target_market": "AI systems engineering; demand and use cases unverified",
+      "market_segments": [
+        "AI runtime architecture",
+        "Platform engineering"
+      ],
+      "portfolio_role": "Architecture concept",
+      "lifecycle_stage": "README-only scaffold",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "Name and README only",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "aios-core-architect",
@@ -212,7 +367,21 @@
       "interface_status": "Implementation and UI unverified",
       "interface_source_url": "https://github.com/Daniel550-pixel/AIOS-Core-Architect.",
       "purpose_confidence": "Repository structure inspected",
-      "integration_boundary": "Architecture reference only; not treated as a separate live runtime."
+      "integration_boundary": "Architecture reference only; not treated as a separate live runtime.",
+      "business_model": "Internal architecture capability (hypothesis)",
+      "system_type": "AI operating-system architecture",
+      "sector": "AI Infrastructure & Platforms",
+      "target_market": "AI platform architects and systems engineering workflows",
+      "market_segments": [
+        "Architecture design",
+        "Runtime foundations"
+      ],
+      "portfolio_role": "Architecture reference",
+      "lifecycle_stage": "Architecture / dependency scaffold",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "Repository structure inspected",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "obsidian-ai",
@@ -231,7 +400,22 @@
       "interface_source_url": "https://github.com/Daniel550-pixel/Obsidian-AI/blob/main/src/App.tsx",
       "external_project_url": "https://ai.studio/apps/2e3b7d75-5284-4b6e-8ab3-796a55a99476",
       "purpose_confidence": "README and component names inspected",
-      "integration_boundary": "Opens the separate AI Studio project; secrets and model calls remain external to SysCentre."
+      "integration_boundary": "Opens the separate AI Studio project; secrets and model calls remain external to SysCentre.",
+      "business_model": "Developer / strategy workbench (commercial model unverified)",
+      "system_type": "AI business-model & knowledge workbench",
+      "sector": "Business Software & AI Productivity",
+      "target_market": "Founders, product strategists, and AI-assisted planning teams",
+      "market_segments": [
+        "Business model design",
+        "Knowledge visualization",
+        "AI-assisted ideation"
+      ],
+      "portfolio_role": "Strategy and knowledge tooling",
+      "lifecycle_stage": "React prototype / external service required",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "README and component names inspected",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "fgse",
@@ -250,7 +434,21 @@
       "interface_source_url": "https://github.com/Daniel550-pixel/FGSE/blob/main/src/App.tsx",
       "external_project_url": "https://ai.studio/apps/50d360c9-dad9-486a-8681-39bff3702159",
       "purpose_confidence": "README and component names inspected",
-      "integration_boundary": "Opens the separate AI Studio project; no model keys or runtime are shared with SysCentre."
+      "integration_boundary": "Opens the separate AI Studio project; no model keys or runtime are shared with SysCentre.",
+      "business_model": "Unvalidated intelligence application concept",
+      "system_type": "Neural visualization / intelligence UI",
+      "sector": "AI Visualization (domain unvalidated)",
+      "target_market": "Not validated; product domain is undocumented",
+      "market_segments": [
+        "Neural visualization",
+        "Intelligence interfaces"
+      ],
+      "portfolio_role": "Exploratory application",
+      "lifecycle_stage": "UI scaffold / domain confirmation required",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "README and component names inspected",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "archos-repo",
@@ -271,7 +469,22 @@
       "interface_status": "UI source present; production readiness not claimed",
       "interface_source_url": "https://github.com/Daniel550-pixel/ArchOS-Repo/blob/main/src/components/ArchOSSystemUI.tsx",
       "purpose_confidence": "README and UI source tree inspected",
-      "integration_boundary": "Source links only. ArchOS remains an independent runtime; SysCentre does not forward actions to it."
+      "integration_boundary": "Source links only. ArchOS remains an independent runtime; SysCentre does not forward actions to it.",
+      "business_model": "Internal AI platform; external licensing unverified",
+      "system_type": "AI operating system & governed orchestration",
+      "sector": "AI Infrastructure & Platforms",
+      "target_market": "AI platform engineers and organizations building multimodal agent systems",
+      "market_segments": [
+        "Agent orchestration",
+        "World models and simulation",
+        "Spatial / multimodal interfaces"
+      ],
+      "portfolio_role": "Strategic platform core",
+      "lifecycle_stage": "Early-stage architecture / UI source present",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "README and UI source tree inspected",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "archos-3",
@@ -289,7 +502,22 @@
       "interface_status": "Dashboard source present; live deployment unverified",
       "interface_source_url": "https://github.com/Daniel550-pixel/archos-3/blob/main/client/src/components/DashboardLayout.tsx",
       "purpose_confidence": "Repository structure inspected",
-      "integration_boundary": "Kept as a separate source from ArchOS-Repo until repository lineage is verified."
+      "integration_boundary": "Kept as a separate source from ArchOS-Repo until repository lineage is verified.",
+      "business_model": "Developer component platform or internal UI capability (hypothesis)",
+      "system_type": "Dashboard shell & reusable UI system",
+      "sector": "Developer Tools & Design Systems",
+      "target_market": "Frontend engineers and teams standardizing application interfaces",
+      "market_segments": [
+        "Dashboard scaffolds",
+        "Reusable UI components",
+        "Navigation and form patterns"
+      ],
+      "portfolio_role": "Shared UI capability",
+      "lifecycle_stage": "Separate codebase / lineage unverified",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "Repository structure inspected",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "bitminer-ai",
@@ -311,7 +539,22 @@
       "interface_status": "UI source present; public deployment unverified",
       "interface_source_url": "https://github.com/Daniel550-pixel/BitMiner-AI/blob/main/src/components/DashboardView.tsx",
       "purpose_confidence": "Repository structure and UI components inspected",
-      "integration_boundary": "Display as an independent source; no mining, financial or execution operations are triggered from SysCentre."
+      "integration_boundary": "Display as an independent source; no mining, financial or execution operations are triggered from SysCentre.",
+      "business_model": "Operations analytics or specialist software (hypothesis)",
+      "system_type": "Digital-asset & computational-economics intelligence",
+      "sector": "Digital Assets & Computational Infrastructure",
+      "target_market": "Mining operators, digital-asset researchers, and compute-economics analysts",
+      "market_segments": [
+        "Mining fleet analytics",
+        "Forecasting and simulation",
+        "Operational decision support"
+      ],
+      "portfolio_role": "Vertical intelligence product",
+      "lifecycle_stage": "Early product build / deployment unverified",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "Repository structure and UI components inspected",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "networklab",
@@ -332,7 +575,22 @@
       "interface_status": "Local-only UI; not hosted by GitHub Pages",
       "interface_source_url": "https://github.com/Daniel550-pixel/NetworkLab/tree/main/web",
       "purpose_confidence": "README verified",
-      "integration_boundary": "Browser controls on a local network are not proxied from this static site; operate NetworkLab through its own trusted local runtime."
+      "integration_boundary": "Browser controls on a local network are not proxied from this static site; operate NetworkLab through its own trusted local runtime.",
+      "business_model": "Internal lab / education enablement; commercial model not documented",
+      "system_type": "IT infrastructure lab & virtualization control",
+      "sector": "IT Infrastructure & ICT Education",
+      "target_market": "ICT students, lab operators, and small IT infrastructure teams",
+      "market_segments": [
+        "Network labs",
+        "VirtualBox environments",
+        "Troubleshooting and evidence capture"
+      ],
+      "portfolio_role": "Infrastructure operations tool",
+      "lifecycle_stage": "Local-first operational project",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "README verified",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "secureos",
@@ -353,7 +611,22 @@
       "interface_status": "UI source present; public deployment unverified",
       "interface_source_url": "https://github.com/Daniel550-pixel/SecureOS/blob/main/src/App.tsx",
       "purpose_confidence": "Repository structure and UI components inspected",
-      "integration_boundary": "Security telemetry and agent execution remain inside SecureOS; source display does not confer trust or authority."
+      "integration_boundary": "Security telemetry and agent execution remain inside SecureOS; source display does not confer trust or authority.",
+      "business_model": "B2B security software (hypothesis)",
+      "system_type": "Security, trust & integrity monitoring",
+      "sector": "Cybersecurity & IT Risk",
+      "target_market": "Security engineers, IT administrators, and risk / compliance teams",
+      "market_segments": [
+        "Integrity monitoring",
+        "Security telemetry",
+        "Trust and scenario analysis"
+      ],
+      "portfolio_role": "Security intelligence product",
+      "lifecycle_stage": "Early product build / deployment unverified",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "Repository structure and UI components inspected",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "ai-venture-radar",
@@ -374,7 +647,22 @@
       "interface_status": "Purpose documented; runnable UI not identified in tree scan",
       "interface_source_url": "",
       "purpose_confidence": "README verified",
-      "integration_boundary": "The directory links to the source concept. No live market scanning is implied by this catalog."
+      "integration_boundary": "The directory links to the source concept. No live market scanning is implied by this catalog.",
+      "business_model": "B2B intelligence workflow or internal venture capability (hypothesis)",
+      "system_type": "Market-gap & venture intelligence",
+      "sector": "Market Intelligence & Venture Development",
+      "target_market": "Founders, product teams, and venture researchers",
+      "market_segments": [
+        "Market sensing",
+        "Opportunity discovery",
+        "Competitive and feasibility analysis"
+      ],
+      "portfolio_role": "Venture discovery capability",
+      "lifecycle_stage": "Workflow source / UI readiness unverified",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "README verified",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "the-factory",
@@ -394,7 +682,22 @@
       "interface_status": "Audit / extraction stage; no standalone UI confirmed",
       "interface_source_url": "https://github.com/Daniel550-pixel/The-Factory",
       "purpose_confidence": "README verified",
-      "integration_boundary": "Architecture lineage reference; this page does not merge code or establish a shared runtime."
+      "integration_boundary": "Architecture lineage reference; this page does not merge code or establish a shared runtime.",
+      "business_model": "Shared internal platform; productization unverified",
+      "system_type": "AI engineering foundations & architecture governance",
+      "sector": "AI Infrastructure & Developer Platforms",
+      "target_market": "Engineering teams standardizing agent runtime, policy, events, and memory",
+      "market_segments": [
+        "Runtime architecture",
+        "Policy gates",
+        "Event ledger and memory"
+      ],
+      "portfolio_role": "Shared platform foundation",
+      "lifecycle_stage": "Architecture audit / extraction in progress",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "README verified",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "the-factory-2",
@@ -418,7 +721,22 @@
       "interface_status": "UI source present; README cautions that production security boundaries are not yet complete",
       "interface_source_url": "https://github.com/Daniel550-pixel/The-Factory-2.0/blob/main/src/App.tsx",
       "purpose_confidence": "README verified",
-      "integration_boundary": "The visual system is represented through interface patterns and source links only; no execution broker is connected."
+      "integration_boundary": "The visual system is represented through interface patterns and source links only; no execution broker is connected.",
+      "business_model": "Enterprise AI operations platform (hypothesis)",
+      "system_type": "Governed agent execution control plane",
+      "sector": "AI Infrastructure & Enterprise Automation",
+      "target_market": "AI engineering, platform operations, and teams deploying governed agents",
+      "market_segments": [
+        "Agent governance",
+        "Execution evidence",
+        "Replay and recovery"
+      ],
+      "portfolio_role": "Strategic platform core",
+      "lifecycle_stage": "Early control-plane build / security incomplete",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "README verified",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "the-house-of-coding",
@@ -439,7 +757,22 @@
       "interface_status": "UI implementation documented; hosted deployment unverified",
       "interface_source_url": "https://github.com/Daniel550-pixel/The-House-Of-Coding/tree/main/apps/web",
       "purpose_confidence": "README verified",
-      "integration_boundary": "Code execution remains isolated in its own project. This directory does not run or edit other repositories."
+      "integration_boundary": "Code execution remains isolated in its own project. This directory does not run or edit other repositories.",
+      "business_model": "Developer tool subscription or self-hosted software (hypothesis)",
+      "system_type": "AI-native coding & engineering workbench",
+      "sector": "Developer Tools & Engineering Productivity",
+      "target_market": "Software developers and engineering teams using AI-assisted workflows",
+      "market_segments": [
+        "Coding and debugging",
+        "Automated test and review",
+        "Bounded code execution"
+      ],
+      "portfolio_role": "Developer productivity product",
+      "lifecycle_stage": "Workbench implementation / hosting unverified",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "README verified",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "localhost-webapp",
@@ -456,7 +789,20 @@
       "interface_status": "Scaffold; purpose and deployment unverified",
       "interface_source_url": "https://github.com/Daniel550-pixel/Localhost-webapp/blob/main/app/page.tsx",
       "purpose_confidence": "README inspected",
-      "integration_boundary": "Reference only until the app is customized and its role is confirmed."
+      "integration_boundary": "Reference only until the app is customized and its role is confirmed.",
+      "business_model": "No business model identified",
+      "system_type": "Generic web application scaffold",
+      "sector": "Unvalidated",
+      "target_market": "Not classifiable until a distinct product purpose is established",
+      "market_segments": [
+        "Generic web app scaffold"
+      ],
+      "portfolio_role": "Unassessed scaffold",
+      "lifecycle_stage": "Starter scaffold",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "README inspected",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "business-os",
@@ -478,7 +824,22 @@
       "interface_status": "Rich UI source present; hosted deployment unverified",
       "interface_source_url": "https://github.com/Daniel550-pixel/Business-OS/blob/main/src/App.tsx",
       "purpose_confidence": "Repository structure and component names inspected",
-      "integration_boundary": "Display and source-navigation only. Business workflows, integrations and API keys are not invoked by this catalog."
+      "integration_boundary": "Display and source-navigation only. Business workflows, integrations and API keys are not invoked by this catalog.",
+      "business_model": "Business operations software (commercial model unverified)",
+      "system_type": "Executive & business operations cockpit",
+      "sector": "Business Operations & Enterprise Software",
+      "target_market": "Business owners and cross-functional operations teams",
+      "market_segments": [
+        "Executive reporting",
+        "Finance and sales operations",
+        "Mission and workflow oversight"
+      ],
+      "portfolio_role": "Executive operating platform",
+      "lifecycle_stage": "Rich UI / deployment unverified",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "Repository structure and component names inspected",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "onedrive-cleanup-controller",
@@ -499,7 +860,22 @@
       "interface_status": "CLI only; no web UI",
       "interface_source_url": "https://github.com/Daniel550-pixel/OneDrive-Cleanup-Controller/blob/main/README.md",
       "purpose_confidence": "README verified",
-      "integration_boundary": "Destructive file operations are never exposed as buttons in this website; run and review scripts only in the local trusted environment."
+      "integration_boundary": "Destructive file operations are never exposed as buttons in this website; run and review scripts only in the local trusted environment.",
+      "business_model": "Internal utility / cost avoidance; paid model not documented",
+      "system_type": "Local storage automation & recovery utility",
+      "sector": "IT Operations & Workflow Automation",
+      "target_market": "Windows users and IT support teams managing synced storage",
+      "market_segments": [
+        "Storage inspection",
+        "Safe cleanup and restore",
+        "Local automation"
+      ],
+      "portfolio_role": "Internal productivity utility",
+      "lifecycle_stage": "Local CLI utility",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "README verified",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "experienceengine",
@@ -520,7 +896,22 @@
       "interface_status": "UI source present; hosted deployment unverified",
       "interface_source_url": "https://github.com/Daniel550-pixel/ExperienceEngine/blob/main/src/App.tsx",
       "purpose_confidence": "Repository structure and UI components inspected",
-      "integration_boundary": "Only the interface pattern and source link are integrated; generated code is not executed by SysCentre."
+      "integration_boundary": "Only the interface pattern and source link are integrated; generated code is not executed by SysCentre.",
+      "business_model": "Developer / creator workbench (commercial model unverified)",
+      "system_type": "AI-assisted creation & experience builder",
+      "sector": "Developer Tools & Creative Software",
+      "target_market": "Developers, product builders, and creators prototyping interactive experiences",
+      "market_segments": [
+        "Intent-to-code workflows",
+        "Interactive prototypes",
+        "Project templates"
+      ],
+      "portfolio_role": "Creation platform",
+      "lifecycle_stage": "Interactive UI / deployment unverified",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "Repository structure and UI components inspected",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     },
     {
       "id": "syscentre",
@@ -541,7 +932,30 @@
       "interface_status": "Static fallback deployed through GitHub Pages; local API availability must be checked on the same computer",
       "interface_source_url": "https://github.com/Daniel550-pixel/SysCentre/blob/main/bonus-app/index.html",
       "purpose_confidence": "README and runtime catalog inspected",
-      "integration_boundary": "Repositories remain independent. Indexing does not run repository code or merge runtimes."
+      "integration_boundary": "Repositories remain independent. Indexing does not run repository code or merge runtimes.",
+      "business_model": "Internal portfolio-control capability; external productization unverified",
+      "system_type": "Executive portfolio control plane & source intelligence",
+      "sector": "AI Portfolio Operations & Enterprise Systems",
+      "target_market": "Portfolio owners and operators managing multiple independent AI / software systems",
+      "market_segments": [
+        "Portfolio governance",
+        "Cross-system source discovery",
+        "Lifecycle and market segmentation"
+      ],
+      "portfolio_role": "Portfolio command layer",
+      "lifecycle_stage": "Active development / local runtime plus static fallback",
+      "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
+      "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
+      "classification_basis": "README and runtime catalog inspected",
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
     }
-  ]
+  ],
+  "portfolio_model": {
+    "purpose": "Executive portfolio segmentation across business-model hypotheses, system roles, sectors, and target markets.",
+    "principles": [
+      "Repository purpose is evidence; business model and target market are hypotheses unless explicitly verified.",
+      "No repository is treated as generating revenue or having customers without evidence.",
+      "Repositories and runtimes remain independent; SysCentre aggregates metadata and evidence only."
+    ]
+  }
 }
