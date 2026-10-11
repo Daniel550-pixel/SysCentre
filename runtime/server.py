@@ -209,6 +209,30 @@ def register_inventory_project(payload: dict[str, Any]) -> dict[str, Any]:
     return {"ok": True, "project": entry, "count": len(projects)}
 
 
+def repository_architecture_inventory() -> dict[str, Any]:
+    """Load the committed, evidence-backed architecture snapshot without executing project code."""
+    inventory_path = Path(__file__).with_name("repository_architectures.json")
+    try:
+        with inventory_path.open("r", encoding="utf-8") as handle:
+            payload = json.load(handle)
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError("Repository architecture inventory is unavailable or invalid.") from exc
+    projects = payload.get("repositories") if isinstance(payload, dict) else None
+    if not isinstance(projects, list):
+        raise RuntimeError("Repository architecture inventory must contain a repositories list.")
+    seen: set[str] = set()
+    for project in projects:
+        if not isinstance(project, dict) or not isinstance(project.get("project_id"), str):
+            raise RuntimeError("Repository architecture inventory contains an invalid record.")
+        project_id = project["project_id"]
+        if project_id in seen:
+            raise RuntimeError("Repository architecture inventory contains duplicate project IDs.")
+        seen.add(project_id)
+        if not isinstance(project.get("layers"), list) or not isinstance(project.get("source_snapshot"), dict):
+            raise RuntimeError(f"Architecture record '{project_id}' is missing its layers or source snapshot.")
+    return payload
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "SysCentreRuntime/0.2"
 
@@ -247,6 +271,11 @@ class Handler(BaseHTTPRequestHandler):
             from repository_ingest import list_projects
             projects = list_projects()
             self._send_json(200, {"projects": projects, "count": len(projects)})
+        elif path == "/api/repository-architectures":
+            try:
+                self._send_json(200, repository_architecture_inventory())
+            except RuntimeError as exc:
+                self._send_json(500, {"ok": False, "error": str(exc)})
         elif path == "/api/runtime-projects":
             registry_path = Path(__file__).with_name("project_runtime_registry.json")
             with registry_path.open("r", encoding="utf-8") as handle:
