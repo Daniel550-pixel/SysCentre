@@ -13,6 +13,7 @@ type PortfolioDimension = "business_model" | "system_type" | "sector" | "market_
 type Project = { project_id: string; name: string; repository_url: string; default_branch: string; description: string; latest_commit: string; indexed_at: string; file_count: number; text_file_count: number; skipped_file_count: number; status: string; category?: string; purpose?: string; capabilities?: string[]; interface_kind?: string; interface_status?: string; business_model?: string; system_type?: string; sector?: string; target_market?: string; market_segments?: string[]; market_category?: string; portfolio_role?: string; lifecycle_stage?: string; monetization_status?: string; market_validation?: string; classification_basis?: string; classification_note?: string };
 type SourceResult = { project_id: string; project_name: string; repository_url: string; path: string; blob_sha: string; size_bytes: number; excerpt: string };
 type InventoryProject = { id: string; name: string; status: string; category: string; candidate_repositories: string[]; description?: string; origin?: string; created_at?: string };
+type RuntimeProject = { project_id: string; name: string; repository_url: string; adapter_type: string; runtime_mode: string; execution_state: string; requires_approval: boolean; notes: string; system_type?: string; sector?: string; market_category?: string };
 type IngestJob = { project_id: string; target_commit: string; branch: string; started_at: string; updated_at: string; status: string; files_seen: number; files_processed: number; files_indexed: number; files_skipped: number; error: string };
 
 function formatUptime(seconds = 0) {
@@ -47,6 +48,7 @@ export default function App() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [ingestJobs, setIngestJobs] = useState<IngestJob[]>([]);
   const [inventoryProjects, setInventoryProjects] = useState<InventoryProject[]>([]);
+  const [runtimeProjects, setRuntimeProjects] = useState<RuntimeProject[]>([]);
   const [ingesting, setIngesting] = useState<string | null>(null);
   const [projectMessage, setProjectMessage] = useState("");
   const [newProjectName, setNewProjectName] = useState("");
@@ -71,6 +73,7 @@ export default function App() {
         fetch(API + "/api/repositories", { signal: AbortSignal.timeout(5000) }),
         fetch(API + "/api/project-inventory", { signal: AbortSignal.timeout(5000) }),
         fetch(API + "/api/ingest-status", { signal: AbortSignal.timeout(5000) }),
+        fetch(API + "/api/runtime-projects", { signal: AbortSignal.timeout(5000) }),
       ]);
       if (!responses[0].ok || !responses[1].ok) throw new Error("Runtime API returned an error");
       const nextStatus = (await responses[0].json()) as RuntimeStatus;
@@ -78,6 +81,7 @@ export default function App() {
       if (responses[2].ok) { const nextProjects = (await responses[2].json()) as { projects: Project[] }; setProjects(nextProjects.projects ?? []); }
       if (responses[3].ok) { const inventory = (await responses[3].json()) as { projects: InventoryProject[] }; setInventoryProjects(inventory.projects ?? []); }
       if (responses[4].ok) { const ingestStatus = (await responses[4].json()) as { jobs: IngestJob[] }; setIngestJobs(ingestStatus.jobs ?? []); }
+      if (responses[5].ok) { const registry = (await responses[5].json()) as { projects: RuntimeProject[] }; setRuntimeProjects(registry.projects ?? []); }
       setStatus(nextStatus);
       setEvents(nextEvents.events ?? []);
       setConnected(true);
@@ -212,6 +216,7 @@ export default function App() {
           <a className="nav-item active" href="#portfolio"><Gauge size={17} /><span>Executive portfolio</span><ChevronRight className="nav-chevron" size={15} /></a>
           <a className="nav-item" href="#projects"><FolderGit2 size={17} /><span>Project registry</span></a>
           <a className="nav-item" href="#runtime"><Cpu size={17} /><span>Runtime</span></a>
+          <a className="nav-item" href="#runtime-adapters"><Zap size={17} /><span>Runtime adapters</span></a>
           <a className="nav-item" href="#console"><TerminalSquare size={17} /><span>Command console</span></a>
           <a className="nav-item" href="#security"><ShieldCheck size={17} /><span>Policy & security</span></a>
           <a className="nav-item" href="#events"><Activity size={17} /><span>Event ledger</span></a>
@@ -353,6 +358,14 @@ export default function App() {
               <label className="intake-wide"><span>GitHub repository URL (optional)</span><input type="url" value={newProjectRepository} onChange={(event) => setNewProjectRepository(event.target.value)} placeholder="https://github.com/owner/repository" /></label>
               <div className="intake-actions"><button className="secondary-button project-index-button" type="submit" disabled={registeringProject || !newProjectName.trim()}>{registeringProject ? "Registering…" : "Add to project inventory"}</button><span>New entries require repository verification and an execution adapter before they can be run.</span></div>
             </form>
+          </section>
+          <section className="panel projects-panel runtime-adapters-panel" id="runtime-adapters">
+            <div className="panel-header"><div><div className="panel-kicker">EXECUTION READINESS</div><h2>Runtime adapter registry</h2></div><span className="project-count">{runtimeProjects.filter((project) => project.adapter_type !== "unconfigured" && project.runtime_mode !== "not_configured").length} / {runtimeProjects.length} configured</span></div>
+            <p className="panel-description">All registered repositories have an explicit runtime profile slot. A project is not considered runnable until its adapter, target, health check, and allowed actions are verified. SysCentre never invents launch commands or executes source code during indexing.</p>
+            <div className="runtime-adapter-list">
+              {runtimeProjects.map((project) => { const configured = project.adapter_type !== "unconfigured" && project.runtime_mode !== "not_configured"; return <article className="runtime-adapter-row" key={project.project_id}><div className="runtime-adapter-name"><strong>{project.name}</strong><span>{project.system_type || project.project_id}</span></div><div className="runtime-adapter-context"><span>{project.sector || "Sector unclassified"}</span><span>{project.market_category || "Market unclassified"}</span></div><span className={"runtime-adapter-status " + (configured ? "configured" : "unconfigured")}>{configured ? "Adapter configured" : "Setup required"}</span><a href={project.repository_url} target="_blank" rel="noreferrer">Source ↗</a></article>; })}
+              {!runtimeProjects.length && <div className="empty-state">Runtime registry unavailable. Restart the local runtime after pulling the latest changes.</div>}
+            </div>
           </section>
           {inventoryProjects.length > 0 && <section className="panel projects-panel inventory-panel" id="inventory-audit">
             <div className="panel-header"><div><div className="panel-kicker">INVENTORY RECONCILIATION</div><h2>Historical projects awaiting repository match</h2></div><span className="project-count">{inventoryProjects.length} unresolved</span></div>
