@@ -19,6 +19,35 @@ class RepositoryRegistryTests(unittest.TestCase):
         self.assertIn("networklab", ids)
         self.assertIn("experienceengine", ids)
 
+    def test_catalog_has_complete_executive_portfolio_taxonomy(self):
+        projects = repository_ingest.load_catalog()
+        self.assertEqual(len(projects), 28)
+        required_fields = (
+            "business_model", "system_type", "sector", "market_category",
+            "target_market", "market_segments", "portfolio_role", "lifecycle_stage",
+            "monetization_status", "market_validation",
+        )
+        for project in projects:
+            with self.subTest(project=project["id"]):
+                for field in required_fields:
+                    self.assertIn(field, project)
+                    self.assertTrue(project[field], f"{project['id']} has empty {field}")
+                self.assertIn("unverified", project["monetization_status"].lower())
+                self.assertIn("unverified", project["market_validation"].lower())
+        self.assertGreaterEqual(len({project["sector"] for project in projects}), 5)
+        self.assertGreaterEqual(len({project["market_category"] for project in projects}), 5)
+
+    def test_repository_registry_merges_portfolio_metadata(self):
+        with tempfile.TemporaryDirectory() as directory:
+            db_path = Path(directory) / "syscentre-test.db"
+            with patch.object(repository_ingest.server, "DB_PATH", db_path):
+                projects = repository_ingest.list_projects()
+        self.assertEqual(len(projects), 28)
+        syscentre = next(project for project in projects if project["project_id"] == "syscentre")
+        self.assertEqual(syscentre["system_type"], "Executive portfolio control plane & source intelligence")
+        self.assertEqual(syscentre["market_category"], "AI portfolio operations & enterprise systems")
+        self.assertEqual(syscentre["status"], "registered")
+
     def test_unmatched_historical_projects_are_not_given_guessed_urls(self):
         from pathlib import Path
         import json
