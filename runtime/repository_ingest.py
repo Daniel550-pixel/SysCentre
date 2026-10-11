@@ -275,7 +275,7 @@ def search_index(query: str, limit: int = 50) -> dict[str, Any]:
     with server._DB_LOCK:
         with server._database() as connection:
             rows = connection.execute(
-                """SELECT p.project_id, p.name, p.repository_url, f.path, f.blob_sha, f.size_bytes, f.content
+                """SELECT p.project_id, p.name, p.repository_url, p.default_branch, f.path, f.blob_sha, f.size_bytes, f.content
                    FROM repository_files f JOIN projects p ON p.project_id = f.project_id
                    WHERE f.file_kind = 'text' AND f.content LIKE ?
                    ORDER BY p.name, f.path LIMIT ?""",
@@ -290,7 +290,7 @@ def search_index(query: str, limit: int = 50) -> dict[str, Any]:
         excerpt = content[start:end].replace("\n", " ").replace("\r", " ")
         results.append({
             "project_id": row["project_id"], "project_name": row["name"],
-            "repository_url": row["repository_url"], "path": row["path"],
+            "repository_url": row["repository_url"], "default_branch": row["default_branch"], "path": row["path"],
             "blob_sha": row["blob_sha"], "size_bytes": row["size_bytes"], "excerpt": excerpt,
         })
     return {"query": term, "results": results, "count": len(results), "limit": bounded}
