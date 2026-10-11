@@ -23,6 +23,25 @@ DB_PATH = Path(os.environ.get("SYSCENTRE_DB_PATH", str(Path.home() / ".syscentre
 _DB_LOCK = Lock()
 MAX_BODY_BYTES = 8_192
 
+# Cross-origin browser access is limited to the published fallback and local dev UI.
+# Never use "*" here: the runtime exposes local machine state and indexed source text.
+DEFAULT_ALLOWED_ORIGINS = (
+    "https://daniel550-pixel.github.io",
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
+)
+_configured_origins = os.environ.get("SYSCENTRE_ALLOWED_ORIGINS")
+ALLOWED_ORIGINS = frozenset(
+    value.strip().rstrip("/")
+    for value in (_configured_origins.split(",") if _configured_origins is not None else DEFAULT_ALLOWED_ORIGINS)
+    if value.strip() and value.strip() != "*"
+)
+
+
+def _origin_is_allowed(origin: str | None) -> bool:
+    """Return True only for an explicitly configured browser origin."""
+    return bool(origin and origin.rstrip("/") in ALLOWED_ORIGINS)
+
 
 def _connect() -> sqlite3.Connection:
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -143,9 +162,14 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
-        self.send_header("Access-Control-Allow-Origin", "http://127.0.0.1:5173")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        origin = self.headers.get("Origin")
+        if _origin_is_allowed(origin):
+            self.send_header("Access-Control-Allow-Origin", origin.rstrip("/"))
+            self.send_header("Vary", "Origin")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type")
+            if self.headers.get("Access-Control-Request-Private-Network", "").lower() == "true":
+                self.send_header("Access-Control-Allow-Private-Network", "true")
         self.end_headers()
         self.wfile.write(body)
 
