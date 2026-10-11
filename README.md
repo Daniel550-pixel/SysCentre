@@ -8,7 +8,8 @@ SysCentre is a standalone local-first systems control plane. It catalogs existin
 - **Runtime:** Python standard-library HTTP API on `127.0.0.1:8765`.
 - **Policy engine:** deterministic explicit allowlist; unknown commands are denied and recorded.
 - **Event ledger:** SQLite database at `~/.syscentre/syscentre.db`, with up to 5,000 recent audit events.
-- **Project registry:** `runtime/repository_catalog.json` records the projects known to SysCentre.
+- **Project registry:** `runtime/repository_catalog.json` records the 28 projects known to SysCentre, including executive portfolio metadata. `bonus-app/systems.json` mirrors this catalog for the static GitHub Pages application.
+- **Executive control plane:** portfolio-wide grouping by business-model hypothesis, system type, sector, and target-market category, with repository-level drill-down and lifecycle classifications.
 - **Repository indexer:** `runtime/repository_ingest.py` imports repository metadata, commit/tree identity, file paths, blob hashes, file sizes, and readable UTF-8 source/documentation content.
 - **Project isolation:** indexed source is data, not executable instructions. Repositories are not merged and indexing does not run their code.
 
@@ -77,4 +78,10 @@ npm --prefix .\webapp run build
 
 ## Current boundaries
 
-The project registry and source index are the foundation for cross-project discovery. Automated dependency mapping, project-level semantic search, agent orchestration, approval workflows, and execution adapters are subsequent capabilities. Keep credentials out of the repository and do not treat policy allowlisting as a complete OS sandbox.
+### Executive portfolio classification
+
+Each repository is classified by `business_model`, `system_type`, `sector`, `market_category`, `target_market`, `market_segments`, `portfolio_role`, and `lifecycle_stage`. The local API merges this strategy metadata into each project returned by `GET /api/repositories`; the dashboard uses it to group and drill down across the portfolio. The public static console reads the mirrored `bonus-app/systems.json` catalog and provides the same four executive segmentation views without requiring the local runtime.
+
+Business models and target markets are planning hypotheses inferred from repository evidence, not verified market research. Pricing, customers, revenue, commercial traction, TAM/SAM/SOM, and geographic reach are not claimed unless independently evidenced. Every catalog record explicitly carries a monetization status and market-validation status. Empty repositories and scaffolds remain classified as unvalidated. Keep the canonical runtime catalog and the static mirror synchronized when updating portfolio metadata.
+
+The project registry and source index remain foundations for cross-project discovery. Automated dependency mapping, project-level semantic search, agent orchestration, approval workflows, and execution adapters are subsequent capabilities. Keep credentials out of the repository and do not treat policy allowlisting as a complete OS sandbox.
