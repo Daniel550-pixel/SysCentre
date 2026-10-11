@@ -49,6 +49,12 @@ Open **http://127.0.0.1:5173**. The runtime API is **http://127.0.0.1:8765**.
 - `POST /api/repositories/ingest` with `{"project_id":"networklab"}` — index one catalogued repository
 - `POST /api/command` — accepts only `status`, `help`, or `diagnostics`
 
+### Static continuity fallback and indexed-source search
+
+The published [SysCentre fallback](https://daniel550-pixel.github.io/SysCentre/) remains a static site and its catalog works without the local runtime. Its **Indexed source search** panel sends read-only queries to `http://127.0.0.1:8765/api/search`; it does not trigger indexing or execute repository code. For results, start the local runtime on the same computer and index at least one repository in the local dashboard. Browsers may ask permission to access localhost from the hosted page.
+
+The runtime returns cross-origin headers only for explicit allowed origins: `https://daniel550-pixel.github.io`, `http://127.0.0.1:5173`, and `http://localhost:5173` by default. Administrators can replace that list with comma-separated exact origins in `SYSCENTRE_ALLOWED_ORIGINS`. Wildcard origins are ignored.
+
 Example PowerShell calls:
 
 ```powershell
