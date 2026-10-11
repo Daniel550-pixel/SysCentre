@@ -15,6 +15,14 @@ type SourceResult = { project_id: string; project_name: string; repository_url: 
 type InventoryProject = { id: string; name: string; status: string; category: string; candidate_repositories: string[]; description?: string; origin?: string; created_at?: string };
 type RuntimeProject = { project_id: string; name: string; repository_url: string; adapter_type: string; runtime_mode: string; execution_state: string; requires_approval: boolean; notes: string; system_type?: string; sector?: string; market_category?: string };
 type IngestJob = { project_id: string; target_commit: string; branch: string; started_at: string; updated_at: string; status: string; files_seen: number; files_processed: number; files_indexed: number; files_skipped: number; error: string };
+type ArchitectureLayer = { name: string; role: string; components: string; evidence_paths: string[] };
+type RepositoryArchitecture = {
+  project_id: string; name: string; repository_url: string; default_branch: string;
+  architecture_status: string; architecture_summary: string; technology_stack: string[];
+  entrypoints: string[]; layers: ArchitectureLayer[]; state_and_data: string[];
+  external_integrations: string[]; evidence_paths: string[]; limitations: string[];
+  source_snapshot: { commit: string | null; deployment_verified: boolean; runtime_health_verified: boolean };
+};
 
 function formatUptime(seconds = 0) {
   const total = Math.max(0, Math.floor(seconds));
@@ -36,6 +44,15 @@ const portfolioDimensions: Array<{ key: PortfolioDimension; label: string }> = [
 function dimensionValue(project: Project, dimension: PortfolioDimension) {
   return project[dimension]?.trim() || "Not classified";
 }
+function architectureStatusLabel(status: string) {
+  const labels: Record<string, string> = {
+    "source-verified": "Source verified",
+    "source-limited": "Source limited",
+    "documentation-only": "Documentation only",
+    "empty": "Empty repository",
+  };
+  return labels[status] || status.replaceAll("-", " ");
+}
 
 export default function App() {
   const [status, setStatus] = useState<RuntimeStatus | null>(null);
@@ -49,6 +66,9 @@ export default function App() {
   const [ingestJobs, setIngestJobs] = useState<IngestJob[]>([]);
   const [inventoryProjects, setInventoryProjects] = useState<InventoryProject[]>([]);
   const [runtimeProjects, setRuntimeProjects] = useState<RuntimeProject[]>([]);
+  const [architectures, setArchitectures] = useState<RepositoryArchitecture[]>([]);
+  const [architectureSearch, setArchitectureSearch] = useState("");
+  const [architectureStatusFilter, setArchitectureStatusFilter] = useState("all");
   const [ingesting, setIngesting] = useState<string | null>(null);
   const [projectMessage, setProjectMessage] = useState("");
   const [newProjectName, setNewProjectName] = useState("");
@@ -74,6 +94,7 @@ export default function App() {
         fetch(API + "/api/project-inventory", { signal: AbortSignal.timeout(5000) }),
         fetch(API + "/api/ingest-status", { signal: AbortSignal.timeout(5000) }),
         fetch(API + "/api/runtime-projects", { signal: AbortSignal.timeout(5000) }),
+        fetch(API + "/api/repository-architectures", { signal: AbortSignal.timeout(5000) }),
       ]);
       if (!responses[0].ok || !responses[1].ok) throw new Error("Runtime API returned an error");
       const nextStatus = (await responses[0].json()) as RuntimeStatus;
@@ -82,6 +103,7 @@ export default function App() {
       if (responses[3].ok) { const inventory = (await responses[3].json()) as { projects: InventoryProject[] }; setInventoryProjects(inventory.projects ?? []); }
       if (responses[4].ok) { const ingestStatus = (await responses[4].json()) as { jobs: IngestJob[] }; setIngestJobs(ingestStatus.jobs ?? []); }
       if (responses[5].ok) { const registry = (await responses[5].json()) as { projects: RuntimeProject[] }; setRuntimeProjects(registry.projects ?? []); }
+      if (responses[6].ok) { const inventory = (await responses[6].json()) as { repositories: RepositoryArchitecture[] }; setArchitectures(inventory.repositories ?? []); }
       setStatus(nextStatus);
       setEvents(nextEvents.events ?? []);
       setConnected(true);
@@ -215,6 +237,7 @@ export default function App() {
         <nav className="nav-list" aria-label="Main navigation">
           <a className="nav-item active" href="#portfolio"><Gauge size={17} /><span>Executive portfolio</span><ChevronRight className="nav-chevron" size={15} /></a>
           <a className="nav-item" href="#projects"><FolderGit2 size={17} /><span>Project registry</span></a>
+          <a className="nav-item" href="#architectures"><Layers3 size={17} /><span>App architectures</span></a>
           <a className="nav-item" href="#runtime"><Cpu size={17} /><span>Runtime</span></a>
           <a className="nav-item" href="#runtime-adapters"><Zap size={17} /><span>Runtime adapters</span></a>
           <a className="nav-item" href="#console"><TerminalSquare size={17} /><span>Command console</span></a>
@@ -346,6 +369,63 @@ export default function App() {
               {!projects.length && <div className="empty-state">Waiting for the local repository catalog...</div>}
             </div>
             <div className="project-disclaimer"><ShieldCheck size={14} /><span>Sensitive-looking paths, generated folders, binary files, and oversized files are excluded from the text index.</span></div>
+          </section>
+
+          <section className="panel architecture-panel" id="architectures">
+            <div className="panel-header">
+              <div><div className="panel-kicker">SOURCE-LEVEL SYSTEM MAP</div><h2>Application architectures</h2></div>
+              <span className="project-count">{architectures.length} architecture records</span>
+            </div>
+            <p className="panel-description">Layer-by-layer architecture snapshots from each repository's actual tracked files, manifests and entrypoints. Expand a project to inspect its application boundaries, state layer, integrations and GitHub evidence.</p>
+            <div className="architecture-kpis">
+              <article><span>Source inspected</span><strong>{architectures.filter((item) => item.architecture_status === "source-verified").length}</strong><small>Entry points / implementation files found</small></article>
+              <article><span>Partial implementation</span><strong>{architectures.filter((item) => item.architecture_status === "source-limited").length}</strong><small>Scaffold or missing evidence</small></article>
+              <article><span>Documentation only</span><strong>{architectures.filter((item) => item.architecture_status === "documentation-only").length}</strong><small>Design described, code not found</small></article>
+              <article><span>Empty repositories</span><strong>{architectures.filter((item) => item.architecture_status === "empty").length}</strong><small>No Git tree available</small></article>
+            </div>
+            <div className="architecture-toolbar">
+              <input className="project-filter" value={architectureSearch} onChange={(event) => setArchitectureSearch(event.target.value)} placeholder="Search app, stack, component or path..." aria-label="Search application architectures" />
+              <select className="architecture-status-filter" value={architectureStatusFilter} onChange={(event) => setArchitectureStatusFilter(event.target.value)} aria-label="Filter architecture status">
+                <option value="all">All source states</option>
+                <option value="source-verified">Source verified</option>
+                <option value="source-limited">Source limited</option>
+                <option value="documentation-only">Documentation only</option>
+                <option value="empty">Empty repository</option>
+              </select>
+              <span className="project-count">{architectures.filter((item) => (architectureStatusFilter === "all" || item.architecture_status === architectureStatusFilter) && (item.name + " " + item.architecture_summary + " " + item.technology_stack.join(" ") + " " + item.entrypoints.join(" ") + " " + item.evidence_paths.join(" ")).toLowerCase().includes(architectureSearch.toLowerCase())).length} shown</span>
+            </div>
+            <div className="architecture-list">
+              {architectures.filter((item) => (architectureStatusFilter === "all" || item.architecture_status === architectureStatusFilter) && (item.name + " " + item.architecture_summary + " " + item.technology_stack.join(" ") + " " + item.entrypoints.join(" ") + " " + item.evidence_paths.join(" ")).toLowerCase().includes(architectureSearch.toLowerCase())).map((item) => (
+                <details className="architecture-card" key={item.project_id}>
+                  <summary>
+                    <div className="architecture-identity"><strong>{item.name}</strong><span>{item.default_branch} · {item.layers.length} architecture layers</span></div>
+                    <div className="architecture-stack">{item.technology_stack.slice(0, 4).map((technology) => <span key={technology}>{technology}</span>)}</div>
+                    <span className={"architecture-status " + item.architecture_status}>{architectureStatusLabel(item.architecture_status)}</span>
+                    <ChevronRight className="architecture-chevron" size={17} />
+                  </summary>
+                  <div className="architecture-detail">
+                    <p className="architecture-summary">{item.architecture_summary}</p>
+                    <div className="architecture-detail-grid">
+                      {item.layers.map((layer) => <article className="architecture-layer" key={layer.name}>
+                        <span>{layer.name}</span><strong>{layer.role}</strong><p>{layer.components}</p>
+                        {layer.evidence_paths.length > 0 && <div className="architecture-paths">{layer.evidence_paths.map((path) => <a key={path} href={item.repository_url + "/blob/" + item.default_branch + "/" + path} target="_blank" rel="noreferrer">{path}</a>)}</div>}
+                      </article>)}
+                    </div>
+                    <div className="architecture-metadata-grid">
+                      <article><strong>Application entrypoints</strong>{item.entrypoints.length ? item.entrypoints.map((path) => <a key={path} href={item.repository_url + "/blob/" + item.default_branch + "/" + path} target="_blank" rel="noreferrer">{path}</a>) : <span>None verified</span>}</article>
+                      <article><strong>State and data</strong>{item.state_and_data.length ? item.state_and_data.map((value) => <span key={value}>{value}</span>) : <span>Not confirmed from the inspected source</span>}</article>
+                      <article><strong>External integrations</strong>{item.external_integrations.length ? item.external_integrations.map((value) => <span key={value}>{value}</span>) : <span>No integration verified</span>}</article>
+                      <article><strong>Evidence files</strong>{item.evidence_paths.slice(0, 10).map((path) => <a key={path} href={item.repository_url + "/blob/" + item.default_branch + "/" + path} target="_blank" rel="noreferrer">{path}</a>)}</article>
+                    </div>
+                    <div className="architecture-snapshot"><span>Source commit: <code>{item.source_snapshot.commit ? item.source_snapshot.commit.slice(0, 12) : "No Git tree"}</code></span><a href={item.repository_url + "/tree/" + item.default_branch} target="_blank" rel="noreferrer">Open repository ↗</a><span>Deployment verified: No</span><span>Runtime health verified: No</span></div>
+                    {item.limitations.length > 0 && <div className="architecture-limitations"><strong>Gaps / caveats</strong>{item.limitations.map((note) => <p key={note}>{note}</p>)}</div>}
+                  </div>
+                </details>
+              ))}
+              {!architectures.length && <div className="empty-state">Architecture inventory unavailable. Pull the latest SysCentre changes and restart the local runtime.</div>}
+              {architectures.length > 0 && !architectures.some((item) => (architectureStatusFilter === "all" || item.architecture_status === architectureStatusFilter) && (item.name + " " + item.architecture_summary + " " + item.technology_stack.join(" ") + " " + item.entrypoints.join(" ") + " " + item.evidence_paths.join(" ")).toLowerCase().includes(architectureSearch.toLowerCase())) && <div className="empty-state">No application architecture matches this filter.</div>}
+            </div>
+            <div className="project-disclaimer"><ShieldCheck size={14} /><span>Snapshot-based architecture is not a live health check. Empty and README-only repositories remain explicitly unimplemented; integration declarations are not proof of active connections.</span></div>
           </section>
 
           <section className="panel projects-panel intake-panel" id="project-intake">
