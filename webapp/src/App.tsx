@@ -9,8 +9,8 @@ const API = "http://127.0.0.1:8765";
 type RuntimeStatus = { name: string; state: string; host: string; port: number; uptime_seconds: number; python_version: string; platform: string; policy_gate: string; event_ledger: string; event_ledger_path?: string; timestamp: string };
 type RuntimeEvent = { id: string; timestamp: string; type: string; message: string; details: Record<string, unknown> };
 type CommandResponse = { ok: boolean; command: string; result?: unknown; error?: string };
-type PortfolioDimension = "business_model" | "system_type" | "sector" | "target_market";
-type Project = { project_id: string; name: string; repository_url: string; default_branch: string; description: string; latest_commit: string; indexed_at: string; file_count: number; text_file_count: number; skipped_file_count: number; status: string; category?: string; purpose?: string; capabilities?: string[]; interface_kind?: string; interface_status?: string; business_model?: string; system_type?: string; sector?: string; target_market?: string; market_segments?: string[]; portfolio_role?: string; lifecycle_stage?: string; monetization_status?: string; market_validation?: string; classification_basis?: string; classification_note?: string };
+type PortfolioDimension = "business_model" | "system_type" | "sector" | "market_category";
+type Project = { project_id: string; name: string; repository_url: string; default_branch: string; description: string; latest_commit: string; indexed_at: string; file_count: number; text_file_count: number; skipped_file_count: number; status: string; category?: string; purpose?: string; capabilities?: string[]; interface_kind?: string; interface_status?: string; business_model?: string; system_type?: string; sector?: string; target_market?: string; market_segments?: string[]; market_category?: string; portfolio_role?: string; lifecycle_stage?: string; monetization_status?: string; market_validation?: string; classification_basis?: string; classification_note?: string };
 type SourceResult = { project_id: string; project_name: string; repository_url: string; path: string; blob_sha: string; size_bytes: number; excerpt: string };
 type InventoryProject = { id: string; name: string; status: string; category: string; candidate_repositories: string[] };
 type IngestJob = { project_id: string; target_commit: string; branch: string; started_at: string; updated_at: string; status: string; files_seen: number; files_processed: number; files_indexed: number; files_skipped: number; error: string };
@@ -30,7 +30,7 @@ const portfolioDimensions: Array<{ key: PortfolioDimension; label: string }> = [
   { key: "business_model", label: "Business model" },
   { key: "system_type", label: "System" },
   { key: "sector", label: "Sector" },
-  { key: "target_market", label: "Market" },
+  { key: "market_category", label: "Market" },
 ];
 function dimensionValue(project: Project, dimension: PortfolioDimension) {
   return project[dimension]?.trim() || "Not classified";
