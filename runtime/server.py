@@ -220,6 +220,8 @@ def repository_architecture_inventory() -> dict[str, Any]:
     projects = payload.get("repositories") if isinstance(payload, dict) else None
     if not isinstance(projects, list):
         raise RuntimeError("Repository architecture inventory must contain a repositories list.")
+    if payload.get("schema_version") != 2:
+        raise RuntimeError("Repository architecture inventory uses an unsupported schema version.")
     seen: set[str] = set()
     for project in projects:
         if not isinstance(project, dict) or not isinstance(project.get("project_id"), str):
@@ -228,8 +230,15 @@ def repository_architecture_inventory() -> dict[str, Any]:
         if project_id in seen:
             raise RuntimeError("Repository architecture inventory contains duplicate project IDs.")
         seen.add(project_id)
-        if not isinstance(project.get("layers"), list) or not isinstance(project.get("source_snapshot"), dict):
+        snapshot = project.get("source_snapshot")
+        if not isinstance(project.get("layers"), list) or not isinstance(snapshot, dict):
             raise RuntimeError(f"Architecture record '{project_id}' is missing its layers or source snapshot.")
+        if "commit" not in snapshot or "tree_sha" not in snapshot or not isinstance(snapshot.get("source_checked_at"), str):
+            raise RuntimeError(f"Architecture record '{project_id}' is missing source provenance metadata.")
+        if not isinstance(project.get("repository_hygiene_findings"), list):
+            raise RuntimeError(f"Architecture record '{project_id}' is missing repository hygiene findings.")
+        if snapshot.get("commit") is None and snapshot.get("tree_sha") is not None:
+            raise RuntimeError(f"Architecture record '{project_id}' has inconsistent empty-repository provenance.")
     return payload
 
 
