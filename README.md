@@ -9,7 +9,7 @@ SysCentre is a standalone local-first systems control plane. It catalogs existin
 - **Policy engine:** deterministic explicit allowlist; unknown commands are denied and recorded.
 - **Event ledger:** SQLite database at `~/.syscentre/syscentre.db`, with up to 5,000 recent audit events.
 - **Project registry:** `runtime/repository_catalog.json` records the 28 projects known to SysCentre, including executive portfolio metadata. `bonus-app/systems.json` mirrors this catalog for the static GitHub Pages application.
-- **Executive control plane:** portfolio-wide grouping by business-model hypothesis, system type, sector, and target-market category, with repository-level drill-down and lifecycle classifications.
+- **Executive control plane:** portfolio-wide grouping by business-model hypothesis, system type, sector, and market category, with an executive register that combines all four filters, searches target markets and portfolio roles, and surfaces market-validation, lifecycle, and monetization-evidence gaps. Each repository remains individually inspectable with source links and classification basis.
 - **Repository indexer:** `runtime/repository_ingest.py` imports repository metadata, commit/tree identity, file paths, blob hashes, file sizes, and readable UTF-8 source/documentation content.
 - **Project isolation:** indexed source is data, not executable instructions. Repositories are not merged and indexing does not run their code.
 
@@ -84,4 +84,4 @@ Each repository is classified by `business_model`, `system_type`, `sector`, `mar
 
 Business models and target markets are planning hypotheses inferred from repository evidence, not verified market research. Pricing, customers, revenue, commercial traction, TAM/SAM/SOM, and geographic reach are not claimed unless independently evidenced. Every catalog record explicitly carries a monetization status and market-validation status. Empty repositories and scaffolds remain classified as unvalidated. Keep the canonical runtime catalog and the static mirror synchronized when updating portfolio metadata.
 
-The project registry and source index remain foundations for cross-project discovery. Automated dependency mapping, project-level semantic search, agent orchestration, approval workflows, and execution adapters are subsequent capabilities. Keep credentials out of the repository and do not treat policy allowlisting as a complete OS sandbox.
+The executive register is a decision-support view, not a financial forecast: portfolio counts are computed from catalog fields, and evidence-gap totals do not imply commercial performance. The project registry and source index remain foundations for cross-project discovery. Automated dependency mapping, project-level semantic search, agent orchestration, approval workflows, and execution adapters are subsequent capabilities. Keep credentials out of the repository and do not treat policy allowlisting as a complete OS sandbox.
