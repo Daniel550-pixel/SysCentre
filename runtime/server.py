@@ -247,6 +247,12 @@ class Handler(BaseHTTPRequestHandler):
             from repository_ingest import list_projects
             projects = list_projects()
             self._send_json(200, {"projects": projects, "count": len(projects)})
+        elif path == "/api/runtime-projects":
+            registry_path = Path(__file__).with_name("project_runtime_registry.json")
+            with registry_path.open("r", encoding="utf-8") as handle:
+                registry = json.load(handle)
+            projects = registry.get("projects", [])
+            self._send_json(200, {"projects": projects, "count": len(projects), "runnable": sum(1 for item in projects if item.get("runtime_mode") != "not_configured" and item.get("adapter_type") != "unconfigured")})
         elif path == "/api/ingest-status":
             from repository_ingest import ingest_status
             params = parse_qs(parsed.query)
