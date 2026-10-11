@@ -21,10 +21,37 @@ class RuntimeTests(unittest.TestCase):
         for project in projects:
             self.assertIn(project["architecture_status"], allowed_statuses)
             self.assertIsInstance(project["layers"], list)
-            self.assertIn("commit", project["source_snapshot"])
-            self.assertFalse(project["source_snapshot"]["deployment_verified"])
+            snapshot = project["source_snapshot"]
+            self.assertIn("commit", snapshot)
+            self.assertIn("tree_sha", snapshot)
+            self.assertRegex(snapshot["source_checked_at"], r"^\\d{4}-\\d{2}-\\d{2}$")
+            self.assertIsInstance(project["repository_hygiene_findings"], list)
+            self.assertFalse(snapshot["deployment_verified"])
+            self.assertFalse(snapshot["runtime_health_verified"])
+
+        by_id = {item["project_id"]: item for item in projects}
+        radar = by_id["ai-venture-radar"]
+        self.assertEqual(radar["architecture_status"], "source-limited")
+        self.assertTrue(any("core/scoring.py" in layer["evidence_paths"] for layer in radar["layers"]))
+        self.assertTrue(any("core/adversarial.py" in layer["evidence_paths"] for layer in radar["layers"]))
+
+        factory = by_id["the-factory"]
+        self.assertEqual(factory["architecture_status"], "source-verified")
+        self.assertTrue(any("factory/kernel/policy.py" in layer["evidence_paths"] for layer in factory["layers"]))
+        self.assertTrue(any("factory/kernel/events.py" in layer["evidence_paths"] for layer in factory["layers"]))
+
+        secret_findings = by_id["finsight-global-ai-dashboard"]["repository_hygiene_findings"]
+        self.assertTrue(any(".env" in finding["evidence_paths"] and finding["severity"] == "high" for finding in secret_findings))
+        self.assertNotIn("API_KEY=", " ".join(finding["description"] for finding in secret_findings))
+
+        business_findings = by_id["business-os"]["repository_hygiene_findings"]
+        self.assertTrue(any(".business-os-data/security-events.jsonl" in finding["evidence_paths"] for finding in business_findings))
+
         empty_projects = [item for item in projects if item["architecture_status"] == "empty"]
         self.assertEqual({item["project_id"] for item in empty_projects}, {"ai-trading-dashboard-2", "ai-os-global-wealth-engine"})
+        for project in empty_projects:
+            self.assertIsNone(project["source_snapshot"]["commit"])
+            self.assertIsNone(project["source_snapshot"]["tree_sha"])
 
     def test_status_contains_policy_and_persistent_ledger_state(self):
         status = server.runtime_status()
