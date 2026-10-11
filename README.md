@@ -12,6 +12,7 @@ SysCentre is a standalone local-first systems control plane. It catalogs existin
 - **Executive control plane:** portfolio-wide grouping by business-model hypothesis, system type, sector, and market category, with an executive register that combines all four filters, searches target markets and portfolio roles, and surfaces market-validation, lifecycle, and monetization-evidence gaps. Each repository remains individually inspectable with source links and classification basis.
 - **Repository indexer:** `runtime/repository_ingest.py` imports repository metadata, commit/tree identity, file paths, blob hashes, file sizes, and readable UTF-8 source/documentation content.
 - **Runtime adapter registry:** `runtime/project_runtime_registry.json` has an explicit, initially unconfigured adapter profile for every one of the 28 repositories. The dashboard shows readiness and does not pretend unconfigured projects are runnable. `GET /api/runtime-projects` exposes this read-only registry.
+- **Application architecture inventory:** `runtime/repository_architectures.json` documents the observed stack, entrypoints, layers, data/state boundaries, declared integrations, evidence paths and source-tree commit for every catalog repository. `GET /api/repository-architectures` serves it to the searchable **Application architectures** explorer. Records distinguish verified source structure from partial scaffolds, documentation-only projects and empty repositories; they do not assert deployment or runtime health.
 - **Extensible project intake:** the dashboard and `POST /api/project-inventory` can register future project identities with validation, duplicate protection, persistence, and an audit event. Registration does not confirm a repository mapping or enable execution.
 - **Project isolation:** indexed source is data, not executable instructions. Repositories are not merged and indexing does not run their code.
 
@@ -49,7 +50,9 @@ Open **http://127.0.0.1:5173**. The runtime API is **http://127.0.0.1:8765**.
 - `GET /api/events` — persisted audit events
 - `GET /api/policy` — current allowlisted command catalog
 - `GET /api/repositories` — catalog plus indexing status
-- `GET /api/ingest-status?project_id=syscentre` — persisted per-project ingestion progress, including interrupted runs and checkpoint counts\n- `GET /api/runtime-projects` — runtime adapter configuration/readiness for all registered repository records
+- `GET /api/ingest-status?project_id=syscentre` — persisted per-project ingestion progress, including interrupted runs and checkpoint counts
+- `GET /api/runtime-projects` — runtime adapter configuration/readiness for all registered repository records
+- `GET /api/repository-architectures` — 28 evidence-backed architecture records with stack, entrypoints, layers, data/state, integrations, snapshot SHAs and limitations
 - `GET /api/repositories/{project_id}/files?path=term&limit=100` — indexed file records and source text (maximum 200 per response)
 - `GET /api/search?q=policy&limit=50` — search indexed source across projects (maximum 100 matches)
 - `POST /api/repositories/ingest` with `{"project_id":"networklab"}` — index one catalogued repository
@@ -70,7 +73,11 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8765/api/repositories/inges
 Invoke-RestMethod 'http://127.0.0.1:8765/api/repositories/networklab/files?limit=10'
 ```
 
-## Google AI Studio app prompt\n\nThe full master prompt for building a separate Google AI Studio full-stack control plane is in [`docs/GOOGLE_AI_STUDIO_CONTROL_PLANE_PROMPT.md`](docs/GOOGLE_AI_STUDIO_CONTROL_PLANE_PROMPT.md). Supply that prompt together with `runtime/repository_catalog.json`, `runtime/project_inventory.json`, and `runtime/project_runtime_registry.json`. The prompt requires real adapter configuration and honest readiness labels; it does not assume that registering a repository makes its application runnable.\n\n## Development checks
+## Google AI Studio app prompt
+
+The full master prompt for building a separate Google AI Studio full-stack control plane is in [`docs/GOOGLE_AI_STUDIO_CONTROL_PLANE_PROMPT.md`](docs/GOOGLE_AI_STUDIO_CONTROL_PLANE_PROMPT.md). Supply that prompt together with `runtime/repository_catalog.json`, `runtime/project_inventory.json`, `runtime/project_runtime_registry.json`, and `runtime/repository_architectures.json`. The architecture file is the source-backed reference for app layers, entrypoints and limitations; it must not be used as evidence of deployment or health.
+
+## Development checks
 
 ```powershell
 python -m unittest discover -s runtime -p "test_*.py" -v
