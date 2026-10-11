@@ -55,9 +55,10 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
         raise ValueError("No indexed text files are available for analysis.")
 
     paths = {row["path"] for row in files}
-    path_by_stem: dict[str, str] = {}
-    for path in paths:
+    paths_by_stem: dict[str, list[str]] = {}
+    for path in sorted(paths):
         candidate = PurePosixPath(path)
+        paths_by_stem.setdefault(candidate.stem, []).append(path)
         path_by_stem.setdefault(candidate.stem, path)
 
     imports: list[dict[str, str]] = []
@@ -147,16 +148,10 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
                     signals.append(label)
             for signal in signals:
                 storage.append({"name": signal, "source": path, "evidence": "Pattern match in indexed source; runtime connectivity is not verified"})
-
         for module in module_imports:
-            if module.startswith("."):
-                stem = PurePosixPath(path).parent.joinpath(module).as_posix()
-                stem = re.sub(r"\.(js|jsx|ts|tsx|mjs|cjs|py)$", "", stem)
-                candidate = next((known for known in paths if known == stem or known.startswith(stem + ".") or known.startswith(stem + "/") or known == stem + "/index.ts" or known == stem + "/index.js"), None)
-                if candidate:
-                    edge_set.add((path, candidate))
-            elif "/" not in module and module.split(".")[0] in path_by_stem:
-                edge_set.add((path, path_by_stem[module.split(".")[0]]))
+            candidate = _resolve_local_import(path, module, paths, paths_by_stem)
+            if candidate and candidate != path:
+                edge_set.add((path, candidate))
 
         if suffix in {".py", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"} and (module_imports or len(lines) > 0):
             modules.append({
@@ -239,6 +234,43 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
         },
     }
 
+
+
+def _resolve_local_import(
+    source_path: str,
+    module: str,
+    known_paths: set[str],
+    paths_by_stem: dict[str, list[str]],
+) -> str | None:
+    """Resolve common Python and JS/TS local imports against indexed paths only."""
+    source = PurePosixPath(source_path)
+    suffix = source.suffix.lower()
+    candidates: list[str] = []
+
+    if module.startswith(".") and suffix in {".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"}:
+        base = source.parent.joinpath(module).as_posix()
+        candidates.extend([base, base + ".ts", base + ".tsx", base + ".js", base + ".jsx", base + ".mjs", base + ".cjs", base + ".json"])
+        candidates.extend(f"{base}/index{ext}" for ext in (".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".json"))
+    else:
+        module_path = module.lstrip(".").replace(".", "/")
+        if module_path:
+            candidates.extend((module_path + ".py", module_path + "/__init__.py"))
+            if module.startswith("."):
+                base = source.parent
+                candidates.extend((base.joinpath(module_path + ".py").as_posix(),
+                                   base.joinpath(module_path, "__init__.py").as_posix()))
+        leaf = module.split(".")[-1]
+        candidates.extend(paths_by_stem.get(leaf, []))
+        candidates.extend(paths_by_stem.get(module.split(".")[0], []))
+
+    for candidate in candidates:
+        normalized = PurePosixPath(candidate).as_posix()
+        if normalized in known_paths:
+            return normalized
+    # Only fall back to a stem when it is unique; duplicate names are ambiguous.
+    stem = module.rstrip("/").split("/")[-1].split(".")[-1]
+    matches = paths_by_stem.get(stem, [])
+    return matches[0] if len(matches) == 1 else None
 
 def _role_for_path(path: str, text: str) -> str:
     lower = path.lower()
