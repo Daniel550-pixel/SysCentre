@@ -112,3 +112,20 @@
 .intake-actions{grid-column:1/-1;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .intake-actions>span{font-size:9px;line-height:1.5;color:#7f8ba2;flex:1 1 240px}
 @media(max-width:650px){.project-intake-form{grid-template-columns:1fr}.project-intake-form .intake-wide{grid-column:auto}.intake-actions{align-items:flex-start;flex-direction:column}}
+
+
+/* Runtime adapter readiness registry */
+.runtime-adapters-panel{scroll-margin-top:20px}
+.runtime-adapter-list{display:grid;border:1px solid #293142;border-radius:10px;overflow:hidden;background:#101722}
+.runtime-adapter-row{display:grid;grid-template-columns:minmax(145px,1.1fr) minmax(180px,1.5fr) auto auto;align-items:center;gap:14px;padding:11px 13px;border-bottom:1px solid #252c3a}
+.runtime-adapter-row:last-child{border-bottom:0}
+.runtime-adapter-name{display:flex;flex-direction:column;gap:4px;min-width:0}
+.runtime-adapter-name strong{font-size:10px;color:#e2e8f3;overflow-wrap:anywhere}
+.runtime-adapter-name span,.runtime-adapter-context span{font-size:8px;color:#7f8ba2;line-height:1.5;overflow-wrap:anywhere}
+.runtime-adapter-context{display:flex;flex-direction:column;gap:4px;min-width:0}
+.runtime-adapter-status{font-size:8px;white-space:nowrap;padding:5px 7px;border-radius:5px}
+.runtime-adapter-status.unconfigured{color:#ffd18b;background:#352a1a;border:1px solid #5b4427}
+.runtime-adapter-status.configured{color:#91e2b9;background:#19352b;border:1px solid #2d5946}
+.runtime-adapter-row>a{font-size:9px;color:#aaa0ff;white-space:nowrap}
+@media(max-width:800px){.runtime-adapter-row{grid-template-columns:minmax(0,1fr) auto}.runtime-adapter-context{grid-column:1}.runtime-adapter-row>a{grid-column:2;grid-row:1}}
+@media(max-width:480px){.runtime-adapter-row{grid-template-columns:1fr}.runtime-adapter-context{grid-column:auto}.runtime-adapter-row>a{grid-column:auto;grid-row:auto}}
