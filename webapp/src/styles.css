@@ -200,3 +200,40 @@
 .hygiene-recommendation{margin-top:9px;color:#c2c8d6;font-size:9px;line-height:1.6}
 .hygiene-recommendation>strong{color:#f0c4ae;font-weight:650}
 @media(max-width:760px){.architecture-hygiene{padding:9px}.architecture-hygiene-finding{padding:9px}.architecture-snapshot{align-items:flex-start;flex-direction:column;gap:7px}}
+
+
+/* Evidence-backed static source architecture analysis */
+.architecture-analysis-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 12px;padding:10px 12px;border:1px solid #293244;border-radius:7px;background:#101722}
+.architecture-analysis-actions>span{font-size:9px;line-height:1.6;color:#8492a9}
+.architecture-analysis-result{margin:10px 0 14px;padding:13px;border:1px solid #3b4160;border-radius:9px;background:linear-gradient(150deg,#151c2b,#10151f)}
+.architecture-analysis-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.architecture-analysis-heading>div{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.architecture-analysis-heading strong{font-size:12px;color:#e1e7f3}
+.architecture-analysis-heading span{font-size:9px;color:#98a5ba}
+.architecture-analysis-heading code{font:9px var(--mono);color:#b9adff}
+.architecture-analysis-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin-bottom:12px}
+.architecture-analysis-metrics article{min-width:0;padding:9px;border:1px solid #2a3448;border-radius:6px;background:#111a28}
+.architecture-analysis-metrics article>span{display:block;font-size:8px;color:#8d9ab0;line-height:1.5}
+.architecture-analysis-metrics article>strong{display:block;margin-top:5px;font-size:17px;font-weight:650;color:#d9d5ff;overflow-wrap:anywhere}
+.architecture-analysis-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.architecture-analysis-grid>article{display:flex;flex-direction:column;gap:6px;min-width:0;padding:10px;border:1px solid #293244;border-radius:6px;background:#111824}
+.architecture-analysis-grid>article>strong{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:#c1cbe0;margin-bottom:2px}
+.architecture-analysis-grid>article>span,.architecture-analysis-grid>article>a{font-size:9px;line-height:1.55;color:#a9b5c9;overflow-wrap:anywhere}
+.architecture-analysis-grid>article>a{color:#aaa0ff;text-decoration:none}
+.architecture-analysis-grid>article>a:hover{text-decoration:underline}
+.architecture-analysis-grid small{font-size:8px;color:#75839b;overflow-wrap:anywhere}
+.architecture-analysis-grid code{font:8px var(--mono);color:#c0b5ff;overflow-wrap:anywhere}
+.architecture-module-details{margin-top:9px;border:1px solid #2b3548;border-radius:6px;background:#101722}
+.architecture-module-details>summary{cursor:pointer;padding:10px;font-size:9px;color:#c5cce0}
+.architecture-module-list,.architecture-edge-list{display:flex;flex-direction:column;gap:5px;padding:0 10px 10px}
+.architecture-module-list>div,.architecture-edge-list>div{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:6px 0;border-top:1px solid #222d3e}
+.architecture-module-list code,.architecture-edge-list code{font:8px var(--mono);color:#b6adff;overflow-wrap:anywhere}
+.architecture-module-list span{font-size:8px;color:#8b98ae;text-align:right}
+.architecture-edge-list>div{justify-content:flex-start;flex-wrap:wrap}
+.architecture-edge-list>div>span{font-size:10px;color:#7685a0}
+.architecture-analysis-findings{margin-top:10px;padding:10px;border-left:2px solid #8b83d7;background:#171d2b}
+.architecture-analysis-findings>strong{font-size:9px;color:#d7d3ff}
+.architecture-analysis-findings p{font-size:9px;line-height:1.6;color:#9ca9bf;margin:6px 0 0}
+.architecture-analysis-limitations{display:flex;flex-direction:column;gap:5px;margin-top:10px}
+.architecture-analysis-limitations span{font-size:8px;line-height:1.6;color:#77869d}
+@media(max-width:760px){.architecture-analysis-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.architecture-analysis-grid{grid-template-columns:1fr}.architecture-analysis-heading{align-items:flex-start;flex-direction:column}.architecture-module-list>div{flex-direction:column;gap:4px}.architecture-module-list span{text-align:left}}
