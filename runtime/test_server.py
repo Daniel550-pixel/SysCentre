@@ -9,6 +9,23 @@ from policy import evaluate_command, policy_catalog
 
 
 class RuntimeTests(unittest.TestCase):
+    def test_repository_architecture_inventory_is_evidence_backed_and_unique(self):
+        inventory = server.repository_architecture_inventory()
+        projects = inventory["repositories"]
+        project_ids = [item["project_id"] for item in projects]
+        self.assertEqual(len(projects), 28)
+        self.assertEqual(len(project_ids), len(set(project_ids)))
+        self.assertIn("archos-repo", project_ids)
+        self.assertIn("networklab", project_ids)
+        allowed_statuses = {"source-verified", "source-limited", "documentation-only", "empty"}
+        for project in projects:
+            self.assertIn(project["architecture_status"], allowed_statuses)
+            self.assertIsInstance(project["layers"], list)
+            self.assertIn("commit", project["source_snapshot"])
+            self.assertFalse(project["source_snapshot"]["deployment_verified"])
+        empty_projects = [item for item in projects if item["architecture_status"] == "empty"]
+        self.assertEqual({item["project_id"] for item in empty_projects}, {"ai-trading-dashboard-2", "ai-os-global-wealth-engine"})
+
     def test_status_contains_policy_and_persistent_ledger_state(self):
         status = server.runtime_status()
         self.assertEqual(status["state"], "online")
