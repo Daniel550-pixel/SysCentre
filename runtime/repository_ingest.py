@@ -261,7 +261,14 @@ def ingest_repository(project_key: str) -> dict[str, Any]:
     files_indexed = sum(1 for path in reusable if cached[path]["file_kind"] == "text")
     files_skipped = len(reusable) - files_indexed
     files_processed = len(reusable)
-    finished = datetime.now(timezone.utc).isoformat()
+    with server._DB_LOCK:
+        with server._database() as connection:
+            connection.execute(
+                """UPDATE ingest_progress SET updated_at = ?, files_processed = ?,
+                   files_indexed = ?, files_skipped = ?, status = 'running'
+                   WHERE project_id = ?""",
+                (datetime.now(timezone.utc).isoformat(), files_processed, files_indexed, files_skipped, item["id"]),
+            )
 
     from concurrent.futures import ThreadPoolExecutor
 
