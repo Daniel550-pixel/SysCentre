@@ -41,7 +41,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "README verified",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "Financial services & fintech"
     },
     {
       "id": "ai-trading-dashboard",
@@ -77,7 +78,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "Repository structure inspected",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "Financial services & fintech"
     },
     {
       "id": "ai-trading-dashboard-2",
@@ -106,7 +108,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "Name only",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "Unvalidated / unclassified"
     },
     {
       "id": "ai-trading-dashboard-3",
@@ -135,7 +138,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "README verified; implementation absent",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "Financial services & fintech (tentative)"
     },
     {
       "id": "finsight-global-ai-2",
@@ -168,7 +172,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "Repository structure inspected",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "Financial services & fintech"
     },
     {
       "id": "finsight-global-ai-4",
@@ -199,7 +204,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "Repository structure inspected; domain inferred from name",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "Financial services & fintech"
     },
     {
       "id": "finsight-global-ai-dashboard",
@@ -234,7 +240,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "Repository structure inspected",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "Regulated finance & public-sector operations"
     },
     {
       "id": "ai-mainframe",
@@ -268,7 +275,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "README verified",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "AI platform engineering & enterprise automation"
     },
     {
       "id": "ai-os-global-super-app",
@@ -297,7 +305,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "Name and README only",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "AI platform engineering (unvalidated)"
     },
     {
       "id": "ai-os-global-wealth-engine",
@@ -326,7 +335,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "Name only",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "Financial services & fintech (unvalidated)"
     },
     {
       "id": "aios-system",
@@ -356,7 +366,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "Name and README only",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "AI platform engineering & enterprise automation"
     },
     {
       "id": "aios-core-architect",
@@ -387,7 +398,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "Repository structure inspected",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "AI platform engineering & enterprise automation"
     },
     {
       "id": "obsidian-ai",
@@ -421,7 +433,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "README and component names inspected",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "Business strategy & AI productivity"
     },
     {
       "id": "fgse",
@@ -454,7 +467,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "README and component names inspected",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "AI visualization (market unvalidated)"
     },
     {
       "id": "archos-repo",
@@ -490,7 +504,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "README and UI source tree inspected",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "AI platform engineering & enterprise automation"
     },
     {
       "id": "archos-3",
@@ -523,7 +538,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "Repository structure inspected",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "Developer productivity & design systems"
     },
     {
       "id": "bitminer-ai",
@@ -560,7 +576,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "Repository structure and UI components inspected",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "Digital assets & computational infrastructure"
     },
     {
       "id": "networklab",
@@ -596,7 +613,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "README verified",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "IT infrastructure & ICT education"
     },
     {
       "id": "secureos",
@@ -632,7 +650,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "Repository structure and UI components inspected",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "Cybersecurity & IT risk"
     },
     {
       "id": "ai-venture-radar",
@@ -668,7 +687,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "README verified",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "Market intelligence & venture development"
     },
     {
       "id": "the-factory",
@@ -703,7 +723,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "README verified",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "AI platform engineering & enterprise automation"
     },
     {
       "id": "the-factory-2",
@@ -742,7 +763,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "README verified",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "AI platform engineering & enterprise automation"
     },
     {
       "id": "the-house-of-coding",
@@ -778,7 +800,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "README verified",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "Developer productivity & engineering"
     },
     {
       "id": "localhost-webapp",
@@ -808,7 +831,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "README inspected",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "Developer productivity (unvalidated)"
     },
     {
       "id": "business-os",
@@ -845,7 +869,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "Repository structure and component names inspected",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "Business operations & enterprise software"
     },
     {
       "id": "onedrive-cleanup-controller",
@@ -881,7 +906,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "README verified",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "IT operations & workflow automation"
     },
     {
       "id": "experienceengine",
@@ -917,7 +943,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "Repository structure and UI components inspected",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "Developer productivity & interactive creation"
     },
     {
       "id": "syscentre",
@@ -953,7 +980,8 @@
       "monetization_status": "Unverified — repository metadata contains no confirmed pricing, customers, or revenue",
       "market_validation": "Unverified — target market is a planning hypothesis unless repository evidence says otherwise",
       "classification_basis": "README and runtime catalog inspected",
-      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery."
+      "classification_note": "Portfolio planning classification only; validate with product evidence and customer discovery.",
+      "market_category": "AI portfolio operations & enterprise systems"
     }
   ]
 }
