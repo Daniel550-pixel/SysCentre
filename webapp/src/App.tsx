@@ -52,6 +52,8 @@ export default function App() {
   const [projectSearch, setProjectSearch] = useState("");
   const [portfolioDimension, setPortfolioDimension] = useState<PortfolioDimension>("business_model");
   const [portfolioGroupFilter, setPortfolioGroupFilter] = useState("");
+  const [portfolioFilters, setPortfolioFilters] = useState<Record<PortfolioDimension, string>>({ business_model: "", system_type: "", sector: "", market_category: "" });
+  const [portfolioSearch, setPortfolioSearch] = useState("");
   const [sourceQuery, setSourceQuery] = useState("");
   const [sourceResults, setSourceResults] = useState<SourceResult[]>([]);
   const [sourceSearching, setSourceSearching] = useState(false);
@@ -169,6 +171,9 @@ export default function App() {
   const sectorCount = new Set(projects.map((project) => project.sector).filter((value): value is string => Boolean(value))).size;
   const marketCount = new Set(projects.map((project) => project.target_market).filter((value): value is string => Boolean(value))).size;
   const verifiedCommercialModels = projects.filter((project) => Boolean(project.monetization_status) && !project.monetization_status!.toLowerCase().startsWith("unverified")).length;
+  const filteredExecutiveProjects = projects.filter((project) => portfolioDimensions.every(({ key }) => !portfolioFilters[key] || dimensionValue(project, key) === portfolioFilters[key]) && (!portfolioSearch.trim() || [project.name, project.purpose, project.target_market, project.portfolio_role].some((value) => value?.toLowerCase().includes(portfolioSearch.trim().toLowerCase())))).sort((left, right) => left.name.localeCompare(right.name));
+  const evidenceGapCount = projects.filter((project) => !project.market_validation || project.market_validation.toLowerCase().startsWith("unverified")).length;
+  const unbuiltCount = projects.filter((project) => /empty|scaffold|concept|unverified|unvalidated/i.test((project.lifecycle_stage || "") + " " + (project.interface_status || ""))).length;
 
   return (
     <div className="app-shell">
@@ -245,6 +250,40 @@ export default function App() {
               </div>}
             </div>
             <div className="portfolio-caveat"><ShieldCheck size={15} /><span><strong>Evidence boundary:</strong> business models and markets are hypotheses; pricing, customers, revenue, and geographic reach are not verified by this catalog. Projects remain separate and no runtime is controlled from this portfolio layer.</span></div>
+            <section className="executive-register" aria-labelledby="executive-register-title">
+              <div className="executive-register-heading">
+                <div><div className="panel-kicker">DECISION SUPPORT</div><h3 id="executive-register-title">Executive portfolio register</h3><p>Apply all four lenses together to isolate a business line, system family, sector, or market. Use this register to identify what is built, what remains unverified, and where evidence is missing.</p></div>
+                <span className="register-count">{filteredExecutiveProjects.length} / {projects.length} systems</span>
+              </div>
+              <div className="register-filters">
+                <label className="register-search"><span>Search portfolio</span><input value={portfolioSearch} onChange={(event) => setPortfolioSearch(event.target.value)} placeholder="Name, purpose, role, target market…" /></label>
+                {portfolioDimensions.map(({ key, label }) => {
+                  const options = Array.from(new Set(projects.map((project) => dimensionValue(project, key)))).sort((left, right) => left.localeCompare(right));
+                  return <label key={key}><span>{label}</span><select value={portfolioFilters[key]} onChange={(event) => setPortfolioFilters((current) => ({ ...current, [key]: event.target.value }))}><option value="">All {label.toLowerCase()}s</option>{options.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>;
+                })}
+                <button className="secondary-button register-reset" onClick={() => { setPortfolioSearch(""); setPortfolioFilters({ business_model: "", system_type: "", sector: "", market_category: "" }); }}>Reset filters</button>
+              </div>
+              <div className="register-summary">
+                <div><span>Market evidence gaps</span><strong>{evidenceGapCount}</strong><small>Market validation not verified</small></div>
+                <div><span>Build / maturity review</span><strong>{unbuiltCount}</strong><small>Scaffolds, concepts, empty or unverified interfaces</small></div>
+                <div><span>Commercial models evidenced</span><strong>{verifiedCommercialModels}</strong><small>Pricing, customers, or revenue evidence</small></div>
+              </div>
+              <div className="executive-register-list">
+                {filteredExecutiveProjects.map((project) => <article className="executive-register-row" key={project.project_id}>
+                  <div className="register-project-identity"><strong>{project.name}</strong><span>{project.portfolio_role || "Portfolio role not classified"}</span><a href={project.repository_url} target="_blank" rel="noreferrer">Open source repository ↗</a></div>
+                  <div className="register-project-fields">
+                    <div><span>Business model</span><strong>{project.business_model || "Not classified"}</strong></div>
+                    <div><span>System</span><strong>{project.system_type || "Not classified"}</strong></div>
+                    <div><span>Sector</span><strong>{project.sector || "Not classified"}</strong></div>
+                    <div><span>Market</span><strong>{project.market_category || project.target_market || "Not classified"}</strong></div>
+                    <div><span>Lifecycle</span><strong>{project.lifecycle_stage || "Not verified"}</strong></div>
+                    <div><span>Commercial evidence</span><strong>{project.monetization_status || "Not recorded"}</strong></div>
+                  </div>
+                  <div className="register-validation"><span className={project.market_validation && !project.market_validation.toLowerCase().startsWith("unverified") ? "evidence-confirmed" : "evidence-unverified"}>{project.market_validation && !project.market_validation.toLowerCase().startsWith("unverified") ? "Evidence recorded" : "Validation gap"}</span><p>{project.classification_basis || "Classification basis not recorded"}</p></div>
+                </article>)}
+                {!filteredExecutiveProjects.length && <div className="empty-state">No systems match the current combination of filters.</div>}
+              </div>
+            </section>
           </section>
 
           <section className="panel projects-panel" id="projects">
