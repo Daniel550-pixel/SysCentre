@@ -12,7 +12,7 @@ type CommandResponse = { ok: boolean; command: string; result?: unknown; error?:
 type PortfolioDimension = "business_model" | "system_type" | "sector" | "market_category";
 type Project = { project_id: string; name: string; repository_url: string; default_branch: string; description: string; latest_commit: string; indexed_at: string; file_count: number; text_file_count: number; skipped_file_count: number; status: string; category?: string; purpose?: string; capabilities?: string[]; interface_kind?: string; interface_status?: string; business_model?: string; system_type?: string; sector?: string; target_market?: string; market_segments?: string[]; market_category?: string; portfolio_role?: string; lifecycle_stage?: string; monetization_status?: string; market_validation?: string; classification_basis?: string; classification_note?: string };
 type SourceResult = { project_id: string; project_name: string; repository_url: string; path: string; blob_sha: string; size_bytes: number; excerpt: string };
-type InventoryProject = { id: string; name: string; status: string; category: string; candidate_repositories: string[] };
+type InventoryProject = { id: string; name: string; status: string; category: string; candidate_repositories: string[]; description?: string; origin?: string; created_at?: string };
 type IngestJob = { project_id: string; target_commit: string; branch: string; started_at: string; updated_at: string; status: string; files_seen: number; files_processed: number; files_indexed: number; files_skipped: number; error: string };
 
 function formatUptime(seconds = 0) {
@@ -49,6 +49,11 @@ export default function App() {
   const [inventoryProjects, setInventoryProjects] = useState<InventoryProject[]>([]);
   const [ingesting, setIngesting] = useState<string | null>(null);
   const [projectMessage, setProjectMessage] = useState("");
+  const [newProjectName, setNewProjectName] = useState("");
+  const [newProjectCategory, setNewProjectCategory] = useState("new-project");
+  const [newProjectDescription, setNewProjectDescription] = useState("");
+  const [newProjectRepository, setNewProjectRepository] = useState("");
+  const [registeringProject, setRegisteringProject] = useState(false);
   const [projectSearch, setProjectSearch] = useState("");
   const [portfolioDimension, setPortfolioDimension] = useState<PortfolioDimension>("business_model");
   const [portfolioGroupFilter, setPortfolioGroupFilter] = useState("");
@@ -113,6 +118,26 @@ export default function App() {
     }
   }
 
+  async function registerProject(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!newProjectName.trim() || registeringProject) return;
+    setRegisteringProject(true);
+    setProjectMessage("Registering project identity…");
+    try {
+      const response = await fetch(API + "/api/project-inventory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newProjectName.trim(), category: newProjectCategory.trim() || "new-project", description: newProjectDescription.trim(), repository_url: newProjectRepository.trim() }),
+        signal: AbortSignal.timeout(10000),
+      });
+      const data = await response.json() as { ok?: boolean; project?: InventoryProject; error?: string };
+      if (!response.ok || !data.ok) throw new Error(data.error ?? "Project registration failed");
+      setNewProjectName(""); setNewProjectCategory("new-project"); setNewProjectDescription(""); setNewProjectRepository("");
+      setProjectMessage((data.project?.name ?? "Project") + " registered. Repository matching and runtime adapter setup remain separate steps.");
+      await refresh();
+    } catch (error) { setProjectMessage("Project registration failed: " + (error instanceof Error ? error.message : "unknown error")); }
+    finally { setRegisteringProject(false); }
+  }
   async function indexProject(projectId: string, projectName: string) {
     if (ingesting) return;
     setIngesting(projectId);
@@ -318,6 +343,17 @@ export default function App() {
             <div className="project-disclaimer"><ShieldCheck size={14} /><span>Sensitive-looking paths, generated folders, binary files, and oversized files are excluded from the text index.</span></div>
           </section>
 
+          <section className="panel projects-panel intake-panel" id="project-intake">
+            <div className="panel-header"><div><div className="panel-kicker">PORTFOLIO EXPANSION</div><h2>Register a new project</h2></div><span className="project-count">Extensible registry</span></div>
+            <p className="panel-description">Add a project created here or elsewhere without changing the existing 28 repositories. Registration records the project identity; it does not claim the code exists, map an unverified repository, or execute anything.</p>
+            <form className="project-intake-form" onSubmit={registerProject}>
+              <label><span>Project name *</span><input required maxLength={120} value={newProjectName} onChange={(event) => setNewProjectName(event.target.value)} placeholder="e.g. AI Appointment Setter SaaS" /></label>
+              <label><span>System category</span><input maxLength={60} value={newProjectCategory} onChange={(event) => setNewProjectCategory(event.target.value)} placeholder="ai-platform, finance, security…" /></label>
+              <label className="intake-wide"><span>Purpose / description</span><textarea maxLength={1000} value={newProjectDescription} onChange={(event) => setNewProjectDescription(event.target.value)} placeholder="What should this project do? Keep it concise." rows={2} /></label>
+              <label className="intake-wide"><span>GitHub repository URL (optional)</span><input type="url" value={newProjectRepository} onChange={(event) => setNewProjectRepository(event.target.value)} placeholder="https://github.com/owner/repository" /></label>
+              <div className="intake-actions"><button className="secondary-button project-index-button" type="submit" disabled={registeringProject || !newProjectName.trim()}>{registeringProject ? "Registering…" : "Add to project inventory"}</button><span>New entries require repository verification and an execution adapter before they can be run.</span></div>
+            </form>
+          </section>
           {inventoryProjects.length > 0 && <section className="panel projects-panel inventory-panel" id="inventory-audit">
             <div className="panel-header"><div><div className="panel-kicker">INVENTORY RECONCILIATION</div><h2>Historical projects awaiting repository match</h2></div><span className="project-count">{inventoryProjects.length} unresolved</span></div>
             <p className="panel-description">These project identities were found in the historical project inventory but do not have a confirmed, exact repository mapping yet. Candidate repositories are suggestions only; SysCentre will not index them as these projects until the match is confirmed.</p>
