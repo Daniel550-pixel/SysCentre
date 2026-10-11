@@ -12,6 +12,14 @@ class RuntimeTests(unittest.TestCase):
         self.assertEqual(status["event_ledger"], "sqlite")
         self.assertTrue(status["event_ledger_path"])
 
+    def test_cors_allows_static_fallback_and_local_dev_origins_only(self):
+        self.assertTrue(server._origin_is_allowed("https://daniel550-pixel.github.io"))
+        self.assertTrue(server._origin_is_allowed("http://127.0.0.1:5173"))
+        self.assertTrue(server._origin_is_allowed("http://localhost:5173"))
+        self.assertFalse(server._origin_is_allowed("https://example.org"))
+        self.assertFalse(server._origin_is_allowed("*"))
+        self.assertFalse(server._origin_is_allowed(None))
+
     def test_allowlisted_command_runs(self):
         result = server.execute_command("help")
         self.assertTrue(result["ok"])
