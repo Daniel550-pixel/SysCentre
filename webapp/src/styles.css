@@ -129,3 +129,54 @@
 .runtime-adapter-row>a{font-size:9px;color:#aaa0ff;white-space:nowrap}
 @media(max-width:800px){.runtime-adapter-row{grid-template-columns:minmax(0,1fr) auto}.runtime-adapter-context{grid-column:1}.runtime-adapter-row>a{grid-column:2;grid-row:1}}
 @media(max-width:480px){.runtime-adapter-row{grid-template-columns:1fr}.runtime-adapter-context{grid-column:auto}.runtime-adapter-row>a{grid-column:auto;grid-row:auto}}
+
+/* Evidence-backed per-repository application architecture explorer */
+.architecture-panel{scroll-margin-top:18px}
+.architecture-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}
+.architecture-kpis article{min-width:0;padding:14px;border:1px solid #292f40;border-radius:9px;background:linear-gradient(145deg,#171d2a,#111620)}
+.architecture-kpis article span,.architecture-kpis article small{display:block;color:#8792a8;font-size:9px;line-height:1.45}
+.architecture-kpis article strong{display:block;margin:7px 0 5px;color:#e7eaf5;font-size:24px;font-weight:650;letter-spacing:-.04em}
+.architecture-kpis article small{font-size:8px}
+.architecture-toolbar{display:flex;align-items:center;gap:10px;margin:6px 0 13px}
+.architecture-toolbar .project-filter{flex:1;min-width:180px}
+.architecture-status-filter{min-height:35px;max-width:205px;padding:8px 10px;color:#d8deec;background:#111824;border:1px solid #30394b;border-radius:7px;font-size:10px;outline:none}
+.architecture-list{display:grid;gap:8px}
+.architecture-card{border:1px solid #2a3142;border-radius:9px;background:#111620;overflow:hidden}
+.architecture-card[open]{border-color:#4d477b;background:#10151f}
+.architecture-card summary{display:grid;grid-template-columns:minmax(140px,1fr) minmax(140px,1.5fr) auto 18px;align-items:center;gap:14px;padding:14px;list-style:none;cursor:pointer}
+.architecture-card summary::-webkit-details-marker{display:none}
+.architecture-identity{display:flex;flex-direction:column;gap:5px;min-width:0}
+.architecture-identity strong{font-size:11px;line-height:1.4;color:#e4e8f2;overflow-wrap:anywhere}
+.architecture-identity span{font:8px var(--mono);color:#7f8ba2}
+.architecture-stack{display:flex;flex-wrap:wrap;gap:5px;min-width:0}
+.architecture-stack span{font-size:8px;color:#aab4c8;background:#1a2130;border:1px solid #2a3346;border-radius:4px;padding:4px 6px}
+.architecture-status{display:inline-flex;align-items:center;justify-content:center;max-width:155px;text-align:center;padding:5px 7px;border:1px solid #394255;border-radius:5px;background:#1b2330;color:#c2ccdf;font-size:8px;line-height:1.35;white-space:normal}
+.architecture-status.source-verified{background:#173329;border-color:#28543f;color:#8fe0b8}
+.architecture-status.source-limited{background:#372c1c;border-color:#5b472c;color:#f0c98a}
+.architecture-status.documentation-only{background:#28233c;border-color:#46406e;color:#c7bdff}
+.architecture-status.empty{background:#352328;border-color:#68414a;color:#f0a0a5}
+.architecture-chevron{color:#8e84d6;transition:transform .15s}
+.architecture-card[open] .architecture-chevron{transform:rotate(90deg)}
+.architecture-detail{padding:0 14px 14px;border-top:1px solid #252d3d}
+.architecture-summary{font-size:10px;line-height:1.7;color:#adb7ca;margin:13px 0}
+.architecture-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.architecture-layer{min-width:0;padding:12px;border:1px solid #293244;border-radius:7px;background:#111a27}
+.architecture-layer>span{display:block;font:8px var(--mono);letter-spacing:.8px;text-transform:uppercase;color:#a59aff;margin-bottom:6px}
+.architecture-layer>strong{display:block;font-size:10px;line-height:1.5;font-weight:600;color:#e0e5f1;overflow-wrap:anywhere}
+.architecture-layer>p{font-size:9px;line-height:1.6;color:#8f9bb1;margin:7px 0}
+.architecture-paths{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.architecture-paths a,.architecture-metadata-grid a{max-width:100%;padding:4px 6px;border:1px solid #32344f;border-radius:4px;background:#191a2b;color:#aaa0ff;font:8px/1.4 var(--mono);overflow-wrap:anywhere;text-decoration:none}
+.architecture-paths a:hover,.architecture-metadata-grid a:hover{border-color:#7770bd;text-decoration:underline}
+.architecture-metadata-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:9px}
+.architecture-metadata-grid article{display:flex;flex-direction:column;align-items:flex-start;gap:7px;min-width:0;padding:11px;border:1px solid #293244;border-radius:7px;background:#0e141e}
+.architecture-metadata-grid article>strong{font-size:9px;color:#cbd4e5;margin-bottom:2px}
+.architecture-metadata-grid article>span{font-size:9px;line-height:1.6;color:#8e9bb1;overflow-wrap:anywhere}
+.architecture-snapshot{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px;margin-top:10px;padding:10px 12px;border:1px solid #292f40;border-radius:7px;background:#121824;color:#8d99ae;font-size:8px}
+.architecture-snapshot code{color:#c1b8ff;font:9px var(--mono)}
+.architecture-snapshot a{color:#a99eff}
+.architecture-limitations{margin-top:9px;padding:10px 12px;border:1px solid #51422a;border-radius:7px;background:#211d18}
+.architecture-limitations>strong{display:block;color:#e9c88f;font-size:9px;margin-bottom:5px}
+.architecture-limitations p{color:#b3a38a;font-size:9px;line-height:1.6;margin:4px 0}
+@media(max-width:1050px){.architecture-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.architecture-card summary{grid-template-columns:minmax(120px,1fr) minmax(130px,1.3fr) auto 18px;gap:9px}}
+@media(max-width:760px){.architecture-kpis{gap:8px}.architecture-kpis article{padding:11px}.architecture-kpis article strong{font-size:21px}.architecture-toolbar{align-items:stretch;flex-direction:column}.architecture-toolbar .project-filter{min-width:0;width:100%}.architecture-status-filter{max-width:none;width:100%}.architecture-card summary{grid-template-columns:minmax(0,1fr) auto 18px;gap:8px;padding:12px}.architecture-stack{grid-column:1/3;grid-row:2}.architecture-status{grid-column:2;grid-row:1}.architecture-chevron{grid-column:3;grid-row:1}.architecture-detail-grid,.architecture-metadata-grid{grid-template-columns:1fr}.architecture-snapshot{align-items:flex-start;flex-direction:column;gap:7px}}
+
