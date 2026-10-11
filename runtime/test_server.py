@@ -7,6 +7,7 @@ from unittest.mock import Mock, patch
 import server
 from policy import evaluate_command, policy_catalog
 from repository_ingest import load_catalog
+from architecture_analysis import analyze_indexed_repository
 
 
 class RuntimeTests(unittest.TestCase):
@@ -173,6 +174,51 @@ class RuntimeTests(unittest.TestCase):
         self.assertTrue(any(item["id"] == event["id"] for item in events))
         stored = next(item for item in events if item["id"] == event["id"])
         self.assertEqual(stored["details"]["test"], True)
+
+
+    def test_static_architecture_analyzer_uses_indexed_source_without_execution(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            database_path = Path(temporary) / "analysis.db"
+            sources = {
+                "main.py": "from fastapi import FastAPI\nimport sqlite3\nfrom api import router\napp = FastAPI()\napp.include_router(router)\n@app.get('/health')\ndef health():\n    return {'ok': True}\nconn = sqlite3.connect('app.db')\n",
+                "api.py": "from fastapi import APIRouter\nrouter = APIRouter()\n@router.post('/items')\ndef create_item():\n    return {'ok': True}\n",
+                "requirements.txt": "fastapi==0.115.0\n",
+            }
+            with patch.object(server, "DB_PATH", database_path):
+                from repository_ingest import _db_executescript
+                _db_executescript()
+                with server._DB_LOCK:
+                    with server._database() as connection:
+                        connection.execute(
+                            """INSERT INTO projects
+                               (project_id, name, repository_url, default_branch, description, latest_commit,
+                                indexed_at, file_count, text_file_count, skipped_file_count, status, metadata_json)
+                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                            ("analysis-fixture", "Analysis Fixture", "https://github.com/example/fixture", "main",
+                             "fixture", "abc123", "2026-10-11T00:00:00Z", len(sources), len(sources), 0, "indexed", "{}"),
+                        )
+                        for path, content in sources.items():
+                            connection.execute(
+                                """INSERT INTO repository_files
+                                   (project_id, path, blob_sha, size_bytes, file_kind, content, skip_reason)
+                                   VALUES (?, ?, ?, ?, 'text', ?, '')""",
+                                ("analysis-fixture", path, "blob-" + path, len(content.encode("utf-8")), content),
+                            )
+                result = analyze_indexed_repository("analysis-fixture")
+
+        analysis = result["analysis"]
+        self.assertEqual(result["project"]["indexed_commit"], "abc123")
+        self.assertEqual(analysis["source_files_analyzed"], 3)
+        self.assertGreaterEqual(analysis["routes_detected"], 2)
+        self.assertIn("main.py", analysis["entrypoints"])
+        self.assertTrue(any(item["name"] == "fastapi" for item in analysis["framework_signals"]))
+        self.assertTrue(any(item["name"] == "SQLite" for item in analysis["data_store_signals"]))
+        self.assertTrue(any(edge["from"] == "main.py" and edge["to"] == "api.py" for edge in analysis["dependency_edges"]))
+        self.assertTrue(any("never" in item.lower() or "static" in item.lower() for item in analysis["limitations"]))
+
+    def test_static_architecture_analyzer_requires_indexed_repository(self):
+        with self.assertRaisesRegex(ValueError, "has not been indexed"):
+            analyze_indexed_repository("not-indexed-fixture")
 
 
 if __name__ == "__main__":
