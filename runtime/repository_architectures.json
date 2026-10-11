@@ -1,7 +1,7 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "generated_at": "2026-10-11",
-  "purpose": "Evidence-backed architecture inventory for the 28 repositories known to SysCentre. Summaries are derived from the default-branch source tree, selected entrypoints, README files and dependency manifests. Architecture documentation never implies deployment or runtime health.",
+  "purpose": "Evidence-backed application architecture snapshots for the 28 registered GitHub repositories. Repository code is inspected as source only; architecture descriptions do not imply that applications are deployed or healthy.",
   "owner": "Daniel550-pixel",
   "scan_method": {
     "source": "GitHub recursive tree API plus selected README, dependency-manifest and application-entrypoint files",
@@ -87,11 +87,15 @@
         "commit": "db006841c3369938a126449e30f708052ec6d21d",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "cd71dc4e56f43544e9e0caa63d33ee1998b6bf06",
+        "commit_date": "2025-11-10T12:21:43Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "Dependency breadth exceeds the currently visible entrypoint implementation; treat advertised analytics as unverified until traced through source."
-      ]
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "ai-trading-dashboard",
@@ -153,10 +157,28 @@
         "commit": "7f9f2055744719bbc28cca7de5de1c11ae838fa9",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "a3c1d7c12e75c60f4ebdbef286ef26bcc7f0fd35",
+        "commit_date": "2025-11-04T12:12:21Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "The /run endpoint currently returns a simple success result; do not treat it as proof a real model was executed."
+      ],
+      "repository_hygiene_findings": [
+        {
+          "severity": "high",
+          "category": "repository-hygiene",
+          "title": "Personal and recovered artifacts mixed into source",
+          "description": "Tracked paths include personal email/PDF/document exports, desktop shortcuts, ZIP archives and a recovered SQL dump alongside application source. This creates privacy, data-retention and accidental-disclosure risk.",
+          "evidence_paths": [
+            "Fw_ Bewijs van inschrijving.eml",
+            "OA_AP_D09C Bewijs van inschrijving (Briefpapier).pdf",
+            "Recovered-feb-25-2025-0947.~vs3CF8.sql",
+            "ChatGPT gesprekken FinSight Global AI OS Platform.odt"
+          ],
+          "recommended_action": "Review repository visibility and Git history; remove unrelated personal/recovered artifacts in a separate cleanup commit, add targeted ignore rules, and inspect the SQL/archive contents locally without copying them into SysCentre."
+        }
       ]
     },
     {
@@ -178,11 +200,15 @@
         "commit": null,
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": null,
+        "commit_date": null,
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "Repository has no Git objects / source tree; architecture remains unassessed."
-      ]
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "ai-trading-dashboard-3",
@@ -218,11 +244,15 @@
         "commit": "fc602daca1e43d10091244d595765c93bdda1a47",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "b58db45cf805f7f33666aa0fa341a71447c1e980",
+        "commit_date": "2025-11-04T12:04:27Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "Any intended architecture is a concept, not an implemented application."
-      ]
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "finsight-global-ai-2",
@@ -283,10 +313,28 @@
         "commit": "121a6ba2e90e7b173feefe438f84e793df742d0d",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "17bf6ed9e36015002d4d340c7a682d3e16b39a98",
+        "commit_date": "2025-11-04T14:32:02Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "Legacy lineage versus other FinSight repositories is not confirmed."
+      ],
+      "repository_hygiene_findings": [
+        {
+          "severity": "high",
+          "category": "repository-hygiene",
+          "title": "Legacy repository contains personal and recovery artifacts",
+          "description": "Tracked paths include personal email/PDF/document exports, desktop shortcuts, ZIP archives and a recovered SQL dump alongside legacy application source. Treat these as potentially sensitive; their contents were not read by SysCentre.",
+          "evidence_paths": [
+            "Fw_ Bewijs van inschrijving.eml",
+            "OA_AP_D09C Bewijs van inschrijving (Briefpapier).pdf",
+            "Recovered-feb-25-2025-0947.~vs3CF8.sql",
+            "ChatGPT gesprekken FinSight Global AI OS Platform.odt"
+          ],
+          "recommended_action": "Review repository visibility and Git history; remove unrelated artifacts in a separate cleanup commit, add ignore rules, and inspect any SQL/archive files locally for credentials or personal information before retaining them."
+        }
       ]
     },
     {
@@ -326,11 +374,15 @@
         "commit": "a081dd0fa4a33efa6c20cea6416e65a28f7a57cc",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "6c60d34de60ad029bdbb36001f4491d3954b83c0",
+        "commit_date": "2025-11-05T08:44:17Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "The repo tree is very small and has no README; product purpose beyond the entrypoint is not established."
-      ]
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "finsight-global-ai-dashboard",
@@ -338,48 +390,110 @@
       "repository_url": "https://github.com/Daniel550-pixel/FinSight_Global_AI_Dashboard",
       "default_branch": "master",
       "architecture_status": "source-verified",
-      "architecture_summary": "Python finance/operations module collection with 37 tracked files and Streamlit/plotting/market-data dependencies. A canonical entrypoint and module wiring were not verified.",
+      "architecture_summary": "Python Streamlit financial workstation. finSight_master.py is a thin import wrapper for finsight_terminal_ui.py, which configures the Streamlit page and dashboard interface; additional tracked modules cover market analysis, sentiment, backtesting, simulation, hedging, broker/auth/alert helpers and operations scripts.",
       "technology_stack": [
         "Python",
-        "Streamlit dependency",
-        "Pandas / NumPy / Plotly / yfinance"
+        "Streamlit",
+        "Pandas",
+        "NumPy",
+        "Plotly (declared in requirements)",
+        "yfinance (declared in requirements)"
       ],
-      "entrypoints": [],
+      "entrypoints": [
+        "finSight_master.py",
+        "finsight_terminal_ui.py"
+      ],
       "layers": [
         {
-          "name": "Domain modules",
-          "role": "Finance/dashboard-related source modules and operational scripts exist",
-          "components": "Domain logic and support modules",
+          "name": "Presentation",
+          "role": "Streamlit UI configures the FinSight Global page and composes dashboard content.",
+          "components": "finSight_master.py delegates to finsight_terminal_ui.py",
           "evidence_paths": [
+            "finSight_master.py",
+            "finsight_terminal_ui.py",
             "requirements.txt"
           ]
         },
         {
-          "name": "Presentation",
-          "role": "Streamlit dependency is declared; an entrypoint was not confirmed in the scanned tree",
-          "components": "No canonical UI entrypoint identified",
+          "name": "Market and portfolio analytics",
+          "role": "Separate modules exist for market engines, sentiment, Monte Carlo, backtesting, hedging, valuation and deep reinforcement learning; exact production wiring is not claimed.",
+          "components": "market_engine.py, sentiment_analysis.py, monte_carlo.py, backtest.py, portfolio_hedging.py, deep_rl_agent.py",
           "evidence_paths": [
-            "requirements.txt"
+            "market_engine.py",
+            "sentiment_analysis.py",
+            "monte_carlo.py",
+            "backtest.py",
+            "portfolio_hedging.py",
+            "deep_rl_agent.py"
+          ]
+        },
+        {
+          "name": "API / user support modules",
+          "role": "Broker API, authentication, alert and utility modules are present; external connection and authorization behavior require independent review.",
+          "components": "broker_api.py, auth.py, alerts.py, utils.py",
+          "evidence_paths": [
+            "broker_api.py",
+            "auth.py",
+            "alerts.py",
+            "utils.py"
+          ]
+        },
+        {
+          "name": "Operations and packaging",
+          "role": "Container/devcontainer configuration and multiple shell upgrade/restore scripts are tracked.",
+          "components": "Dockerfile, .devcontainer configuration and maintenance scripts",
+          "evidence_paths": [
+            "Dockerfile",
+            ".devcontainer/devcontainer.json",
+            "finsight_full_upgrade.sh",
+            "finsight_safe_restore_upgrade.sh"
           ]
         }
       ],
       "state_and_data": [
-        "Persistent store not confirmed from manifest/tree scan."
+        "No persistent database configuration was confirmed from the inspected manifests and source tree.",
+        "A tracked .env file is present. Its contents were intentionally not read or copied; treat it as a credential-exposure risk until reviewed."
       ],
       "external_integrations": [
-        "yfinance dependency is declared; external API use unverified."
+        "requirements.txt declares yfinance; live market-data calls were not tested.",
+        "broker_api.py and auth.py exist, but configured broker/provider endpoints and live connectivity are not verified."
       ],
       "evidence_paths": [
-        "requirements.txt"
+        "finSight_master.py",
+        "finsight_terminal_ui.py",
+        "requirements.txt",
+        "market_engine.py",
+        "backtest.py",
+        "broker_api.py",
+        "auth.py",
+        "Dockerfile",
+        ".env"
       ],
       "source_snapshot": {
         "commit": "f1a8aed0429cb9a96be62bfa25fbfd6b700e0c17",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "dff0bb48e04396a73180d441e8eb5dcd26332c9d",
+        "commit_date": "2026-09-18T08:06:50Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
-        "No README or canonical UI entrypoint surfaced in the scan; inspect module paths before running."
+        "The presence of analytics modules does not prove all modules are wired into the Streamlit page.",
+        "requirements.txt uses broad, unpinned dependency declarations.",
+        "The tracked .env path is a high-priority repository hygiene concern; do not display or index its contents."
+      ],
+      "repository_hygiene_findings": [
+        {
+          "severity": "high",
+          "category": "secret-management",
+          "title": "Tracked .env file",
+          "description": "The current tracked tree contains a .env file. Its contents were not read or copied into SysCentre. If it contains real credentials, they may be exposed to repository readers and Git history.",
+          "evidence_paths": [
+            ".env"
+          ],
+          "recommended_action": "Review the file and repository access immediately; rotate any real credentials, remove the file from future commits, add it to .gitignore, and keep only a redacted .env.example. Historical commits may still contain prior values."
+        }
       ]
     },
     {
@@ -430,11 +544,15 @@
         "commit": "f27ba860005a32ebd5d45c49c6e2aa8b82483252",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "7485b330520df53c2dce23d29c9bd37329d1518b",
+        "commit_date": "2026-08-25T09:47:26Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "Not a standalone web application; no UI or network server is intended."
-      ]
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "ai-os-global-super-app",
@@ -470,11 +588,15 @@
         "commit": "04a19fa52cb1f5589baa4eaa81dd8c28a4d41802",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "4677376151061a9acd64bcc09df381c5c9248f5a",
+        "commit_date": "2025-12-11T13:27:00Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "Feature architecture and runtime behavior cannot be verified yet."
-      ]
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "ai-os-global-wealth-engine",
@@ -495,11 +617,15 @@
         "commit": null,
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": null,
+        "commit_date": null,
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "Empty Git repository; no architecture can be claimed."
-      ]
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "aios-system",
@@ -535,11 +661,15 @@
         "commit": "135156f9d7bee89002bb0748ee38ac5c37168678",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "def6579b1d895d59731484f2df5313789ea7c49b",
+        "commit_date": "2025-12-30T14:04:04Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "This is not yet an app architecture backed by runnable source."
-      ]
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "aios-core-architect",
@@ -598,11 +728,15 @@
         "commit": "4ca3b69e27dca5d1b46f8ed52abce8b411f6eafe",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "4fee0b4ffd599bcce511bf1ca5d4ef22c18ab66c",
+        "commit_date": "2026-01-20T14:03:59Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "configs/system_config.json and configs/modules.json are referenced by app.py but were not in the scanned tree. Validate dependencies/config before startup."
-      ]
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "obsidian-ai",
@@ -680,11 +814,15 @@
         "commit": "2de5c83490209ae441a91ed4aa270a58b3d57bf8",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "a58d44e05e98f9372455dce7b7cdf88b2d4e1d3f",
+        "commit_date": "2026-03-25T15:10:50Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "The repository's server dependency is declared, but no server.ts was found in the scanned tree; backend hosting model is not confirmed."
-      ]
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "fgse",
@@ -761,11 +899,15 @@
         "commit": "8abadadb9efaa7a7fe9237d1e37713613447701a",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "97ed438ae7f00a1d0dfb35953666d4e1787e5b50",
+        "commit_date": "2026-04-22T17:31:31Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "Source includes demo/mock labels and illustrative thresholds; do not treat labels such as 'deployed' as verified infrastructure state."
-      ]
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "archos-repo",
@@ -860,11 +1002,15 @@
         "commit": "eb935d3a1337b469f8c29b8ec01c9200cd8ebd8e",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "21a47d0942f96f85b0d8fe9d78bcc1730db1fba4",
+        "commit_date": "2026-08-28T12:33:39Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "Architecture combines present modules and documented direction; no claim that every integration or production security control is live."
-      ]
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "archos-3",
@@ -933,11 +1079,15 @@
         "commit": "0616406be6678231b29f8c9fc7f2e5f7e7e37fe3",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "82450dd54de067e963d17dc80606332fe455296f",
+        "commit_date": "2026-08-21T14:49:51Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "Recursive tree did not show client/package.json at the expected path; client build/package wiring needs a separate check."
-      ]
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "bitminer-ai",
@@ -1020,11 +1170,15 @@
         "commit": "5616d8c8f7a6d32dabed426b1eafdb3c18b83146",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "8900792a8df62e5041fccdf30c57f95b4a05642d",
+        "commit_date": "2026-08-31T17:36:49Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "Module names evidence intended controls; do not assume the complete mining, economic, or fleet pipeline is live in production."
-      ]
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "networklab",
@@ -1098,11 +1252,15 @@
         "commit": "8f0bf60bd63b52bbbe397b5f0fbeb8ebd192284a",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "4af1b7bc817894f0edd0f4c947749193b2a96bd7",
+        "commit_date": "2026-10-09T08:59:45Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "Documented target topology values are not the same as a live VM/network health check."
-      ]
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "secureos",
@@ -1183,114 +1341,222 @@
         "commit": "b3afc717d0ba45445e9c0f730a6dda4ec96ffb87",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "0d5cff5b9938074fd252f0a874a6882447f4979a",
+        "commit_date": "2026-09-04T09:09:06Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "This architecture records code boundaries; runtime protection of an actual host is not established by this scan."
-      ]
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "ai-venture-radar",
       "name": "AI-Venture-Radar",
       "repository_url": "https://github.com/Daniel550-pixel/AI-Venture-Radar",
       "default_branch": "main",
-      "architecture_status": "documentation-only",
-      "architecture_summary": "README documents an intended signal-to-opportunity pipeline, but the scanned default branch contains only README.md and no runnable engine, UI, manifest or data adapters.",
+      "architecture_status": "source-limited",
+      "architecture_summary": "Python domain-core prototype for AI Venture Radar. Tracked code currently implements dataclass domain models for evidence/signals/opportunities, deterministic weighted opportunity scoring, and deterministic adversarial validation; the README's broader data-ingestion, agents, opportunity graph, API and dashboard are planned rather than present in the current tree.",
       "technology_stack": [
-        "No implementation stack confirmed"
+        "Python",
+        "Python standard library (dataclasses, datetime, enum, uuid, typing)"
       ],
-      "entrypoints": [
-        "README.md (design description only)"
-      ],
+      "entrypoints": [],
       "layers": [
         {
-          "name": "Documented pipeline",
-          "role": "World data → observations/signals → gap discovery → opportunity hypothesis → adversarial validation → venture thesis",
-          "components": "Architecture described in prose/diagrams, not backed by tracked implementation",
+          "name": "Domain model",
+          "role": "Typed in-memory records for evidence, signals and opportunities, including polarity/status/confidence metadata.",
+          "components": "Evidence, Signal, Opportunity and status enums",
+          "evidence_paths": [
+            "core/models.py"
+          ]
+        },
+        {
+          "name": "Scoring",
+          "role": "Deterministic weighted opportunity score and evidence-derived confidence calculation.",
+          "components": "DEFAULT_WEIGHTS and score_opportunity()",
+          "evidence_paths": [
+            "core/scoring.py",
+            "core/models.py"
+          ]
+        },
+        {
+          "name": "Adversarial validation",
+          "role": "Deterministic checks for supporting evidence, counter-evidence and required problem/gap descriptions.",
+          "components": "validate_opportunity()",
+          "evidence_paths": [
+            "core/adversarial.py",
+            "core/models.py"
+          ]
+        },
+        {
+          "name": "Architecture specification",
+          "role": "Documents the intended signal-to-opportunity pipeline, but the described ingestion, agents, graph, storage, API and dashboard are not present in the current tree.",
+          "components": "README architecture and proposed repository structure",
           "evidence_paths": [
             "README.md"
           ]
         }
       ],
       "state_and_data": [
-        "No data store or pipeline code currently in the scanned tree."
+        "Evidence, Signal and Opportunity are in-memory Python dataclasses; no persistence layer is present in the tracked tree.",
+        "No ingestion scheduler, source connector or API endpoint is present in the current tracked tree."
       ],
-      "external_integrations": [
-        "News/research/company/market/regulatory sources are described as intended sources, not verified integrations."
-      ],
+      "external_integrations": [],
       "evidence_paths": [
-        "README.md"
+        "README.md",
+        "core/__init__.py",
+        "core/models.py",
+        "core/scoring.py",
+        "core/adversarial.py"
       ],
       "source_snapshot": {
         "commit": "9519620d74164ae2a610bd3f6a75dbb4364f4672",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "721d4fe91a12b37e7717bb81e51bb91d864f89e0",
+        "commit_date": "2026-09-04T13:16:08Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
-        "Recorded as documented architecture, not implemented app behavior."
-      ]
+        "README explicitly identifies the repository as Phase 0 / architecture initialized.",
+        "No runnable service, web UI, external data adapters, persistence layer or tests were found in the current tracked tree.",
+        "Opportunity scores and validation are deterministic domain primitives, not evidence that market data has been collected or a venture has been validated."
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "the-factory",
       "name": "The-Factory",
       "repository_url": "https://github.com/Daniel550-pixel/The-Factory",
       "default_branch": "main",
-      "architecture_status": "source-limited",
-      "architecture_summary": "Python package metadata and an architecture/audit README define a proposed systems kernel of agent runtime, policy gate, event ledger and context/memory. README explicitly says extraction/audit is in progress and the kernel is not final.",
+      "architecture_status": "source-verified",
+      "architecture_summary": "Python 3.11+ alpha package implementing reusable system primitives for governed proposals and execution, agent/provider abstractions, events and provenance, context/memory, recovery, scheduling, simulation, observability, tenancy and storage. It is an importable/package-level runtime, not a verified deployed HTTP application; the README still describes kernel extraction and architecture lock as in progress.",
       "technology_stack": [
         "Python >=3.11",
-        "setuptools",
-        "pytest / Ruff / mypy configuration"
+        "setuptools package",
+        "pytest",
+        "Ruff / mypy configuration"
       ],
       "entrypoints": [
-        "No canonical runnable server entrypoint verified in inspected key files"
+        "factory/__main__.py",
+        "factory/api.py"
       ],
       "layers": [
         {
-          "name": "Architecture target",
-          "role": "Agent runtime → policy gate → event ledger → context/memory",
-          "components": "Documented kernel hypothesis",
+          "name": "Public package and operation dispatch",
+          "role": "Package entry surface and in-process operation handler registry; factory/api.py is not an HTTP server.",
+          "components": "factory/__init__.py, factory/__main__.py, APIRequest / APIResponse / FactoryAPI",
           "evidence_paths": [
-            "README.md"
+            "factory/__init__.py",
+            "factory/__main__.py",
+            "factory/api.py"
           ]
         },
         {
-          "name": "Package / quality tooling",
-          "role": "Python distribution metadata and static/test configuration",
-          "components": "Packaging and validation setup",
+          "name": "Governance and execution kernel",
+          "role": "Explicit proposal/decision boundary; a proposal is only executed when the supplied policy decision is ALLOW.",
+          "components": "PolicyDecision, Proposal, PolicyGate, ExecutionBoundary and security adapters",
           "evidence_paths": [
+            "factory/kernel/policy.py",
+            "factory/kernel/execution.py",
+            "factory/kernel/security.py",
+            "factory/kernel/adapters.py"
+          ]
+        },
+        {
+          "name": "State, evidence and recovery primitives",
+          "role": "In-memory hash-chained reference event ledger plus provenance, context/memory and recovery abstractions; durability depends on selected adapters.",
+          "components": "Events, context, memory, provenance, recovery and observability modules",
+          "evidence_paths": [
+            "factory/kernel/events.py",
+            "factory/kernel/context.py",
+            "factory/kernel/memory.py",
+            "factory/kernel/provenance.py",
+            "factory/kernel/recovery.py",
+            "factory/kernel/observability.py"
+          ]
+        },
+        {
+          "name": "Agent/runtime and coordination",
+          "role": "Agent/provider contracts, scheduling, simulation, queue and worker modules provide reusable runtime components.",
+          "components": "Agents, providers, scheduler, simulation, queue, workers",
+          "evidence_paths": [
+            "factory/kernel/agents.py",
+            "factory/kernel/providers.py",
+            "factory/kernel/scheduler.py",
+            "factory/kernel/simulation.py",
+            "factory/queue.py",
+            "factory/workers.py"
+          ]
+        },
+        {
+          "name": "Storage, tenancy and product boundaries",
+          "role": "Supporting storage/PostgreSQL/tenancy modules and thin product packages separate common primitives from domain projects.",
+          "components": "Storage and product package boundaries",
+          "evidence_paths": [
+            "factory/storage.py",
+            "factory/postgres.py",
+            "factory/tenancy.py",
+            "products/README.md",
+            "products/archos/__init__.py",
+            "products/bitminer/__init__.py",
+            "products/secureos/__init__.py",
+            "products/venture_radar/__init__.py"
+          ]
+        },
+        {
+          "name": "Quality controls",
+          "role": "Tests and static tooling are configured for the package and integration contracts.",
+          "components": "pytest tests; Ruff and mypy project configuration",
+          "evidence_paths": [
+            "tests/test_kernel.py",
+            "tests/test_integrations.py",
             "pyproject.toml"
-          ]
-        },
-        {
-          "name": "Audit/extraction",
-          "role": "Project lineage and planned domains documented; no single implemented runtime entrypoint confirmed",
-          "components": "Migration/audit stage",
-          "evidence_paths": [
-            "README.md"
           ]
         }
       ],
       "state_and_data": [
-        "No verified persistent runtime store exposed by the inspected project metadata."
+        "factory/kernel/events.py documents EventLedger as an in-memory reference implementation; events are hash-chained within the process and are not durable by themselves.",
+        "PostgreSQL/storage modules exist, but an active database connection or production storage configuration is not verified by tree inspection.",
+        "Tenancy and product module boundaries are implemented as source packages; no deployment topology is configured in the repository itself."
       ],
       "external_integrations": [
-        "Several sibling repositories are described as source lineages; no assumption that their code has been merged."
+        "PostgreSQL integration module exists; live database connectivity was not tested.",
+        "Product packages reference ArchOS, BitMiner, SecureOS and Venture Radar domains; no cross-repository runtime coupling is assumed."
       ],
       "evidence_paths": [
         "README.md",
-        "pyproject.toml"
+        "pyproject.toml",
+        "factory/__main__.py",
+        "factory/api.py",
+        "factory/kernel/policy.py",
+        "factory/kernel/execution.py",
+        "factory/kernel/events.py",
+        "factory/kernel/agents.py",
+        "factory/storage.py",
+        "factory/postgres.py",
+        "factory/tenancy.py",
+        "tests/test_kernel.py",
+        "tests/test_integrations.py"
       ],
       "source_snapshot": {
         "commit": "4420c7c9853d1621ccb3c66abaeeffb6ba39e4b5",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "85e1de414844ae213a4c0490111982a96cb8fe87",
+        "commit_date": "2026-09-05T06:27:49Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
-        "Keep 'planned kernel architecture' separate from implemented runtime components."
-      ]
+        "README labels the architecture audit/extraction and kernel architecture lock as in progress.",
+        "This package contains implemented primitives, but this inventory does not claim their integration into a production orchestrator or successful runtime test execution.",
+        "The default event ledger is in-memory; do not treat it as durable audit storage."
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "the-factory-2",
@@ -1380,11 +1646,15 @@
         "commit": "087f09265c2581e3910f5cb6f3d04e4c15c8d2a0",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "47bafd30ddc060d945d5fd61de959a20f451d677",
+        "commit_date": "2026-09-11T08:58:18Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "Repository README explicitly cautions that production security boundaries are not yet complete."
-      ]
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "the-house-of-coding",
@@ -1455,11 +1725,15 @@
         "commit": "7d3bc97168ceba585c51f61f78b72ccc2166c962",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "208399f204975791bb79530754f7459f07ce1795",
+        "commit_date": "2026-09-12T21:29:14Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "Build/deployment success is not verified from tree inspection alone."
-      ]
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "localhost-webapp",
@@ -1503,11 +1777,15 @@
         "commit": "24aa5206d971ccfc5e1ce6b84459d16ac74ecf0e",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "9442b5ad12ef8b61b35a2066b4488b372967d3c9",
+        "commit_date": "2026-09-20T10:03:12Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "Currently a starter scaffold rather than a verified functional product."
-      ]
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "business-os",
@@ -1584,10 +1862,25 @@
         "commit": "f2e32c34f743080f1b905cad424d6900b83ddbbc",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "d1e587f1f5e7d9e94b86961367e03677b4433d79",
+        "commit_date": "2026-09-29T18:47:50Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "A rich UI is not evidence that backend actions are deployed or safe in a production environment."
+      ],
+      "repository_hygiene_findings": [
+        {
+          "severity": "medium",
+          "category": "operational-data",
+          "title": "Runtime security-event log is tracked",
+          "description": "The repository tree contains a runtime security event log under .business-os-data. Its contents were not inspected or copied; logs can contain operational identifiers or sensitive event details.",
+          "evidence_paths": [
+            ".business-os-data/security-events.jsonl"
+          ],
+          "recommended_action": "Confirm the file is a safe synthetic fixture; otherwise move runtime logs outside version control, ignore the directory, and retain only a sanitized sample or schema."
+        }
       ]
     },
     {
@@ -1649,11 +1942,15 @@
         "commit": "fed42c719b8fe42e7dca5f687720bd3ed52bcdbd",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "cca1198329886280158c4826b3d1dc63b814abd7",
+        "commit_date": "2026-09-20T12:48:57Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "Architecture is inferred primarily from README; source scripts should be inspected to verify exact enforcement."
-      ]
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "experienceengine",
@@ -1724,11 +2021,15 @@
         "commit": "b89acf7c56b6d3ccc2427c99959fef545f056f9a",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "f43ae217a29ac82bc1a92734c30dd765f1f99226",
+        "commit_date": "2026-10-01T19:18:42Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "Build is declared as Vite bundle and lint/type check; runtime and provider quotas not tested by this architecture scan."
-      ]
+      ],
+      "repository_hygiene_findings": []
     },
     {
       "project_id": "syscentre",
@@ -1817,14 +2118,19 @@
         "runtime/project_runtime_registry.json"
       ],
       "source_snapshot": {
-        "commit": "be8a349b8063ccf0c0e8c9d477ace225619bdcb8",
+        "commit": "af949623bb731151414ac07c28ccc3b990a9111c",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
-        "runtime_health_verified": false
+        "runtime_health_verified": false,
+        "tree_sha": "082e4c915ed5abf14e1bcb1da2fa045d881a33bb",
+        "commit_date": "2026-10-11T13:29:50Z",
+        "source_checked_at": "2026-10-11"
       },
       "limitations": [
         "This architecture inventory is a static source-tree snapshot; it does not verify build/deploy/live health for the linked repositories."
-      ]
+      ],
+      "repository_hygiene_findings": []
     }
-  ]
+  ],
+  "policy": "Document only observed files, manifests, and code boundaries. Keep planned modules distinct from implemented ones. Do not execute source code while indexing. Sensitive-looking repository findings expose paths and risk summaries only; never copy secret contents into SysCentre."
 }
