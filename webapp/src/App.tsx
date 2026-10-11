@@ -21,6 +21,22 @@ type ArchitectureFinding = {
   category: string; title: string; description: string;
   evidence_paths: string[]; recommended_action: string;
 };
+type ArchitectureAnalysis = {
+  ok: boolean;
+  project: { project_id: string; name: string; indexed_commit: string; indexed_at: string; index_status: string };
+  analysis: {
+    mode: string; generated_at: string; source_files_analyzed: number; source_bytes_analyzed: number;
+    code_files: number; lines_of_source: number; imports_detected: number; local_dependency_edges: number;
+    functions_detected: number; classes_detected: number; routes_detected: number; entrypoints: string[];
+    framework_signals: Array<{ name: string; evidence_count: number }>;
+    api_routes: Array<{ method: string; path: string; source: string }>;
+    data_store_signals: Array<{ name: string; source: string; evidence: string }>;
+    modules: Array<{ path: string; language: string; lines: number; imports: number; role: string }>;
+    dependency_edges: Array<{ from: string; to: string; kind: string }>;
+    findings: Array<{ severity: string; title: string; detail: string }>;
+    limitations: string[];
+  };
+};
 type RepositoryArchitecture = {
   project_id: string; name: string; repository_url: string; default_branch: string;
   architecture_status: string; architecture_summary: string; technology_stack: string[];
@@ -90,6 +106,8 @@ export default function App() {
   const [inventoryProjects, setInventoryProjects] = useState<InventoryProject[]>([]);
   const [runtimeProjects, setRuntimeProjects] = useState<RuntimeProject[]>([]);
   const [architectures, setArchitectures] = useState<RepositoryArchitecture[]>([]);
+  const [architectureAnalyses, setArchitectureAnalyses] = useState<Record<string, ArchitectureAnalysis>>({});
+  const [analyzingArchitecture, setAnalyzingArchitecture] = useState<string | null>(null);
   const [architectureSearch, setArchitectureSearch] = useState("");
   const [architectureStatusFilter, setArchitectureStatusFilter] = useState("all");
   const [ingesting, setIngesting] = useState<string | null>(null);
@@ -199,6 +217,20 @@ export default function App() {
       await refresh();
     } catch (error) { setProjectMessage("Indexing failed for " + projectName + ": " + (error instanceof Error ? error.message : "unknown error")); }
     finally { setIngesting(null); }
+  }
+
+  async function analyzeArchitecture(projectId: string, projectName: string) {
+    if (analyzingArchitecture) return;
+    setAnalyzingArchitecture(projectId);
+    try {
+      const response = await fetch(API + "/api/repositories/" + encodeURIComponent(projectId) + "/architecture-analysis", { signal: AbortSignal.timeout(30000) });
+      const data = await response.json() as ArchitectureAnalysis & { error?: string };
+      if (!response.ok || !data.ok) throw new Error(data.error ?? "Source architecture analysis failed");
+      setArchitectureAnalyses((current) => ({ ...current, [projectId]: data }));
+      setProjectMessage("Source analysis complete for " + projectName + ": " + data.analysis.source_files_analyzed + " files inspected, " + data.analysis.routes_detected + " route patterns and " + data.analysis.local_dependency_edges + " local dependency edges detected.");
+    } catch (error) {
+      setProjectMessage("Source analysis unavailable for " + projectName + ": " + (error instanceof Error ? error.message : "unknown error") + " Index the repository first if it has not been indexed.");
+    } finally { setAnalyzingArchitecture(null); }
   }
 
   async function searchSource(event: FormEvent<HTMLFormElement>) {
@@ -428,6 +460,32 @@ export default function App() {
                   </summary>
                   <div className="architecture-detail">
                     <p className="architecture-summary">{item.architecture_summary}</p>
+                    <div className="architecture-analysis-actions">
+                      <button className="secondary-button project-index-button" disabled={analyzingArchitecture !== null} onClick={() => void analyzeArchitecture(item.project_id, item.name)}>{analyzingArchitecture === item.project_id ? "Analyzing indexed source…" : architectureAnalyses[item.project_id] ? "Refresh source analysis" : "Analyze indexed source"}</button>
+                      <span>Read-only static analysis. Index this repository first; project code is never executed.</span>
+                    </div>
+                    {architectureAnalyses[item.project_id] && <section className="architecture-analysis-result" aria-label={"Static source analysis for " + item.name}>
+                      <div className="architecture-analysis-heading"><div><strong>Static source analysis</strong><span>Indexed commit <code>{architectureAnalyses[item.project_id].project.indexed_commit.slice(0, 12) || "unknown"}</code></span></div><span>{architectureAnalyses[item.project_id].analysis.source_files_analyzed} text files</span></div>
+                      <div className="architecture-analysis-metrics">
+                        <article><span>Source lines</span><strong>{architectureAnalyses[item.project_id].analysis.lines_of_source.toLocaleString()}</strong></article>
+                        <article><span>Imports</span><strong>{architectureAnalyses[item.project_id].analysis.imports_detected}</strong></article>
+                        <article><span>Local dependencies</span><strong>{architectureAnalyses[item.project_id].analysis.local_dependency_edges}</strong></article>
+                        <article><span>Routes detected</span><strong>{architectureAnalyses[item.project_id].analysis.routes_detected}</strong></article>
+                        <article><span>Functions / classes</span><strong>{architectureAnalyses[item.project_id].analysis.functions_detected} / {architectureAnalyses[item.project_id].analysis.classes_detected}</strong></article>
+                      </div>
+                      <div className="architecture-analysis-grid">
+                        <article><strong>Framework signals</strong>{architectureAnalyses[item.project_id].analysis.framework_signals.length ? architectureAnalyses[item.project_id].analysis.framework_signals.slice(0, 12).map((signal) => <span key={signal.name}>{signal.name} · {signal.evidence_count} signals</span>) : <span>No framework signals detected</span>}</article>
+                        <article><strong>Entry points</strong>{architectureAnalyses[item.project_id].analysis.entrypoints.length ? architectureAnalyses[item.project_id].analysis.entrypoints.map((path) => <a key={path} href={item.repository_url + "/blob/" + (architectureAnalyses[item.project_id].project.indexed_commit || item.default_branch) + "/" + path} target="_blank" rel="noreferrer">{path}</a>) : <span>No conventional entrypoint identified</span>}</article>
+                        <article><strong>Data-store signals</strong>{architectureAnalyses[item.project_id].analysis.data_store_signals.length ? architectureAnalyses[item.project_id].analysis.data_store_signals.slice(0, 12).map((signal, index) => <span key={signal.name + signal.source + index}>{signal.name} <small>· {signal.source}</small></span>) : <span>No supported data-store patterns detected</span>}</article>
+                        <article><strong>API / route patterns</strong>{architectureAnalyses[item.project_id].analysis.api_routes.length ? architectureAnalyses[item.project_id].analysis.api_routes.slice(0, 20).map((route, index) => <span key={route.method + route.path + route.source + index}><code>{route.method}</code> {route.path} <small>· {route.source}</small></span>) : <span>No supported route patterns detected</span>}</article>
+                      </div>
+                      <details className="architecture-module-details"><summary>Module inventory ({architectureAnalyses[item.project_id].analysis.modules.length}) and dependency edges ({architectureAnalyses[item.project_id].analysis.dependency_edges.length})</summary>
+                        <div className="architecture-module-list">{architectureAnalyses[item.project_id].analysis.modules.slice(0, 80).map((module) => <div key={module.path}><code>{module.path}</code><span>{module.role} · {module.lines} lines · {module.imports} imports</span></div>)}</div>
+                        {architectureAnalyses[item.project_id].analysis.dependency_edges.length > 0 && <div className="architecture-edge-list">{architectureAnalyses[item.project_id].analysis.dependency_edges.slice(0, 100).map((edge, index) => <div key={edge.from + edge.to + index}><code>{edge.from}</code><span>→</span><code>{edge.to}</code></div>)}</div>}
+                      </details>
+                      {!!architectureAnalyses[item.project_id].analysis.findings.length && <div className="architecture-analysis-findings"><strong>Analysis notes</strong>{architectureAnalyses[item.project_id].analysis.findings.map((finding) => <p key={finding.title}>{finding.severity.toUpperCase()} · {finding.title}: {finding.detail}</p>)}</div>}
+                      <div className="architecture-analysis-limitations">{architectureAnalyses[item.project_id].analysis.limitations.map((limitation) => <span key={limitation}>{limitation}</span>)}</div>
+                    </section>}
                     <div className="architecture-detail-grid">
                       {item.layers.map((layer) => <article className="architecture-layer" key={layer.name}>
                         <span>{layer.name}</span><strong>{layer.role}</strong><p>{layer.components}</p>
