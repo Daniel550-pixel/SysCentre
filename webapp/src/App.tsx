@@ -170,7 +170,7 @@ export default function App() {
   const activePortfolioGroup = portfolioGroupFilter ? (portfolioGroups[portfolioGroupFilter] ?? []) : [];
   const sectorCount = new Set(projects.map((project) => project.sector).filter((value): value is string => Boolean(value))).size;
   const marketCount = new Set(projects.map((project) => project.target_market).filter((value): value is string => Boolean(value))).size;
-  const verifiedCommercialModels = projects.filter((project) => Boolean(project.monetization_status) && !project.monetization_status!.toLowerCase().startsWith("unverified")).length;
+  const verifiedCommercialModels = projects.filter((project) => /verified|confirmed|pricing evidence|customer evidence|revenue evidence/i.test(project.monetization_status || "") && !/unverified|not verified|no confirmed|undefined|undocumented/i.test(project.monetization_status || "")).length;
   const filteredExecutiveProjects = projects.filter((project) => portfolioDimensions.every(({ key }) => !portfolioFilters[key] || dimensionValue(project, key) === portfolioFilters[key]) && (!portfolioSearch.trim() || [project.name, project.purpose, project.target_market, project.portfolio_role].some((value) => value?.toLowerCase().includes(portfolioSearch.trim().toLowerCase())))).sort((left, right) => left.name.localeCompare(right.name));
   const evidenceGapCount = projects.filter((project) => !project.market_validation || project.market_validation.toLowerCase().startsWith("unverified")).length;
   const unbuiltCount = projects.filter((project) => /empty|scaffold|concept|unverified|unvalidated/i.test((project.lifecycle_stage || "") + " " + (project.interface_status || ""))).length;
@@ -275,7 +275,8 @@ export default function App() {
                     <div><span>Business model</span><strong>{project.business_model || "Not classified"}</strong></div>
                     <div><span>System</span><strong>{project.system_type || "Not classified"}</strong></div>
                     <div><span>Sector</span><strong>{project.sector || "Not classified"}</strong></div>
-                    <div><span>Market</span><strong>{project.market_category || project.target_market || "Not classified"}</strong></div>
+                    <div><span>Market category</span><strong>{project.market_category || "Not classified"}</strong></div>
+                    <div><span>Target customer / market</span><strong>{project.target_market || "Not classified"}</strong></div>
                     <div><span>Lifecycle</span><strong>{project.lifecycle_stage || "Not verified"}</strong></div>
                     <div><span>Commercial evidence</span><strong>{project.monetization_status || "Not recorded"}</strong></div>
                   </div>
