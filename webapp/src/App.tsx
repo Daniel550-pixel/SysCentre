@@ -9,7 +9,8 @@ const API = "http://127.0.0.1:8765";
 type RuntimeStatus = { name: string; state: string; host: string; port: number; uptime_seconds: number; python_version: string; platform: string; policy_gate: string; event_ledger: string; event_ledger_path?: string; timestamp: string };
 type RuntimeEvent = { id: string; timestamp: string; type: string; message: string; details: Record<string, unknown> };
 type CommandResponse = { ok: boolean; command: string; result?: unknown; error?: string };
-type Project = { project_id: string; name: string; repository_url: string; default_branch: string; description: string; latest_commit: string; indexed_at: string; file_count: number; text_file_count: number; skipped_file_count: number; status: string };
+type PortfolioDimension = "business_model" | "system_type" | "sector" | "target_market";
+type Project = { project_id: string; name: string; repository_url: string; default_branch: string; description: string; latest_commit: string; indexed_at: string; file_count: number; text_file_count: number; skipped_file_count: number; status: string; category?: string; purpose?: string; capabilities?: string[]; interface_kind?: string; interface_status?: string; business_model?: string; system_type?: string; sector?: string; target_market?: string; market_segments?: string[]; portfolio_role?: string; lifecycle_stage?: string; monetization_status?: string; market_validation?: string; classification_basis?: string; classification_note?: string };
 type SourceResult = { project_id: string; project_name: string; repository_url: string; path: string; blob_sha: string; size_bytes: number; excerpt: string };
 type InventoryProject = { id: string; name: string; status: string; category: string; candidate_repositories: string[] };
 type IngestJob = { project_id: string; target_commit: string; branch: string; started_at: string; updated_at: string; status: string; files_seen: number; files_processed: number; files_indexed: number; files_skipped: number; error: string };
@@ -24,6 +25,15 @@ function formatUptime(seconds = 0) {
 function formatTime(value: string) {
   try { return new Date(value).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }); }
   catch { return value; }
+}
+const portfolioDimensions: Array<{ key: PortfolioDimension; label: string }> = [
+  { key: "business_model", label: "Business model" },
+  { key: "system_type", label: "System" },
+  { key: "sector", label: "Sector" },
+  { key: "target_market", label: "Market" },
+];
+function dimensionValue(project: Project, dimension: PortfolioDimension) {
+  return project[dimension]?.trim() || "Not classified";
 }
 
 export default function App() {
@@ -40,6 +50,8 @@ export default function App() {
   const [ingesting, setIngesting] = useState<string | null>(null);
   const [projectMessage, setProjectMessage] = useState("");
   const [projectSearch, setProjectSearch] = useState("");
+  const [portfolioDimension, setPortfolioDimension] = useState<PortfolioDimension>("business_model");
+  const [portfolioGroupFilter, setPortfolioGroupFilter] = useState("");
   const [sourceQuery, setSourceQuery] = useState("");
   const [sourceResults, setSourceResults] = useState<SourceResult[]>([]);
   const [sourceSearching, setSourceSearching] = useState(false);
@@ -146,6 +158,17 @@ export default function App() {
   }
 
   const uptime = status ? formatUptime(status.uptime_seconds) : "—";
+  const portfolioGroups = projects.reduce<Record<string, Project[]>>((groups, project) => {
+    const label = dimensionValue(project, portfolioDimension);
+    (groups[label] ??= []).push(project);
+    return groups;
+  }, {});
+  const sortedPortfolioGroups = Object.entries(portfolioGroups).sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]));
+  const maxGroupSize = Math.max(1, ...sortedPortfolioGroups.map(([, items]) => items.length));
+  const activePortfolioGroup = portfolioGroupFilter ? (portfolioGroups[portfolioGroupFilter] ?? []) : [];
+  const sectorCount = new Set(projects.map((project) => project.sector).filter((value): value is string => Boolean(value))).size;
+  const marketCount = new Set(projects.map((project) => project.target_market).filter((value): value is string => Boolean(value))).size;
+  const verifiedCommercialModels = projects.filter((project) => Boolean(project.monetization_status) && !project.monetization_status!.toLowerCase().startsWith("unverified")).length;
 
   return (
     <div className="app-shell">
@@ -156,7 +179,7 @@ export default function App() {
         </div>
         <div className="workspace-label">WORKSPACE</div>
         <nav className="nav-list" aria-label="Main navigation">
-          <a className="nav-item active" href="#overview"><Gauge size={17} /><span>Overview</span><ChevronRight className="nav-chevron" size={15} /></a>
+          <a className="nav-item active" href="#portfolio"><Gauge size={17} /><span>Executive portfolio</span><ChevronRight className="nav-chevron" size={15} /></a>
           <a className="nav-item" href="#projects"><FolderGit2 size={17} /><span>Project registry</span></a>
           <a className="nav-item" href="#runtime"><Cpu size={17} /><span>Runtime</span></a>
           <a className="nav-item" href="#console"><TerminalSquare size={17} /><span>Command console</span></a>
@@ -174,17 +197,55 @@ export default function App() {
 
       <main className="main-content" id="overview">
         <header className="topbar">
-          <div className="breadcrumbs"><span>Workspace</span><ChevronRight size={14} /><strong>Overview</strong></div>
+          <div className="breadcrumbs"><span>Workspace</span><ChevronRight size={14} /><strong>Executive portfolio</strong></div>
           <div className="topbar-right"><span className="local-badge"><span className="tiny-dot" /> LOCAL ENVIRONMENT</span><span className="topbar-divider" /><button className="icon-button" onClick={() => void refresh()} title="Refresh data" aria-label="Refresh data"><RefreshCw size={16} /></button><div className="topbar-avatar">SC</div></div>
         </header>
 
         <div className="page-wrap">
           <section className="page-heading">
-            <div><div className="eyebrow"><span className="eyebrow-line" /> CONTROL PLANE / 001</div><h1>System overview</h1><p className="page-description">Observe runtime health, verify policy controls, and operate your local system.</p></div>
+            <div><div className="eyebrow"><span className="eyebrow-line" /> EXECUTIVE CONTROL PLANE / 001</div><h1>Executive portfolio</h1><p className="page-description">One decision layer across 28 independent systems: business-model hypotheses, system roles, sectors, and target markets.</p></div>
             <div className="heading-actions"><span className={"connection-pill " + (connected ? "connected" : "disconnected")}>{connected ? <Check size={14} /> : <WifiOff size={14} />}{connected ? "All systems operational" : "Runtime unavailable"}</span><button className="secondary-button" onClick={() => void refresh()}><RefreshCw size={15} /> Refresh</button></div>
           </section>
 
           {!connected && <div className="connection-alert"><WifiOff size={18} /><div><strong>Runtime not detected</strong><p>Start the Python runtime to populate live system data. The dashboard will reconnect automatically.</p></div><code>python .\runtime\server.py</code></div>}
+
+          <section className="executive-portfolio" id="portfolio">
+            <div className="portfolio-header">
+              <div><div className="panel-kicker">PORTFOLIO INTELLIGENCE</div><h2>28 systems · one executive view</h2><p>Classify the portfolio by its intended business model, system function, sector, or target market. Values are planning classifications derived from repository evidence—not verified revenue, customers, or market validation.</p></div>
+              <span className="portfolio-meta">CATALOG v2 · READ-ONLY</span>
+            </div>
+            <div className="portfolio-kpis">
+              <article><span>Registered systems</span><strong>{projects.length || "—"}</strong><small>Independent repositories</small></article>
+              <article><span>Sector coverage</span><strong>{sectorCount || "—"}</strong><small>Distinct sector groupings</small></article>
+              <article><span>Target markets</span><strong>{marketCount || "—"}</strong><small>Market hypotheses, not TAM estimates</small></article>
+              <article><span>Commercial evidence</span><strong>{verifiedCommercialModels}</strong><small>Pricing / customers / revenue verified</small></article>
+            </div>
+            <div className="portfolio-explorer panel">
+              <div className="portfolio-explorer-head"><div><h3>Portfolio segmentation</h3><p>Switch dimension to regroup every repository using the catalog’s strategy metadata.</p></div><div className="portfolio-dimensions" role="group" aria-label="Portfolio segmentation dimension">
+                {portfolioDimensions.map((dimension) => <button key={dimension.key} className={portfolioDimension === dimension.key ? "active" : ""} onClick={() => { setPortfolioDimension(dimension.key); setPortfolioGroupFilter(""); }}>{dimension.label}</button>)}
+              </div></div>
+              <div className="portfolio-group-grid">
+                {sortedPortfolioGroups.map(([label, items]) => <button type="button" key={label} className={"portfolio-group-card " + (portfolioGroupFilter === label ? "selected" : "")} onClick={() => setPortfolioGroupFilter((current) => current === label ? "" : label)}>
+                  <div className="portfolio-group-title"><strong>{label}</strong><span>{items.length.toString().padStart(2, "0")}</span></div>
+                  <div className="portfolio-share-track"><span style={{ width: Math.max(6, Math.round(items.length / maxGroupSize * 100)) + "%" }} /></div>
+                  <p>{items.slice(0, 3).map((project) => project.name).join(" · ")}{items.length > 3 ? " · +" + (items.length - 3) + " more" : ""}</p>
+                  <small>{portfolioGroupFilter === label ? "Selected · click to clear" : "Select to drill into systems"}</small>
+                </button>)}
+                {!projects.length && <div className="empty-state portfolio-empty">Portfolio metadata will appear when the local runtime is connected.</div>}
+              </div>
+              {portfolioGroupFilter && <div className="portfolio-drilldown">
+                <div className="portfolio-drilldown-head"><div><span className="panel-kicker">GROUP DRILL-DOWN</span><h3>{portfolioGroupFilter}</h3><p>{activePortfolioGroup.length} repository records · {portfolioDimensions.find((dimension) => dimension.key === portfolioDimension)?.label}</p></div><button className="text-button" onClick={() => setPortfolioGroupFilter("")}>Clear selection</button></div>
+                <div className="portfolio-drilldown-grid">{activePortfolioGroup.map((project) => <article key={project.project_id}>
+                  <div className="portfolio-drilldown-top"><strong>{project.name}</strong><span>{project.status.replaceAll("_", " ")}</span></div>
+                  <p>{project.portfolio_role || "Role not classified"} · {project.lifecycle_stage || "Stage unverified"}</p>
+                  <div className="portfolio-detail-line"><span>Sector</span><b>{project.sector || "Unclassified"}</b></div>
+                  <div className="portfolio-detail-line"><span>Target market</span><b>{project.target_market || "Unclassified"}</b></div>
+                  <a href={project.repository_url} target="_blank" rel="noreferrer">Open repository ↗</a>
+                </article>)}</div>
+              </div>}
+            </div>
+            <div className="portfolio-caveat"><ShieldCheck size={15} /><span><strong>Evidence boundary:</strong> business models and markets are hypotheses; pricing, customers, revenue, and geographic reach are not verified by this catalog. Projects remain separate and no runtime is controlled from this portfolio layer.</span></div>
+          </section>
 
           <section className="panel projects-panel" id="projects">
             <div className="panel-header"><div><div className="panel-kicker">PROJECT INTELLIGENCE</div><h2>Project registry</h2></div><button className="secondary-button project-index-button" disabled={ingesting !== null || projects.length === 0} onClick={() => void indexAllProjects()}>{ingesting === "ALL" ? "Indexing all..." : "Index all projects"}</button></div>
