@@ -215,6 +215,10 @@ export default function App() {
       if (!response.ok || !data.ok) throw new Error(data.error ?? "Repository indexing failed");
       setProjectMessage(projectName + " indexed: " + data.files_indexed + " text files stored, " + data.files_skipped + " excluded out of " + data.files_seen + " files.");
       await refresh();
+      if (architectureAnalyses[projectId]) {
+        setProjectMessage(projectName + " indexed. Refreshing its source architecture against the newly indexed commit…");
+        await analyzeArchitecture(projectId, projectName);
+      }
     } catch (error) { setProjectMessage("Indexing failed for " + projectName + ": " + (error instanceof Error ? error.message : "unknown error")); }
     finally { setIngesting(null); }
   }
