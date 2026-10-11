@@ -2037,7 +2037,7 @@
       "repository_url": "https://github.com/Daniel550-pixel/SysCentre",
       "default_branch": "main",
       "architecture_status": "source-verified",
-      "architecture_summary": "Local-first React/Vite control plane backed by a Python standard-library HTTP runtime. It keeps project catalog/intake/runtime-adapter records, indexes GitHub trees and text into SQLite, exposes read-only search and records policy-gated commands/audit events.",
+      "architecture_summary": "Local-first React/Vite portfolio control plane backed by a Python standard-library HTTP API. It catalogs independent GitHub repositories, indexes eligible source into SQLite, tracks project intake and unconfigured runtime adapters, applies a deterministic command policy, persists audit events, and exposes an evidence-based architecture explorer with commit/tree provenance and path-only repository hygiene alerts.",
       "technology_stack": [
         "Python 3.11+ standard library",
         "React 18",
@@ -2055,79 +2055,100 @@
       "layers": [
         {
           "name": "Web control plane",
-          "role": "React UI for portfolio, project registry, intake, runtime adapters, command console, policy and event ledger",
-          "components": "Vite browser bundle",
+          "role": "React UI for portfolio segmentation, project registry/intake, runtime readiness, policy, audit events and source-level architecture inspection.",
+          "components": "Vite / React / TypeScript dashboard; architecture cards show layer evidence, snapshot provenance, limitations and hygiene findings.",
           "evidence_paths": [
-            "webapp/src/main.tsx",
             "webapp/src/App.tsx",
-            "webapp/src/styles.css"
+            "webapp/src/styles.css",
+            "webapp/src/main.tsx",
+            "webapp/package.json"
           ]
         },
         {
           "name": "Local runtime API",
-          "role": "ThreadingHTTPServer on 127.0.0.1:8765 with health/status/events/policy/project/search/ingestion routes",
-          "components": "Read-only metadata endpoints and bounded actions",
+          "role": "Python standard-library HTTP service bound by default to localhost; exposes bounded metadata, policy, ingestion, search, intake and architecture endpoints.",
+          "components": "ThreadingHTTPServer handler, route dispatch and JSON payload validation.",
           "evidence_paths": [
             "runtime/server.py",
             "runtime/policy.py"
           ]
         },
         {
-          "name": "Repository ingestion",
-          "role": "GitHub tree/contents import, path filters, checkpoints and full-text source search",
-          "components": "External read-only repository scanning",
+          "name": "Repository ingestion and source index",
+          "role": "Read-only GitHub tree/content scan, path exclusions, checkpoints and SQLite source search; repository code is never executed.",
+          "components": "GitHub tree reader, content fetcher, blob metadata, checkpoint/promotion logic.",
           "evidence_paths": [
-            "runtime/repository_ingest.py"
+            "runtime/repository_ingest.py",
+            "runtime/test_repository_ingest.py"
+          ]
+        },
+        {
+          "name": "Catalogs and runtime registry",
+          "role": "JSON source of truth for portfolio classification, unresolved identities, architecture snapshots and execution adapter slots.",
+          "components": "repository_catalog, project_inventory, project_runtime_registry and repository_architectures.",
+          "evidence_paths": [
+            "runtime/repository_catalog.json",
+            "runtime/project_inventory.json",
+            "runtime/project_runtime_registry.json",
+            "runtime/repository_architectures.json"
+          ]
+        },
+        {
+          "name": "Architecture provenance and repository hygiene",
+          "role": "The API serves per-repository stack/layer/state/integration/evidence snapshots. The UI displays exact source commit/tree identity and path-only warnings for potentially sensitive tracked artifacts.",
+          "components": "Schema-versioned architecture records, source check dates, hygiene findings and human-readable audit register.",
+          "evidence_paths": [
+            "runtime/repository_architectures.json",
+            "docs/REPOSITORY_ARCHITECTURE_AUDIT.md",
+            "runtime/test_server.py"
           ]
         },
         {
           "name": "State and audit",
-          "role": "SQLite event ledger/index and JSON catalogs/registries",
-          "components": "Local persistent state + configuration",
+          "role": "SQLite stores source index and audit events; JSON files store canonical catalog/registry configuration.",
+          "components": "Local database at ~/.syscentre/syscentre.db and committed JSON metadata.",
           "evidence_paths": [
             "runtime/server.py",
-            "runtime/repository_catalog.json",
-            "runtime/project_inventory.json",
-            "runtime/project_runtime_registry.json"
-          ]
-        },
-        {
-          "name": "Architecture inventory",
-          "role": "New JSON snapshot and GET API expose evidence-backed layers per project; no source is executed",
-          "components": "This feature",
-          "evidence_paths": [
-            "runtime/repository_architectures.json",
-            "runtime/server.py"
+            "README.md"
           ]
         }
       ],
       "state_and_data": [
-        "SQLite at ~/.syscentre/syscentre.db; catalogs/registry remain JSON files in the repository."
+        "SQLite database at ~/.syscentre/syscentre.db stores the local source index and audit-event state; committed JSON files remain the catalog/registry source of truth.",
+        "The architecture register records commit SHA, Git tree SHA, commit date, inventory check date, evidence paths and limitations. It is a static snapshot, not a live source crawler.",
+        "Runtime adapter profiles remain unconfigured by default. Repository metadata and architecture snapshots do not imply that a project is runnable or healthy."
       ],
       "external_integrations": [
-        "GitHub API reads; no repository code is run. Runtime adapters default to unconfigured pending explicit verification."
+        "GitHub REST API is used for read-only repository metadata/tree/content ingestion; credentials, if supplied, remain runtime configuration and are not copied into the catalog.",
+        "No indexed repository's application code is executed by SysCentre."
       ],
       "evidence_paths": [
         "README.md",
         "runtime/server.py",
         "runtime/repository_ingest.py",
         "runtime/policy.py",
-        "webapp/src/App.tsx",
-        "webapp/package.json",
         "runtime/repository_catalog.json",
-        "runtime/project_runtime_registry.json"
+        "runtime/project_runtime_registry.json",
+        "runtime/repository_architectures.json",
+        "runtime/test_server.py",
+        "webapp/src/App.tsx",
+        "webapp/src/styles.css",
+        "docs/REPOSITORY_ARCHITECTURE_AUDIT.md",
+        "docs/GOOGLE_AI_STUDIO_CONTROL_PLANE_PROMPT.md"
       ],
       "source_snapshot": {
-        "commit": "af949623bb731151414ac07c28ccc3b990a9111c",
+        "commit": "1e656aca351da089421590b5c54ba04dd4770774",
         "tree_api": "GitHub recursive git tree",
         "deployment_verified": false,
         "runtime_health_verified": false,
-        "tree_sha": "082e4c915ed5abf14e1bcb1da2fa045d881a33bb",
-        "commit_date": "2026-10-11T13:29:50Z",
+        "tree_sha": "55b00d69df9cd9acebfebbcf46dbf7581231e118",
+        "commit_date": "2026-10-11T14:21:25Z",
         "source_checked_at": "2026-10-11"
       },
       "limitations": [
-        "This architecture inventory is a static source-tree snapshot; it does not verify build/deploy/live health for the linked repositories."
+        "This is a local-first control plane; the architecture explorer describes source snapshots rather than deployment/live health.",
+        "Architecture metadata is committed snapshot data and must be refreshed when a linked repository advances materially.",
+        "All project execution adapters remain unconfigured until a per-project target, command/action allowlist and real health check are verified."
       ],
       "repository_hygiene_findings": []
     }
