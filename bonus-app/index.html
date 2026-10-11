@@ -36,6 +36,48 @@
 @media(max-width:560px){.map-node{flex:1 1 100%}.map-domain-head{flex-direction:column}}
 
 .source-search-form{display:grid;gap:9px}.source-search-row{display:flex;gap:10px;align-items:center}.source-search-row input{flex:1;min-width:0;width:100%;background:var(--panel2);border:1px solid var(--line2);border-radius:10px;padding:12px;color:var(--text)}.source-search-row input:focus{outline:2px solid var(--cyan);outline-offset:1px}.source-search-row button:disabled{opacity:.6;cursor:wait}.source-search-summary{margin-top:12px;color:var(--muted);font-size:13px}.source-results{display:grid;gap:10px;margin-top:12px}.source-result{min-width:0;border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--panel2)}.source-result-head{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}.source-result-head strong{overflow-wrap:anywhere}.source-result-path{display:block;color:var(--cyan);font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere}.source-result p{margin:10px 0;color:var(--muted);font-size:13px;overflow-wrap:anywhere;white-space:normal}.source-result a{font-size:12px;font-weight:700}@media(max-width:560px){.source-search-row{align-items:stretch;flex-direction:column}.source-search-row .button{width:100%}}
+
+/* Executive portfolio view */
+.executive-panel{padding:18px;margin-bottom:14px}
+.executive-section-head{margin-top:0}
+.portfolio-dimensions{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 13px;padding:5px;border:1px solid var(--line);border-radius:11px;background:#0c1421;width:max-content;max-width:100%}
+.portfolio-dimension{border:1px solid transparent;border-radius:7px;padding:8px 11px;background:transparent;color:var(--muted);font-size:11px;font-weight:700;cursor:pointer}
+.portfolio-dimension:hover{color:var(--text);background:#162336}
+.portfolio-dimension.active{background:#18363b;border-color:#2d6870;color:var(--cyan)}
+.portfolio-groups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.portfolio-group{min-width:0;border:1px solid var(--line);border-radius:12px;background:#0d1725;overflow:hidden}
+.portfolio-group.selected{border-color:#3c9c9d;box-shadow:0 0 0 1px #75e4d313}
+.portfolio-group-button{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:9px;width:100%;border:0;background:transparent;color:var(--text);padding:13px 13px 9px;text-align:left;cursor:pointer}
+.portfolio-group-name{font-size:12px;line-height:1.35;font-weight:750;overflow-wrap:anywhere}
+.portfolio-group-count{font:11px ui-monospace,monospace;color:var(--cyan);background:#132c32;border:1px solid #28515a;padding:3px 6px;border-radius:6px}
+.portfolio-share{height:4px;grid-column:1/-1;background:#1e2f41;border-radius:999px;overflow:hidden}
+.portfolio-share i{display:block;height:100%;background:var(--cyan);border-radius:999px}
+.portfolio-group-button small{grid-column:1/-1;font-size:9px;color:#748aa3}
+.portfolio-repo-chips{display:flex;align-items:flex-start;gap:5px;flex-wrap:wrap;padding:0 12px 12px}
+.portfolio-repo-chip{font-size:9px;color:#9db2c9;border:1px solid #253a50;background:#111e2d;padding:4px 6px;border-radius:5px;overflow-wrap:anywhere}
+.portfolio-repo-chip.more{color:var(--amber)}
+.portfolio-drilldown{margin-top:16px;padding-top:15px;border-top:1px solid var(--line)}
+.portfolio-select-hint{padding:15px;border:1px dashed #32465c;border-radius:10px;color:var(--muted);font-size:11px;text-align:center}
+.portfolio-drilldown-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.portfolio-drilldown-head h3{font-size:18px;margin:5px 0 4px;overflow-wrap:anywhere}
+.portfolio-drilldown-head p{margin:0;font-size:11px;color:var(--muted)}
+.portfolio-project-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.portfolio-project{min-width:0;border:1px solid var(--line);background:#101b2a;border-radius:11px;padding:13px}
+.portfolio-project-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.portfolio-project-top>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.portfolio-project-top strong{font-size:12px;overflow-wrap:anywhere}
+.portfolio-project-top>div span{font-size:9px;color:var(--cyan)}
+.portfolio-project>p{font-size:11px;line-height:1.55;color:#a0b0c3;margin:10px 0}
+.portfolio-project-facts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.portfolio-project-facts>div{border-top:1px solid #24374b;padding-top:7px;min-width:0}
+.portfolio-project-facts small,.portfolio-project-facts b{display:block;font-size:9px}
+.portfolio-project-facts small{color:#70869d;margin-bottom:3px}
+.portfolio-project-facts b{color:#c2cddd;font-weight:550;line-height:1.4;overflow-wrap:anywhere}
+.portfolio-project-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.executive-notes{margin-top:14px}
+@media(max-width:1200px){.portfolio-groups{grid-template-columns:repeat(2,minmax(0,1fr))}.portfolio-project-grid{grid-template-columns:1fr}}
+@media(max-width:760px){.portfolio-groups{grid-template-columns:1fr}.portfolio-dimensions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}.portfolio-dimension{white-space:normal}.executive-section-head{align-items:flex-start;flex-direction:column}.portfolio-drilldown-head{flex-direction:column}.portfolio-project-facts{grid-template-columns:1fr 1fr}}
+
 </style>
 </head>
 <body>
@@ -43,7 +85,8 @@
 <aside class="rail">
   <div class="brand"><div class="brand-mark">S</div><div><strong>SYSCENTRE</strong><small>SYSTEMS FABRIC</small></div></div>
   <div><div class="nav-label">WORKSPACE</div><nav class="nav" aria-label="Primary navigation">
-    <button class="nav-item active" data-view="overview"><span>◫</span> Overview</button>
+    <button class="nav-item active" data-view="executive"><span>◈</span> Executive portfolio</button>
+    <button class="nav-item" data-view="overview"><span>◫</span> Overview</button>
     <button class="nav-item" data-view="systems"><span>▦</span> Systems & sources</button>
     <button class="nav-item" data-view="interfaces"><span>◈</span> Interface library</button>
     <button class="nav-item" data-view="architecture"><span>⌘</span> Architecture</button>
@@ -54,7 +97,28 @@
 <main class="main">
 <header class="topbar"><div class="crumb">Systems Fabric <span style="color:#4e637c">/</span> <strong id="breadcrumb">Overview</strong></div><div class="top-actions"><span class="health-pill"><i class="dot"></i> Static console available</span><a class="button small ghost" href="https://github.com/Daniel550-pixel/SysCentre/actions" target="_blank" rel="noreferrer">Builds & deployments ↗</a></div></header>
 
-<section class="view active" id="view-overview">
+
+<section class="view active" id="view-executive">
+  <div class="page-head"><div><div class="eyebrow">Executive control plane</div><h1>Portfolio intelligence</h1><p>One decision layer across 28 independent repositories. Segment the portfolio by business-model hypothesis, system function, sector, or target market and drill into the assets behind each group.</p></div><button class="button primary" data-go="systems">Inspect full repository registry ↗</button></div>
+  <div class="metrics">
+    <article class="metric-card"><span>Registered systems</span><strong id="portfolio-total">—</strong><small>Independent repositories</small></article>
+    <article class="metric-card"><span>Sectors represented</span><strong id="portfolio-sectors">—</strong><small>Strategy taxonomy</small></article>
+    <article class="metric-card"><span>Target markets</span><strong id="portfolio-markets">—</strong><small>Market-category hypotheses</small></article>
+    <article class="metric-card"><span>Verified commercial models</span><strong id="portfolio-revenue">—</strong><small>Confirmed pricing / customers / revenue</small></article>
+  </div>
+  <section class="panel executive-panel">
+    <div class="section-head executive-section-head"><div><h2>Portfolio segmentation</h2><p id="portfolio-subtitle">Choose a lens to group the repository portfolio.</p></div><span class="tag" id="portfolio-group-count">Loading groups</span></div>
+    <div class="portfolio-dimensions" id="portfolio-dimensions" role="group" aria-label="Portfolio dimension"></div>
+    <div class="portfolio-groups" id="portfolio-groups"><div class="empty-state">Loading portfolio classifications…</div></div>
+    <div class="portfolio-drilldown" id="portfolio-drilldown"><div class="portfolio-select-hint">Select a group to inspect the repositories, lifecycle status, sector, and target market in that slice.</div></div>
+  </section>
+  <div class="two-col executive-notes">
+    <article class="panel"><h2>Commercial evidence</h2><p>Business-model labels express intended product archetypes, not proof of a business. This catalog does not currently verify customers, pricing, revenue, or commercial traction.</p><div class="boundary-list"><div class="boundary-row"><div class="symbol">◎</div><div><b>Business-model hypothesis</b><span>Potential operating model inferred from purpose and capabilities; validate against product packaging, buyer, and willingness to pay.</span></div></div><div class="boundary-row"><div class="symbol">⌖</div><div><b>Target-market hypothesis</b><span>Market groupings organize strategy and discovery work. They are not TAM / SAM / SOM estimates.</span></div></div></div></article>
+    <article class="panel"><h2>Portfolio operating rule</h2><p>SysCentre provides executive visibility and source navigation while keeping all 28 repositories independent.</p><div class="boundary-list"><div class="boundary-row"><div class="symbol">⛨</div><div><b>Separate execution boundaries</b><span>No source code is run, no external application is controlled, and no shared credentials or customer data are inferred.</span></div></div><div class="boundary-row"><div class="symbol">▤</div><div><b>Evidence-led classification</b><span>Empty repositories and scaffolds remain explicitly unvalidated instead of being presented as finished products.</span></div></div></div></article>
+  </div>
+</section>
+
+<section class="view" id="view-overview">
   <div class="hero">
     <div class="hero-main"><div class="eyebrow">System-of-systems directory</div><h1>One console. <em>Independent systems.</em></h1><p>SysCentre brings the purpose, capabilities, repository sources and interface entry points of your project ecosystem into one navigable workspace. It borrows the strongest interface patterns across the portfolio—command centers, spatial intelligence, coding workspaces, security workbenches and infrastructure consoles—without merging the underlying systems.</p><div class="actions"><button class="button primary" data-go="systems">Browse all sources <span>→</span></button><button class="button" data-go="interfaces">Explore interface patterns</button><a class="button ghost" href="https://github.com/Daniel550-pixel/SysCentre/blob/main/runtime/repository_catalog.json" target="_blank" rel="noreferrer">Open source catalog ↗</a></div></div>
     <aside class="hero-side"><div><div class="card-top"><h2>Catalog status</h2><span class="state source" id="catalog-state">Loading catalog</span></div><div class="status-large"><div class="status-icon">✓</div><div><b id="catalog-summary">Preparing repository inventory</b><p id="catalog-description">The source registry is loaded from the deployed catalog file.</p></div></div></div><div><div class="rule"><span>Source policy</span><b>Read-only reference</b></div><div class="rule"><span>Runtime execution</span><b>Not connected</b></div><div class="rule"><span>Interface previews</span><b>Local pattern previews</b></div></div></aside>
@@ -154,9 +218,17 @@
   "use strict";
   var owner="Daniel550-pixel";
   var systems=[];
-  var currentView="overview";
+  var currentView="executive";
   var selectedId="";
   var activePattern="";
+  var activePortfolioDimension="business_model";
+  var activePortfolioGroup="";
+  var portfolioDimensions=[
+    {id:"business_model",label:"Business model"},
+    {id:"system_type",label:"System"},
+    {id:"sector",label:"Sector"},
+    {id:"market_category",label:"Market"}
+  ];
   var byId=function(id){return document.getElementById(id);};
   var esc=function(value){return String(value==null?"":value).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});};
   var categoryName=function(value){return String(value||"other").replace(/-/g," ").replace(/\b\w/g,function(c){return c.toUpperCase();});};
@@ -239,6 +311,34 @@
     var selected=featuredNames.map(function(n){return systems.find(function(s){return s.name===n;});}).filter(Boolean);
     byId("featured-systems").innerHTML=selected.map(cardHtml).join("");
   };
+  var renderExecutive=function(){
+    if(!systems.length)return;
+    var unique=function(field){return Array.from(new Set(systems.map(function(s){return String(s[field]||"").trim();}).filter(Boolean)));};
+    byId("portfolio-total").textContent=systems.length;
+    byId("portfolio-sectors").textContent=unique("sector").length;
+    byId("portfolio-markets").textContent=unique("market_category").length;
+    byId("portfolio-revenue").textContent=systems.filter(function(s){var v=String(s.monetization_status||"").toLowerCase();return v.indexOf("verified")>=0&&v.indexOf("unverified")<0;}).length;
+    byId("portfolio-dimensions").innerHTML=portfolioDimensions.map(function(d){return '<button type="button" class="portfolio-dimension'+(activePortfolioDimension===d.id?' active':'')+'" data-portfolio-dimension="'+esc(d.id)+'">'+esc(d.label)+'</button>';}).join("");
+    var grouped={};
+    systems.forEach(function(s){var key=String(s[activePortfolioDimension]||"Not classified");(grouped[key]||(grouped[key]=[])).push(s);});
+    var entries=Object.keys(grouped).map(function(key){return {key:key,items:grouped[key]};}).sort(function(a,b){return b.items.length-a.items.length||a.key.localeCompare(b.key);});
+    var max=Math.max.apply(null,[1].concat(entries.map(function(g){return g.items.length;})));
+    byId("portfolio-subtitle").textContent="Grouped by "+portfolioDimensions.find(function(d){return d.id===activePortfolioDimension;}).label.toLowerCase()+". Select a group to inspect its system-level records.";
+    byId("portfolio-group-count").textContent=entries.length+" groups · "+systems.length+" repositories";
+    byId("portfolio-groups").innerHTML=entries.map(function(group){
+      var names=group.items.slice(0,6).map(function(s){return '<span class="portfolio-repo-chip">'+esc(s.name)+'</span>';}).join("");
+      if(group.items.length>6)names+='<span class="portfolio-repo-chip more">+'+(group.items.length-6)+' more</span>';
+      return '<article class="portfolio-group'+(activePortfolioGroup===group.key?' selected':'')+'"><button type="button" class="portfolio-group-button" data-portfolio-group="'+esc(group.key)+'"><span class="portfolio-group-name">'+esc(group.key)+'</span><span class="portfolio-group-count">'+group.items.length.toString().padStart(2,"0")+'</span><span class="portfolio-share"><i style="width:'+Math.max(5,Math.round(group.items.length/max*100))+'%"></i></span><small>'+(activePortfolioGroup===group.key?'Selected · click again to clear':'Drill into group ↘')+'</small></button><div class="portfolio-repo-chips">'+names+'</div></article>';
+    }).join("");
+    var selected=activePortfolioGroup?grouped[activePortfolioGroup]||[]:[];
+    if(!selected.length){
+      byId("portfolio-drilldown").innerHTML='<div class="portfolio-select-hint">Select any group above to inspect its repositories, lifecycle stages, sector, and target market.</div>';
+      return;
+    }
+    byId("portfolio-drilldown").innerHTML='<div class="portfolio-drilldown-head"><div><div class="eyebrow">Portfolio slice</div><h3>'+esc(activePortfolioGroup)+'</h3><p>'+selected.length+' repositories · strategy labels are planning hypotheses unless explicitly verified.</p></div><button class="button small ghost" data-clear-portfolio-selection="true">Clear selection</button></div><div class="portfolio-project-grid">'+selected.slice().sort(function(a,b){return a.name.localeCompare(b.name);}).map(function(s){
+      return '<article class="portfolio-project"><div class="portfolio-project-top"><div><strong>'+esc(s.name)+'</strong><span>'+esc(s.portfolio_role||"Role not classified")+'</span></div><span class="state '+statusType(s)+'">'+esc(statusLabel(s))+'</span></div><p>'+esc(s.purpose||"Purpose not documented.")+'</p><div class="portfolio-project-facts"><div><small>Sector</small><b>'+esc(s.sector||"Unclassified")+'</b></div><div><small>Market</small><b>'+esc(s.target_market||"Unclassified")+'</b></div><div><small>Stage</small><b>'+esc(s.lifecycle_stage||"Unverified")+'</b></div><div><small>Business model</small><b>'+esc(s.business_model||"Unclassified")+'</b></div></div><div class="portfolio-project-actions"><a class="button small" href="'+esc(repoUrl(s))+'" target="_blank" rel="noreferrer">Repository ↗</a><button type="button" class="button small ghost" data-action="inspect" data-id="'+esc(s.id)+'">Full record</button></div></article>';
+    }).join("")+'</div>';
+  };
   var renderMetrics=function(){
     byId("metric-total").textContent=systems.length;
     byId("metric-ui").textContent=systems.filter(function(s){return Boolean(s.interface_source_url);}).length;
@@ -252,9 +352,10 @@
     currentView=name;
     document.querySelectorAll(".view").forEach(function(el){el.classList.toggle("active",el.id==="view-"+name);});
     document.querySelectorAll(".nav-item").forEach(function(el){el.classList.toggle("active",el.getAttribute("data-view")===name);});
-    var titles={overview:"Overview",systems:"Systems & sources",interfaces:"Interface library",architecture:"Architecture",recovery:"Continuity & recovery"};
+    var titles={executive:"Executive portfolio",overview:"Overview",systems:"Systems & sources",interfaces:"Interface library",architecture:"Architecture",recovery:"Continuity & recovery"};
     byId("breadcrumb").textContent=titles[name]||name;
     if(name==="systems")renderSystems();
+    if(name==="executive")renderExecutive();
     window.scrollTo({top:0,behavior:"smooth"});
   };
   var relatedSystems=function(s){
@@ -364,6 +465,11 @@
     renderSystems();
   };
   document.addEventListener("click",function(event){
+    var dimension=event.target.closest("[data-portfolio-dimension]");
+    if(dimension){activePortfolioDimension=dimension.getAttribute("data-portfolio-dimension");activePortfolioGroup="";renderExecutive();return;}
+    var portfolioGroup=event.target.closest("[data-portfolio-group]");
+    if(portfolioGroup){var nextGroup=portfolioGroup.getAttribute("data-portfolio-group");activePortfolioGroup=activePortfolioGroup===nextGroup?"":nextGroup;renderExecutive();return;}
+    if(event.target.closest("[data-clear-portfolio-selection]")){activePortfolioGroup="";renderExecutive();return;}
     var nav=event.target.closest("[data-view]");
     if(nav){showView(nav.getAttribute("data-view"));return;}
     var go=event.target.closest("[data-go]");
@@ -400,7 +506,7 @@
       var categories=Array.from(new Set(systems.map(function(s){return s.category||"other";}))).sort();
       byId("category-filter").innerHTML='<option value="">All domains</option>'+categories.map(function(c){return '<option value="'+esc(c)+'">'+esc(categoryName(c))+'</option>';}).join("");
       byId("preview-select").innerHTML=systems.map(function(s){return '<option value="'+esc(s.id)+'">'+esc(s.name)+'</option>';}).join("");
-      renderMetrics();renderPatternCards("overview-patterns");renderPatternCards("interface-patterns");renderFeatured();renderSystems();renderCapabilityMap();
+      renderMetrics();renderPatternCards("overview-patterns");renderPatternCards("interface-patterns");renderFeatured();renderSystems();renderCapabilityMap();renderExecutive();showView("executive");
       var first=systems.find(function(s){return s.name==="ArchOS-Repo";})||systems[0];
       byId("preview-select").value=first.id;updatePreview(first.id);
     }catch(error){
