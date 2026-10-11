@@ -35,6 +35,7 @@
 @media(max-width:900px){.map-grid{grid-template-columns:1fr}}
 @media(max-width:560px){.map-node{flex:1 1 100%}.map-domain-head{flex-direction:column}}
 
+.source-search-form{display:grid;gap:9px}.source-search-row{display:flex;gap:10px;align-items:center}.source-search-row input{flex:1;min-width:0;width:100%;background:var(--panel2);border:1px solid var(--line2);border-radius:10px;padding:12px;color:var(--text)}.source-search-row input:focus{outline:2px solid var(--cyan);outline-offset:1px}.source-search-row button:disabled{opacity:.6;cursor:wait}.source-search-summary{margin-top:12px;color:var(--muted);font-size:13px}.source-results{display:grid;gap:10px;margin-top:12px}.source-result{min-width:0;border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--panel2)}.source-result-head{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}.source-result-head strong{overflow-wrap:anywhere}.source-result-path{display:block;color:var(--cyan);font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere}.source-result p{margin:10px 0;color:var(--muted);font-size:13px;overflow-wrap:anywhere;white-space:normal}.source-result a{font-size:12px;font-weight:700}@media(max-width:560px){.source-search-row{align-items:stretch;flex-direction:column}.source-search-row .button{width:100%}}
 </style>
 </head>
 <body>
@@ -132,6 +133,15 @@
       <div class="boundary-row"><div class="symbol">↗</div><div><b><a href="https://github.com/Daniel550-pixel/SysCentre/actions" target="_blank" rel="noreferrer">CI and deployment runs</a></b><span>Check validation before recovery</span></div></div>
     </div></article>
   </div>
+  <div class="section-head"><div><h2>Indexed source search</h2><p>Search readable files already indexed by the local runtime. This is a read-only query; it does not execute or modify repository source.</p></div><span class="tag" id="source-search-status">Local runtime required</span></div>
+  <article class="panel">
+    <form class="source-search-form" id="source-search-form">
+      <label for="source-query">Search indexed repository text</label>
+      <div class="source-search-row"><input id="source-query" type="search" minlength="2" maxlength="200" autocomplete="off" placeholder="Search for a function, file name, policy rule, or phrase…" required><button class="button primary" id="source-search-button" type="submit">Search indexed source</button></div>
+    </form>
+    <div class="source-search-summary" id="source-search-summary" role="status" aria-live="polite">Search requires SysCentre running on this same computer and at least one indexed repository.</div>
+    <div class="source-results" id="source-search-results"></div>
+  </article>
   <div class="section-head"><div><h2>Recovery runbook</h2><p>Verify, recover, then validate.</p></div></div>
   <div class="runbook-steps"><div class="runbook-step"><b>01 · VERIFY</b><p>Open CI and identify the failing check and commit. Confirm whether the problem is the static site, local API, indexer or an individual source project.</p></div><div class="runbook-step"><b>02 · RECOVER</b><p>Pull the correct branch locally, review working-tree changes, and use each project's own documented recovery steps. Do not force-push over remote history.</p></div><div class="runbook-step"><b>03 · VALIDATE</b><p>Run the project's tests, verify its own health endpoints and inspect its UI. Re-index source metadata only after the correct repository mapping is confirmed.</p></div></div>
 </section>
@@ -417,6 +427,50 @@
     byId("checked-at").textContent=new Date().toLocaleTimeString();
     byId("runtime-result").textContent=online?"Both endpoints responded successfully.":"One or both endpoints are unreachable. Check from the same computer that hosts the local runtime.";
     this.disabled=false;
+  });
+  var sourceUrlForResult=function(item){
+    var repositoryUrl=String(item.repository_url||"").replace(/\/+$/,"");
+    var branch=String(item.default_branch||"main");
+    var path=String(item.path||"");
+    if(!/^https:\/\/github\.com\/[\w.-]+\/[\w.-]+$/.test(repositoryUrl)||!path||path.startsWith("/")||path.split("/").some(function(part){return !part||part==="."||part==="..";}))return "";
+    return repositoryUrl+"/blob/"+encodeURIComponent(branch)+"/"+path.split("/").map(function(part){return encodeURIComponent(part);}).join("/");
+  };
+  byId("source-search-form").addEventListener("submit",async function(event){
+    event.preventDefault();
+    var query=byId("source-query").value.trim();
+    var button=byId("source-search-button");
+    var summary=byId("source-search-summary");
+    var resultsRoot=byId("source-search-results");
+    if(query.length<2||query.length>200){
+      summary.textContent="Enter a search term between 2 and 200 characters.";
+      return;
+    }
+    button.disabled=true;
+    summary.textContent="Searching the local source index…";
+    resultsRoot.innerHTML="";
+    byId("source-search-status").textContent="Query in progress";
+    try{
+      var response=await fetch(API+"/api/search?q="+encodeURIComponent(query)+"&limit=50",{cache:"no-store"});
+      var data=await response.json();
+      if(!response.ok)throw new Error(data.error||("Search request returned HTTP "+response.status));
+      var results=Array.isArray(data.results)?data.results:[];
+      byId("source-search-status").textContent="Local index queried";
+      summary.textContent=String(data.count||0)+" match"+(data.count===1?"":"es")+" for “"+query+"”. Results come only from files previously indexed on this computer.";
+      if(!results.length){
+        resultsRoot.innerHTML='<div class="empty-state">No indexed text matched that query. Index a repository in the local SysCentre app, then search again.</div>';
+        return;
+      }
+      resultsRoot.innerHTML=results.map(function(item){
+        var sourceUrl=sourceUrlForResult(item);
+        return '<article class="source-result"><div class="source-result-head"><strong>'+esc(item.project_name||item.project_id||"Unknown project")+'</strong><span class="source-result-path">'+esc(item.path||"Unknown file")+'</span></div><p>'+esc(item.excerpt||"No excerpt available.")+'</p>'+(sourceUrl?'<a href="'+esc(sourceUrl)+'" target="_blank" rel="noreferrer">Open indexed file on GitHub ↗</a>':'<span class="muted">Source link unavailable</span>')+'</article>';
+      }).join("");
+    }catch(error){
+      byId("source-search-status").textContent="Search unavailable";
+      summary.textContent="Could not reach the local source index. Open SysCentre on the same computer, start its runtime, allow localhost access if prompted, then retry. Detail: "+String(error&&error.message||error);
+      resultsRoot.innerHTML='<div class="empty-state">The static catalog is still available; only local indexed-source search is unavailable.</div>';
+    }finally{
+      button.disabled=false;
+    }
   });
   loadCatalog();
 })();
