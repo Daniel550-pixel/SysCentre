@@ -185,6 +185,7 @@ class RuntimeTests(unittest.TestCase):
                 "requirements.txt": "fastapi==0.115.0\n",
                 "webapp/src/App.tsx": "import Card from './components/Card';\\nexport default function App() { return <Card />; }\\n",
                 "webapp/src/components/Card.tsx": "export default function Card() { return <div>Card</div>; }\\n",
+                "client.py": "import requests\nrequests.get('https://api.example.test/v1/items')\n",
             }
             with patch.object(server, "DB_PATH", database_path):
                 from repository_ingest import _db_executescript
@@ -210,13 +211,14 @@ class RuntimeTests(unittest.TestCase):
 
         analysis = result["analysis"]
         self.assertEqual(result["project"]["indexed_commit"], "abc123")
-        self.assertEqual(analysis["source_files_analyzed"], 5)
+        self.assertEqual(analysis["source_files_analyzed"], 6)
         self.assertGreaterEqual(analysis["routes_detected"], 2)
         self.assertIn("main.py", analysis["entrypoints"])
         self.assertTrue(any(item["name"] == "fastapi" for item in analysis["framework_signals"]))
         self.assertTrue(any(item["name"] == "SQLite" for item in analysis["data_store_signals"]))
         self.assertTrue(any(edge["from"] == "main.py" and edge["to"] == "api.py" for edge in analysis["dependency_edges"]))
         self.assertTrue(any(edge["from"] == "webapp/src/App.tsx" and edge["to"] == "webapp/src/components/Card.tsx" for edge in analysis["dependency_edges"]))
+        self.assertTrue(any(item["target"] == "https://api.example.test/v1/items" and item["source"] == "client.py" for item in analysis["outbound_api_calls"]))
         self.assertTrue(any("never" in item.lower() or "static" in item.lower() for item in analysis["limitations"]))
 
     def test_static_architecture_analyzer_requires_indexed_repository(self):
