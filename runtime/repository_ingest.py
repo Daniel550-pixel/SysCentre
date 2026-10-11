@@ -179,6 +179,7 @@ def _db_executescript() -> None:
 
 
 def list_projects() -> list[dict[str, Any]]:
+    """Return indexing state merged with executive portfolio metadata from the source catalog."""
     _db_executescript()
     with server._DB_LOCK:
         with server._database() as connection:
@@ -186,14 +187,27 @@ def list_projects() -> list[dict[str, Any]]:
                 "SELECT project_id, name, repository_url, default_branch, description, latest_commit, indexed_at, file_count, text_file_count, skipped_file_count, status FROM projects ORDER BY name"
             ).fetchall()
     indexed = {row["project_id"]: dict(row) for row in rows}
+    portfolio_fields = (
+        "category", "purpose", "capabilities", "interface_kind", "interface_status",
+        "purpose_confidence", "business_model", "system_type", "sector", "target_market",
+        "market_segments", "portfolio_role", "lifecycle_stage", "monetization_status",
+        "market_validation", "classification_basis", "classification_note",
+    )
     result = []
     for item in load_catalog():
-        result.append(indexed.get(item["id"], {
+        project = indexed.get(item["id"], {
             "project_id": item["id"], "name": item["name"], "repository_url": item["url"],
             "default_branch": item["default_branch"], "description": "", "latest_commit": "",
             "indexed_at": "", "file_count": 0, "text_file_count": 0, "skipped_file_count": 0,
             "status": "registered",
-        }))
+        })
+        project.update({field: item[field] for field in portfolio_fields if field in item})
+        project["repository_url"] = item["url"]
+        project["name"] = item["name"]
+        project["default_branch"] = item["default_branch"]
+        if not project.get("description"):
+            project["description"] = item.get("purpose", "")
+        result.append(project)
     return result
 
 
