@@ -61,3 +61,41 @@
 .portfolio-caveat strong{color:#c2baff;font-weight:600}
 @media(max-width:1050px){.portfolio-group-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.portfolio-explorer-head{flex-direction:column}.portfolio-dimensions{max-width:100%}}
 @media(max-width:760px){.portfolio-header{flex-direction:column;gap:9px}.portfolio-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.portfolio-kpis article{padding:12px}.portfolio-kpis article strong{font-size:21px}.portfolio-group-grid{grid-template-columns:1fr}.portfolio-drilldown-grid{grid-template-columns:1fr}.portfolio-dimensions{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.portfolio-dimensions button{white-space:normal}.portfolio-meta{align-self:flex-start}.portfolio-explorer-head p{max-width:none}}
+
+
+/* Executive portfolio register: combined strategy filters and evidence-first review */
+.executive-register{margin-top:14px;border:1px solid #292f40;border-radius:12px;background:#0f141e;overflow:hidden}
+.executive-register-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:18px 18px 14px;border-bottom:1px solid #252b3a}
+.executive-register-heading h3{font-size:14px;margin:5px 0 4px;color:#e6eaf5}
+.executive-register-heading p{font-size:10px;line-height:1.6;color:#939db2;margin:0;max-width:760px}
+.register-count{flex-shrink:0;border:1px solid #35324f;background:#1b192b;color:#c6bdff;border-radius:6px;padding:6px 9px;font:10px var(--mono)}
+.register-filters{display:grid;grid-template-columns:minmax(180px,1.5fr) repeat(4,minmax(135px,1fr)) auto;gap:9px;padding:14px;border-bottom:1px solid #252b3a;align-items:end}
+.register-filters label{display:grid;gap:6px;min-width:0}
+.register-filters label span{font-size:9px;color:#8e9ab0}
+.register-filters input,.register-filters select{width:100%;min-width:0;border:1px solid #30394b;border-radius:7px;background:#111824;color:#e3e8f3;padding:9px 10px;font:10px inherit;outline:none}
+.register-filters input:focus,.register-filters select:focus{border-color:#8b7cf6;box-shadow:0 0 0 2px #8b7cf61c}
+.register-reset{white-space:nowrap;min-height:35px}
+.register-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:12px 14px;border-bottom:1px solid #252b3a}
+.register-summary>div{display:grid;gap:4px;padding:10px 12px;border:1px solid #2a3040;border-radius:8px;background:#121824}
+.register-summary span{font-size:9px;color:#9ba6ba}
+.register-summary strong{font-size:21px;line-height:1.2;color:#e4e8f2;font-weight:650}
+.register-summary small{font-size:8px;line-height:1.5;color:#78869d}
+.executive-register-list{display:grid}
+.executive-register-row{display:grid;grid-template-columns:minmax(130px,.8fr) minmax(0,2.5fr) minmax(120px,.7fr);gap:14px;padding:14px;border-bottom:1px solid #242a39}
+.executive-register-row:last-child{border-bottom:0}
+.register-project-identity{display:flex;flex-direction:column;align-items:flex-start;gap:7px;min-width:0}
+.register-project-identity strong{font-size:11px;line-height:1.4;color:#e4e8f2;overflow-wrap:anywhere}
+.register-project-identity>span{font-size:9px;line-height:1.5;color:#8e9ab0}
+.register-project-identity a{font-size:9px;color:#aaa0ff;margin-top:auto}
+.register-project-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.register-project-fields>div{display:flex;flex-direction:column;gap:4px;min-width:0;padding:7px 8px;border:1px solid #252c3a;border-radius:6px;background:#111721}
+.register-project-fields span{font-size:8px;text-transform:uppercase;letter-spacing:.06em;color:#7f8ba2}
+.register-project-fields strong{font-size:9px;font-weight:500;line-height:1.5;color:#c3ccdc;overflow-wrap:anywhere}
+.register-validation{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0}
+.register-validation>span{font-size:8px;font-weight:650;padding:5px 7px;border-radius:5px;white-space:nowrap}
+.register-validation .evidence-unverified{color:#ffd18b;background:#352a1a;border:1px solid #5b4427}
+.register-validation .evidence-confirmed{color:#91e2b9;background:#19352b;border:1px solid #2d5946}
+.register-validation p{font-size:8px;line-height:1.5;color:#78869c;margin:0;overflow-wrap:anywhere}
+@media(max-width:1200px){.register-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.register-search{grid-column:1/-1}.register-reset{justify-self:start}}
+@media(max-width:850px){.executive-register-row{grid-template-columns:1fr}.register-project-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.register-validation{flex-direction:row;align-items:center;flex-wrap:wrap}.register-validation p{flex-basis:100%}}
+@media(max-width:560px){.executive-register-heading{flex-direction:column}.register-filters{grid-template-columns:1fr}.register-search{grid-column:auto}.register-summary{grid-template-columns:1fr}.register-project-fields{grid-template-columns:1fr 1fr}}
