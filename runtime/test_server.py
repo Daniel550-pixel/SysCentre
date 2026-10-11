@@ -24,7 +24,7 @@ class RuntimeTests(unittest.TestCase):
             snapshot = project["source_snapshot"]
             self.assertIn("commit", snapshot)
             self.assertIn("tree_sha", snapshot)
-            self.assertRegex(snapshot["source_checked_at"], r"^\\d{4}-\\d{2}-\\d{2}$")
+            self.assertRegex(snapshot["source_checked_at"], r"^\d{4}-\d{2}-\d{2}$")
             self.assertIsInstance(project["repository_hygiene_findings"], list)
             self.assertFalse(snapshot["deployment_verified"])
             self.assertFalse(snapshot["runtime_health_verified"])
