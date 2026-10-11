@@ -72,7 +72,7 @@
 .register-filters{display:grid;grid-template-columns:minmax(180px,1.5fr) repeat(4,minmax(135px,1fr)) auto;gap:9px;padding:14px;border-bottom:1px solid #252b3a;align-items:end}
 .register-filters label{display:grid;gap:6px;min-width:0}
 .register-filters label span{font-size:9px;color:#8e9ab0}
-.register-filters input,.register-filters select{width:100%;min-width:0;border:1px solid #30394b;border-radius:7px;background:#111824;color:#e3e8f3;padding:9px 10px;font:10px inherit;outline:none}
+.register-filters input,.register-filters select{width:100%;min-width:0;border:1px solid #30394b;border-radius:7px;background:#111824;color:#e3e8f3;padding:9px 10px;font:inherit;font-size:10px;outline:none}
 .register-filters input:focus,.register-filters select:focus{border-color:#8b7cf6;box-shadow:0 0 0 2px #8b7cf61c}
 .register-reset{white-space:nowrap;min-height:35px}
 .register-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:12px 14px;border-bottom:1px solid #252b3a}
