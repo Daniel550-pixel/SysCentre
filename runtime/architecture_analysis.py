@@ -30,6 +30,8 @@ def _matches(text: str, patterns: tuple[str, ...]) -> bool:
 
 def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
     """Analyze indexed source without executing it; outputs are tied to the indexed commit."""
+    from repository_ingest import _db_executescript
+    _db_executescript()
     with server._DB_LOCK:
         with server._database() as connection:
             project = connection.execute(
