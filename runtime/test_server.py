@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import Mock
 
 import server
 from policy import evaluate_command, policy_catalog
@@ -19,6 +20,40 @@ class RuntimeTests(unittest.TestCase):
         self.assertFalse(server._origin_is_allowed("https://example.org"))
         self.assertFalse(server._origin_is_allowed("*"))
         self.assertFalse(server._origin_is_allowed(None))
+
+    def test_send_json_sets_cors_headers_for_allowed_origin(self):
+        origin = "https://daniel550-pixel.github.io"
+        handler = object.__new__(server.Handler)
+        handler.headers = {
+            "Origin": origin,
+            "Access-Control-Request-Private-Network": "true",
+        }
+        handler.send_response = Mock()
+        handler.end_headers = Mock()
+        handler.wfile = Mock()
+        captured = {}
+        handler.send_header = lambda name, value: captured.__setitem__(name, value)
+
+        handler._send_json(200, {"ok": True})
+
+        self.assertEqual(captured["Access-Control-Allow-Origin"], origin)
+        self.assertEqual(captured["Access-Control-Allow-Methods"], "GET, POST, OPTIONS")
+        self.assertEqual(captured["Access-Control-Allow-Headers"], "Content-Type")
+        self.assertEqual(captured["Access-Control-Allow-Private-Network"], "true")
+        self.assertEqual(captured["Vary"], "Origin")
+
+    def test_send_json_omits_cors_headers_for_unapproved_origin(self):
+        handler = object.__new__(server.Handler)
+        handler.headers = {"Origin": "https://example.org"}
+        handler.send_response = Mock()
+        handler.end_headers = Mock()
+        handler.wfile = Mock()
+        captured = {}
+        handler.send_header = lambda name, value: captured.__setitem__(name, value)
+
+        handler._send_json(200, {"ok": True})
+
+        self.assertNotIn("Access-Control-Allow-Origin", captured)
 
     def test_allowlisted_command_runs(self):
         result = server.execute_command("help")
