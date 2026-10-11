@@ -1,5 +1,8 @@
+import json
+import tempfile
 import unittest
-from unittest.mock import Mock
+from pathlib import Path
+from unittest.mock import Mock, patch
 
 import server
 from policy import evaluate_command, policy_catalog
@@ -54,6 +57,41 @@ class RuntimeTests(unittest.TestCase):
         handler._send_json(200, {"ok": True})
 
         self.assertNotIn("Access-Control-Allow-Origin", captured)
+
+    def test_register_inventory_project_persists_new_identity_without_guessing_repository(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            inventory_path = root / "project_inventory.json"
+            inventory_path.write_text(json.dumps({"schema_version": 1, "projects": []}), encoding="utf-8")
+            with patch.object(server, "__file__", str(root / "server.py")), patch.object(server, "record_event") as event:
+                result = server.register_inventory_project({
+                    "name": "Future Project Alpha",
+                    "category": "AI Platform",
+                    "description": "A future independent system",
+                })
+            saved = json.loads(inventory_path.read_text(encoding="utf-8"))
+            self.assertEqual(result["project"]["id"], "future-project-alpha")
+            self.assertEqual(saved["projects"][0]["status"], "repository_match_required")
+            self.assertEqual(saved["projects"][0]["candidate_repositories"], [])
+            self.assertEqual(saved["projects"][0]["origin"], "syscentre_intake")
+            event.assert_called_once()
+
+    def test_register_inventory_project_validates_github_url_and_rejects_duplicate(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            inventory_path = root / "project_inventory.json"
+            inventory_path.write_text(json.dumps({"schema_version": 1, "projects": []}), encoding="utf-8")
+            with patch.object(server, "__file__", str(root / "server.py")), patch.object(server, "record_event"):
+                result = server.register_inventory_project({
+                    "name": "Project With Repo",
+                    "category": "Developer Tools",
+                    "repository_url": "https://github.com/example/project",
+                })
+                self.assertEqual(result["project"]["candidate_repositories"], ["project"])
+                with self.assertRaisesRegex(ValueError, "already"):
+                    server.register_inventory_project({"name": "Project With Repo"})
+                with self.assertRaisesRegex(ValueError, "exact https"):
+                    server.register_inventory_project({"name": "Bad URL", "repository_url": "https://example.org/project"})
 
     def test_allowlisted_command_runs(self):
         result = server.execute_command("help")
