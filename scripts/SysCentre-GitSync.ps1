@@ -67,16 +67,40 @@ function Sync-SysCentre {
         }
     }
 
-    # Rebase local commits onto the latest remote main. Never force-push.
-    Invoke-Git -GitArgs @("fetch", "origin", "main")
-    & git pull --rebase origin main
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "Pull/rebase stopped. Resolve the Git issue manually; sync will not push." -ForegroundColor Red
-        throw "Pull/rebase failed. No push was attempted."
-    }
+    # Another computer or sync process can update origin/main between pull and push.
+    # Retry only a rejected/stale push after fetching and rebasing again. Never force-push.
+    $maxPushAttempts = 4
+    for ($attempt = 1; $attempt -le $maxPushAttempts; $attempt++) {
+        & git pull --rebase origin main
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "Pull/rebase stopped. Resolve the Git issue manually; no push was attempted." -ForegroundColor Red
+            throw "Pull/rebase failed. Check for conflicts or a rebase in progress."
+        }
 
-    Invoke-Git -GitArgs @("push", "origin", "main")
-    Write-Host "Sync complete." -ForegroundColor Green
+        $pushOutput = @(& git push origin main 2>&1)
+        $pushExitCode = $LASTEXITCODE
+        foreach ($line in $pushOutput) {
+            Write-Host ([string]$line)
+        }
+
+        if ($pushExitCode -eq 0) {
+            Write-Host "Sync complete." -ForegroundColor Green
+            return
+        }
+
+        $pushText = $pushOutput -join "`n"
+        $isRemoteRace = $pushText -match "(?i)(\[rejected\]|non-fast-forward|fetch first|failed to push some refs|stale info)"
+        if (-not $isRemoteRace) {
+            throw "git push failed for a reason other than a remote-update race. Review the output above. No force-push was attempted."
+        }
+
+        if ($attempt -ge $maxPushAttempts) {
+            throw "origin/main kept changing during push after $maxPushAttempts attempts. Sync stopped safely; no force-push was attempted."
+        }
+
+        Write-Host "origin/main changed during the push window. Refreshing and rebasing before retry $($attempt + 1) of $maxPushAttempts..." -ForegroundColor Yellow
+        Start-Sleep -Seconds 2
+    }
 }
 
 if ($IntervalSeconds -lt 15) {
