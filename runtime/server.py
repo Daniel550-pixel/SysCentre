@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import os
 import platform
+import re
 import sqlite3
 import time
 from urllib.parse import parse_qs, unquote, urlsplit
@@ -21,6 +22,7 @@ PORT = int(os.environ.get("SYSCENTRE_PORT", "8765"))
 STARTED_AT = time.time()
 DB_PATH = Path(os.environ.get("SYSCENTRE_DB_PATH", str(Path.home() / ".syscentre" / "syscentre.db")))
 _DB_LOCK = Lock()
+_INVENTORY_LOCK = Lock()
 MAX_BODY_BYTES = 8_192
 
 # Cross-origin browser access is limited to the published fallback and local dev UI.
@@ -154,6 +156,59 @@ def execute_command(command: str) -> dict[str, Any]:
     return {"ok": True, "command": normalized, "result": result}
 
 
+def register_inventory_project(payload: dict[str, Any]) -> dict[str, Any]:
+    """Register a new project identity without guessing or executing its repository."""
+    name = payload.get("name")
+    category = payload.get("category", "new-project")
+    description = payload.get("description", "")
+    repository_url = payload.get("repository_url", "")
+    if not isinstance(name, str) or not name.strip() or len(name.strip()) > 120:
+        raise ValueError("Project name is required and must be 120 characters or fewer.")
+    if not isinstance(category, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9 _-]{0,59}", category.strip()):
+        raise ValueError("Category must be 1–60 letters, numbers, spaces, hyphens, or underscores.")
+    if not isinstance(description, str) or len(description) > 1000:
+        raise ValueError("Description must be 1000 characters or fewer.")
+    if not isinstance(repository_url, str) or len(repository_url) > 300:
+        raise ValueError("Repository URL must be a string of 300 characters or fewer.")
+    repository_url = repository_url.strip().rstrip("/")
+    if repository_url and not re.fullmatch(r"https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository_url):
+        raise ValueError("Repository URL must be an exact https://github.com/owner/repository URL.")
+    clean_name = name.strip()
+    project_id = re.sub(r"[^a-z0-9]+", "-", clean_name.lower()).strip("-")[:80]
+    if not project_id:
+        raise ValueError("Project name must contain at least one letter or number.")
+    category_slug = re.sub(r"[^a-z0-9]+", "-", category.strip().lower()).strip("-") or "new-project"
+    inventory_path = Path(__file__).with_name("project_inventory.json")
+    with _INVENTORY_LOCK:
+        with inventory_path.open("r", encoding="utf-8") as handle:
+            inventory = json.load(handle)
+        projects = inventory.setdefault("projects", [])
+        if any(item.get("id") == project_id or item.get("name", "").casefold() == clean_name.casefold() for item in projects):
+            raise ValueError("A project with this name is already in the historical/new-project inventory.")
+        entry = {
+            "id": project_id,
+            "name": clean_name,
+            "status": "repository_match_required",
+            "category": category_slug,
+            "candidate_repositories": [repository_url.rsplit("/", 1)[-1]] if repository_url else [],
+            "description": description.strip(),
+            "repository_url_submitted": repository_url,
+            "origin": "syscentre_intake",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
+        projects.append(entry)
+        temporary_path = inventory_path.with_suffix(".json.tmp")
+        with temporary_path.open("w", encoding="utf-8", newline="\n") as handle:
+            json.dump(inventory, handle, ensure_ascii=False, indent=2)
+            handle.write("\n")
+        temporary_path.replace(inventory_path)
+    record_event("project.registered", "New project identity registered", {
+        "project_id": project_id, "name": clean_name, "category": category_slug,
+        "repository_url_submitted": bool(repository_url), "status": entry["status"],
+    })
+    return {"ok": True, "project": entry, "count": len(projects)}
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "SysCentreRuntime/0.2"
 
@@ -228,7 +283,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         parsed = urlsplit(self.path)
-        if parsed.path not in {"/api/command", "/api/repositories/ingest"}:
+        if parsed.path not in {"/api/command", "/api/repositories/ingest", "/api/project-inventory"}:
             self._send_json(404, {"ok": False, "error": "Route not found"})
             return
         try:
@@ -238,7 +293,9 @@ class Handler(BaseHTTPRequestHandler):
             payload = json.loads(self.rfile.read(length).decode("utf-8"))
             if not isinstance(payload, dict):
                 raise ValueError("Request body must be a JSON object.")
-            if parsed.path == "/api/command":
+            if parsed.path == "/api/project-inventory":
+                self._send_json(201, register_inventory_project(payload))
+            elif parsed.path == "/api/command":
                 if not isinstance(payload.get("command"), str):
                     raise ValueError("JSON body must contain a string 'command'.")
                 self._send_json(200, execute_command(payload["command"]))
