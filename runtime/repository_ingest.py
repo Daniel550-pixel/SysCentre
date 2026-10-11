@@ -188,7 +188,7 @@ def list_projects() -> list[dict[str, Any]]:
             ).fetchall()
     indexed = {row["project_id"]: dict(row) for row in rows}
     portfolio_fields = (
-        "category", "purpose", "capabilities", "interface_kind", "interface_status",
+        "category", "purpose", "capabilities", "interface_kind", "interface_status", "market_category",
         "purpose_confidence", "business_model", "system_type", "sector", "target_market",
         "market_segments", "portfolio_role", "lifecycle_stage", "monetization_status",
         "market_validation", "classification_basis", "classification_note",
