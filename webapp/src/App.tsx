@@ -12,6 +12,7 @@ type CommandResponse = { ok: boolean; command: string; result?: unknown; error?:
 type Project = { project_id: string; name: string; repository_url: string; default_branch: string; description: string; latest_commit: string; indexed_at: string; file_count: number; text_file_count: number; skipped_file_count: number; status: string };
 type SourceResult = { project_id: string; project_name: string; repository_url: string; path: string; blob_sha: string; size_bytes: number; excerpt: string };
 type InventoryProject = { id: string; name: string; status: string; category: string; candidate_repositories: string[] };
+type IngestJob = { project_id: string; target_commit: string; branch: string; started_at: string; updated_at: string; status: string; files_seen: number; files_processed: number; files_indexed: number; files_skipped: number; error: string };
 
 function formatUptime(seconds = 0) {
   const total = Math.max(0, Math.floor(seconds));
@@ -34,6 +35,7 @@ export default function App() {
   const [output, setOutput] = useState("Runtime console ready. Enter help to see available commands.");
   const [lastUpdated, setLastUpdated] = useState("");
   const [projects, setProjects] = useState<Project[]>([]);
+  const [ingestJobs, setIngestJobs] = useState<IngestJob[]>([]);
   const [inventoryProjects, setInventoryProjects] = useState<InventoryProject[]>([]);
   const [ingesting, setIngesting] = useState<string | null>(null);
   const [projectMessage, setProjectMessage] = useState("");
@@ -49,12 +51,14 @@ export default function App() {
         fetch(API + "/api/events", { signal: AbortSignal.timeout(2500) }),
         fetch(API + "/api/repositories", { signal: AbortSignal.timeout(5000) }),
         fetch(API + "/api/project-inventory", { signal: AbortSignal.timeout(5000) }),
+        fetch(API + "/api/ingest-status", { signal: AbortSignal.timeout(5000) }),
       ]);
       if (!responses[0].ok || !responses[1].ok) throw new Error("Runtime API returned an error");
       const nextStatus = (await responses[0].json()) as RuntimeStatus;
       const nextEvents = (await responses[1].json()) as { events: RuntimeEvent[] };
       if (responses[2].ok) { const nextProjects = (await responses[2].json()) as { projects: Project[] }; setProjects(nextProjects.projects ?? []); }
       if (responses[3].ok) { const inventory = (await responses[3].json()) as { projects: InventoryProject[] }; setInventoryProjects(inventory.projects ?? []); }
+      if (responses[4].ok) { const ingestStatus = (await responses[4].json()) as { jobs: IngestJob[] }; setIngestJobs(ingestStatus.jobs ?? []); }
       setStatus(nextStatus);
       setEvents(nextEvents.events ?? []);
       setConnected(true);
@@ -187,6 +191,17 @@ export default function App() {
             <p className="panel-description">Independent repositories registered for indexing. Source remains in its own repository; indexing does not merge or execute project code.</p>
             <div className="project-toolbar"><input className="project-filter" value={projectSearch} onChange={(event) => setProjectSearch(event.target.value)} placeholder="Filter projects..." aria-label="Filter projects" /><span className="project-count">{projects.length} registered</span></div>
             {projectMessage && <div className="project-message" role="status">{projectMessage}</div>}
+            {ingestJobs.some((job) => job.status === "running" || job.status === "failed") && <div className="ingest-progress-list" aria-live="polite">
+              {ingestJobs.filter((job) => job.status === "running" || job.status === "failed").map((job) => {
+                const percent = job.files_seen > 0 ? Math.min(100, Math.round(job.files_processed / job.files_seen * 100)) : 0;
+                return <article className={"ingest-progress " + job.status} key={job.project_id}>
+                  <div className="ingest-progress-top"><strong>{job.project_id}</strong><span>{job.status === "running" ? "Indexing" : "Interrupted — retry to resume"}</span></div>
+                  <div className="ingest-progress-track"><span style={{ width: percent + "%" }} /></div>
+                  <div className="ingest-progress-meta">{job.files_processed} / {job.files_seen} files checked · {job.files_indexed} text · {job.files_skipped} excluded</div>
+                  {job.status === "failed" && <div className="ingest-progress-error">{job.error || "Indexing stopped unexpectedly. Retry to resume from saved checkpoints."}</div>}
+                </article>;
+              })}
+            </div>}
             <form className="source-search" onSubmit={searchSource}><input value={sourceQuery} onChange={(event) => setSourceQuery(event.target.value)} placeholder="Search indexed source across projects..." aria-label="Search indexed source" /><button className="secondary-button project-index-button" type="submit" disabled={sourceSearching || sourceQuery.trim().length < 2}>{sourceSearching ? "Searching..." : "Search source"}</button></form>
             {sourceResults.length > 0 && <div className="source-results"><div className="source-results-heading">{sourceResults.length} source matches</div>{sourceResults.map((result, index) => <article className="source-result" key={result.project_id + result.path + index}><div><strong>{result.project_name}</strong><span>{result.path}</span></div><pre>{result.excerpt}</pre><a href={result.repository_url + "/blob/" + (projects.find((project) => project.project_id === result.project_id)?.default_branch ?? "main") + "/" + result.path} target="_blank" rel="noreferrer">Open source on GitHub</a></article>)}</div>}
             <div className="project-list">
