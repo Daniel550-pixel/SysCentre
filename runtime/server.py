@@ -313,6 +313,15 @@ class Handler(BaseHTTPRequestHandler):
                 self._send_json(200, search_index(query, limit=int(params.get("limit", ["50"])[0])))
             except (ValueError, TypeError) as exc:
                 self._send_json(400, {"ok": False, "error": str(exc)})
+        elif path.startswith("/api/repositories/") and path.endswith("/architecture-analysis"):
+            from architecture_analysis import analyze_indexed_repository
+            project_id = unquote(path[len("/api/repositories/"):-len("/architecture-analysis")].strip("/"))
+            try:
+                self._send_json(200, analyze_indexed_repository(project_id))
+            except ValueError as exc:
+                self._send_json(409, {"ok": False, "error": str(exc)})
+            except RuntimeError as exc:
+                self._send_json(422, {"ok": False, "error": str(exc)})
         elif path.startswith("/api/repositories/") and path.endswith("/files"):
             from repository_ingest import project_files
             project_id = unquote(path[len("/api/repositories/"):-len("/files")].strip("/"))
