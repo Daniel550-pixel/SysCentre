@@ -18,6 +18,8 @@ The dashboard Project Registry lists repositories registered in the catalog. Sel
 
 Historical project identities without a confirmed exact repository mapping are tracked separately in `runtime/project_inventory.json` and shown in the dashboard under **Historical projects awaiting repository match**. Candidate names are informational only; SysCentre does not guess repository URLs or ingest a candidate under the wrong project identity. Use `GET /api/project-inventory` to retrieve this reconciliation list.
 
+Repository ingestion checkpoints completed file records in SQLite every 50 files. If a run fails, its last successful checkpoints remain available; retrying the same repository commit reuses files whose blob hashes have not changed and fetches only missing or changed files. The dashboard exposes progress and failure details through `GET /api/ingest-status`, and a successful run atomically promotes the completed checkpoint into the searchable index. A changed upstream commit starts a fresh checkpoint set.
+
 The indexer deliberately excludes sensitive-looking paths (for example, `.env`, private keys, and credential files), generated/dependency directories, binary files, and individual files larger than 900 KB from the text content index. Their paths and exclusion reasons are retained as metadata. A truncated GitHub tree or failed file fetch aborts the run rather than falsely reporting a complete index. The source repository is never modified.
 
 ## Requirements
@@ -44,6 +46,7 @@ Open **http://127.0.0.1:5173**. The runtime API is **http://127.0.0.1:8765**.
 - `GET /api/events` — persisted audit events
 - `GET /api/policy` — current allowlisted command catalog
 - `GET /api/repositories` — catalog plus indexing status
+- `GET /api/ingest-status?project_id=syscentre` — persisted per-project ingestion progress, including interrupted runs and checkpoint counts
 - `GET /api/repositories/{project_id}/files?path=term&limit=100` — indexed file records and source text (maximum 200 per response)
 - `GET /api/search?q=policy&limit=50` — search indexed source across projects (maximum 100 matches)
 - `POST /api/repositories/ingest` with `{"project_id":"networklab"}` — index one catalogued repository
