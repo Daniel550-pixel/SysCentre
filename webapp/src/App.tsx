@@ -16,12 +16,21 @@ type InventoryProject = { id: string; name: string; status: string; category: st
 type RuntimeProject = { project_id: string; name: string; repository_url: string; adapter_type: string; runtime_mode: string; execution_state: string; requires_approval: boolean; notes: string; system_type?: string; sector?: string; market_category?: string };
 type IngestJob = { project_id: string; target_commit: string; branch: string; started_at: string; updated_at: string; status: string; files_seen: number; files_processed: number; files_indexed: number; files_skipped: number; error: string };
 type ArchitectureLayer = { name: string; role: string; components: string; evidence_paths: string[] };
+type ArchitectureFinding = {
+  severity: "critical" | "high" | "medium" | "low" | string;
+  category: string; title: string; description: string;
+  evidence_paths: string[]; recommended_action: string;
+};
 type RepositoryArchitecture = {
   project_id: string; name: string; repository_url: string; default_branch: string;
   architecture_status: string; architecture_summary: string; technology_stack: string[];
   entrypoints: string[]; layers: ArchitectureLayer[]; state_and_data: string[];
   external_integrations: string[]; evidence_paths: string[]; limitations: string[];
-  source_snapshot: { commit: string | null; deployment_verified: boolean; runtime_health_verified: boolean };
+  repository_hygiene_findings?: ArchitectureFinding[];
+  source_snapshot: {
+    commit: string | null; tree_sha?: string | null; commit_date?: string | null;
+    source_checked_at?: string; deployment_verified: boolean; runtime_health_verified: boolean
+  };
 };
 
 function formatUptime(seconds = 0) {
@@ -392,10 +401,10 @@ export default function App() {
                 <option value="documentation-only">Documentation only</option>
                 <option value="empty">Empty repository</option>
               </select>
-              <span className="project-count">{architectures.filter((item) => (architectureStatusFilter === "all" || item.architecture_status === architectureStatusFilter) && (item.name + " " + item.architecture_summary + " " + item.technology_stack.join(" ") + " " + item.entrypoints.join(" ") + " " + item.evidence_paths.join(" ")).toLowerCase().includes(architectureSearch.toLowerCase())).length} shown</span>
+              <span className="project-count">{architectures.filter((item) => (architectureStatusFilter === "all" || item.architecture_status === architectureStatusFilter) && (item.name + " " + item.architecture_summary + " " + item.technology_stack.join(" ") + " " + item.entrypoints.join(" ") + " " + item.evidence_paths.join(" ") + " " + JSON.stringify(item.repository_hygiene_findings ?? [])).toLowerCase().includes(architectureSearch.toLowerCase())).length} shown</span>
             </div>
             <div className="architecture-list">
-              {architectures.filter((item) => (architectureStatusFilter === "all" || item.architecture_status === architectureStatusFilter) && (item.name + " " + item.architecture_summary + " " + item.technology_stack.join(" ") + " " + item.entrypoints.join(" ") + " " + item.evidence_paths.join(" ")).toLowerCase().includes(architectureSearch.toLowerCase())).map((item) => (
+              {architectures.filter((item) => (architectureStatusFilter === "all" || item.architecture_status === architectureStatusFilter) && (item.name + " " + item.architecture_summary + " " + item.technology_stack.join(" ") + " " + item.entrypoints.join(" ") + " " + item.evidence_paths.join(" ") + " " + JSON.stringify(item.repository_hygiene_findings ?? [])).toLowerCase().includes(architectureSearch.toLowerCase())).map((item) => (
                 <details className="architecture-card" key={item.project_id}>
                   <summary>
                     <div className="architecture-identity"><strong>{item.name}</strong><span>{item.default_branch} · {item.layers.length} architecture layers</span></div>
@@ -417,13 +426,31 @@ export default function App() {
                       <article><strong>External integrations</strong>{item.external_integrations.length ? item.external_integrations.map((value) => <span key={value}>{value}</span>) : <span>No integration verified</span>}</article>
                       <article><strong>Evidence files</strong>{item.evidence_paths.slice(0, 10).map((path) => <a key={path} href={item.repository_url + "/blob/" + item.default_branch + "/" + path} target="_blank" rel="noreferrer">{path}</a>)}</article>
                     </div>
-                    <div className="architecture-snapshot"><span>Source commit: <code>{item.source_snapshot.commit ? item.source_snapshot.commit.slice(0, 12) : "No Git tree"}</code></span><a href={item.repository_url + "/tree/" + item.default_branch} target="_blank" rel="noreferrer">Open repository ↗</a><span>Deployment verified: No</span><span>Runtime health verified: No</span></div>
+                    <div className="architecture-snapshot">
+                      <span>Source commit: <code>{item.source_snapshot.commit ? item.source_snapshot.commit.slice(0, 12) : "No Git commit"}</code></span>
+                      {item.source_snapshot.tree_sha && <span>Tree SHA: <code>{item.source_snapshot.tree_sha.slice(0, 12)}</code></span>}
+                      <span>Commit date: {item.source_snapshot.commit_date ? item.source_snapshot.commit_date.slice(0, 10) : "No commit"}</span>
+                      <span>Inventory checked: {item.source_snapshot.source_checked_at || "Unknown"}</span>
+                      {item.source_snapshot.commit && <a href={item.repository_url + "/commit/" + item.source_snapshot.commit} target="_blank" rel="noreferrer">View inspected commit ↗</a>}
+                      <span>Deployment verified: No</span><span>Runtime health verified: No</span>
+                    </div>
+                    {!!item.repository_hygiene_findings?.length && <div className="architecture-hygiene">
+                      <div className="architecture-hygiene-heading"><strong>Repository hygiene findings</strong><span>Path metadata only · no file contents copied</span></div>
+                      <div className="architecture-hygiene-list">
+                        {item.repository_hygiene_findings.map((finding, index) => <article className={"architecture-hygiene-finding severity-" + finding.severity} key={finding.category + finding.title + index}>
+                          <div className="architecture-hygiene-title"><span className={"hygiene-severity severity-" + finding.severity}>{finding.severity}</span><strong>{finding.title}</strong><span className="hygiene-category">{finding.category.replaceAll("-", " ")}</span></div>
+                          <p>{finding.description}</p>
+                          {finding.evidence_paths.length > 0 && <div className="architecture-paths">{finding.evidence_paths.map((path) => <a key={path} href={item.repository_url + "/blob/" + item.default_branch + "/" + path} target="_blank" rel="noreferrer">{path}</a>)}</div>}
+                          <div className="hygiene-recommendation"><strong>Recommended action:</strong> {finding.recommended_action}</div>
+                        </article>)}
+                      </div>
+                    </div>}
                     {item.limitations.length > 0 && <div className="architecture-limitations"><strong>Gaps / caveats</strong>{item.limitations.map((note) => <p key={note}>{note}</p>)}</div>}
                   </div>
                 </details>
               ))}
               {!architectures.length && <div className="empty-state">Architecture inventory unavailable. Pull the latest SysCentre changes and restart the local runtime.</div>}
-              {architectures.length > 0 && !architectures.some((item) => (architectureStatusFilter === "all" || item.architecture_status === architectureStatusFilter) && (item.name + " " + item.architecture_summary + " " + item.technology_stack.join(" ") + " " + item.entrypoints.join(" ") + " " + item.evidence_paths.join(" ")).toLowerCase().includes(architectureSearch.toLowerCase())) && <div className="empty-state">No application architecture matches this filter.</div>}
+              {architectures.length > 0 && !architectures.some((item) => (architectureStatusFilter === "all" || item.architecture_status === architectureStatusFilter) && (item.name + " " + item.architecture_summary + " " + item.technology_stack.join(" ") + " " + item.entrypoints.join(" ") + " " + item.evidence_paths.join(" ") + " " + JSON.stringify(item.repository_hygiene_findings ?? [])).toLowerCase().includes(architectureSearch.toLowerCase())) && <div className="empty-state">No application architecture matches this filter.</div>}
             </div>
             <div className="project-disclaimer"><ShieldCheck size={14} /><span>Snapshot-based architecture is not a live health check. Empty and README-only repositories remain explicitly unimplemented; integration declarations are not proof of active connections.</span></div>
           </section>
