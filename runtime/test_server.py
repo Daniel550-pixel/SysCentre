@@ -221,6 +221,52 @@ class RuntimeTests(unittest.TestCase):
         self.assertTrue(any(item["target"] == "https://api.example.test/v1/items" and item["source"] == "client.py" for item in analysis["outbound_api_calls"]))
         self.assertTrue(any("never" in item.lower() or "static" in item.lower() for item in analysis["limitations"]))
 
+    def test_cross_repository_api_map_requires_static_host_and_route_match(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            database_path = Path(temporary) / "api-map.db"
+            sources_by_project = {
+                "api-provider": {
+                    "server.py": "from fastapi import FastAPI\\napp = FastAPI()\\nAPI_BASE_URL = 'https://api.example.test'\\n@app.get('/v1/items')\\ndef items(): return []\\n",
+                },
+                "api-consumer": {
+                    "client.py": "import requests\\nrequests.get('https://api.example.test/v1/items')\\n",
+                },
+            }
+            with patch.object(server, "DB_PATH", database_path):
+                from repository_ingest import _db_executescript
+                _db_executescript()
+                with server._DB_LOCK:
+                    with server._database() as connection:
+                        for project_id, sources in sources_by_project.items():
+                            connection.execute(
+                                """INSERT INTO projects
+                                   (project_id, name, repository_url, default_branch, description, latest_commit,
+                                    indexed_at, file_count, text_file_count, skipped_file_count, status, metadata_json)
+                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                (project_id, project_id.replace("-", " ").title(),
+                                 "https://github.com/example/" + project_id, "main", "fixture",
+                                 "commit-" + project_id, "2026-10-12T00:00:00Z",
+                                 len(sources), len(sources), 0, "indexed", "{}"),
+                            )
+                            for path, source in sources.items():
+                                connection.execute(
+                                    """INSERT INTO repository_files
+                                       (project_id, path, blob_sha, size_bytes, file_kind, content, skip_reason)
+                                       VALUES (?, ?, ?, ?, 'text', ?, '')""",
+                                    (project_id, path, "blob-" + path, len(source.encode("utf-8")), source),
+                                )
+                from architecture_analysis import build_api_relationship_map
+                result = build_api_relationship_map()
+
+        self.assertEqual(result["repositories_analyzed"], 2)
+        self.assertEqual(len(result["relationships"]), 1)
+        relationship = result["relationships"][0]
+        self.assertEqual(relationship["caller"]["project_id"], "api-consumer")
+        self.assertEqual(relationship["provider"]["project_id"], "api-provider")
+        self.assertEqual(relationship["route"], "/v1/items")
+        self.assertEqual(relationship["confidence"], "static-exact-host-and-route-match")
+        self.assertIn("not proof", relationship["evidence"])
+
     def test_static_architecture_analyzer_requires_indexed_repository(self):
         with self.assertRaisesRegex(ValueError, "has not been indexed"):
             analyze_indexed_repository("not-indexed-fixture")
