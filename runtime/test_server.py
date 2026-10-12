@@ -229,7 +229,7 @@ class RuntimeTests(unittest.TestCase):
                     "server.py": "from fastapi import FastAPI\napp = FastAPI()\nAPI_BASE_URL = 'https://api.example.test'\n@app.get('/v1/items')\ndef items(): return []\n",
                 },
                 "api-consumer": {
-                    "client.py": "import requests\nrequests.get('https://api.example.test/v1/items')\nrequests.get('http://[')\n",
+                    "client.py": "import requests\nrequests.get('https://api.example.test/v1/items')\nrequests.post('https://api.example.test/v1/items')\nrequests.get('http://[')\n",
                 },
             }
             with patch.object(server, "DB_PATH", database_path):
@@ -260,7 +260,8 @@ class RuntimeTests(unittest.TestCase):
 
         self.assertEqual(result["repositories_analyzed"], 2)
         self.assertEqual(len(result["relationships"]), 1)
-        self.assertEqual(result["unmatched_outbound_calls"], [])
+        self.assertEqual(len(result["unmatched_outbound_calls"]), 1)
+        self.assertEqual(result["unmatched_outbound_calls"][0]["client"], "requests.post")
         relationship = result["relationships"][0]
         self.assertEqual(relationship["caller"]["project_id"], "api-consumer")
         self.assertEqual(relationship["provider"]["project_id"], "api-provider")
