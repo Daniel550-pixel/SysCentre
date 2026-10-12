@@ -21,6 +21,13 @@ type ArchitectureFinding = {
   category: string; title: string; description: string;
   evidence_paths: string[]; recommended_action: string;
 };
+type ApiRelationship = {
+  caller: { project_id: string; name: string; repository_url: string; indexed_commit: string };
+  provider: { project_id: string; name: string; repository_url: string; indexed_commit: string };
+  target: string; method: string; route: string; caller_evidence: string; provider_evidence: string;
+  confidence: string; evidence: string;
+};
+type ApiRelationshipMap = { ok: boolean; mode: string; repositories_analyzed: number; repositories_skipped: Array<{ project_id: string; name: string; reason: string }>; relationships: ApiRelationship[]; limitations: string[] };
 type ArchitectureAnalysis = {
   ok: boolean;
   project: { project_id: string; name: string; indexed_commit: string; indexed_at: string; index_status: string };
@@ -109,6 +116,8 @@ export default function App() {
   const [architectures, setArchitectures] = useState<RepositoryArchitecture[]>([]);
   const [architectureAnalyses, setArchitectureAnalyses] = useState<Record<string, ArchitectureAnalysis>>({});
   const [analyzingArchitecture, setAnalyzingArchitecture] = useState<string | null>(null);
+  const [apiRelationshipMap, setApiRelationshipMap] = useState<ApiRelationshipMap | null>(null);
+  const [apiRelationshipMapLoading, setApiRelationshipMapLoading] = useState(false);
   const [architectureSearch, setArchitectureSearch] = useState("");
   const [architectureStatusFilter, setArchitectureStatusFilter] = useState("all");
   const [ingesting, setIngesting] = useState<string | null>(null);
@@ -236,6 +245,20 @@ export default function App() {
     } catch (error) {
       setProjectMessage("Source analysis unavailable for " + projectName + ": " + (error instanceof Error ? error.message : "unknown error") + " Index the repository first if it has not been indexed.");
     } finally { setAnalyzingArchitecture(null); }
+  }
+
+  async function buildApiRelationshipMap() {
+    if (apiRelationshipMapLoading) return;
+    setApiRelationshipMapLoading(true);
+    try {
+      const response = await fetch(API + "/api/architecture/api-map", { signal: AbortSignal.timeout(120000) });
+      const data = await response.json() as ApiRelationshipMap & { error?: string };
+      if (!response.ok || !data.ok) throw new Error(data.error ?? "API relationship mapping failed");
+      setApiRelationshipMap(data);
+      setProjectMessage("API relationship scan complete: " + data.relationships.length + " static candidate relationships across " + data.repositories_analyzed + " indexed repositories.");
+    } catch (error) {
+      setProjectMessage("API relationship mapping failed: " + (error instanceof Error ? error.message : "unknown error") + ". Confirm the local runtime is updated and repositories are indexed.");
+    } finally { setApiRelationshipMapLoading(false); }
   }
 
   async function searchSource(event: FormEvent<HTMLFormElement>) {
@@ -454,6 +477,32 @@ export default function App() {
               </select>
               <span className="project-count">{architectures.filter((item) => (architectureStatusFilter === "all" || item.architecture_status === architectureStatusFilter) && architectureSearchText(item).includes(architectureSearch.toLowerCase())).length} shown</span>
             </div>
+            <div className="architecture-analysis-actions">
+              <button className="secondary-button project-index-button" disabled={apiRelationshipMapLoading} onClick={() => void buildApiRelationshipMap()}>{apiRelationshipMapLoading ? "Mapping indexed APIs…" : apiRelationshipMap ? "Refresh cross-repository API map" : "Build cross-repository API map"}</button>
+              <span>Matches static outbound URLs to another indexed repository's configured API base URL and exact route. No network calls are made.</span>
+            </div>
+            {apiRelationshipMap && <section className="architecture-analysis-result" aria-label="Cross-repository API relationship map">
+              <div className="architecture-analysis-heading"><div><strong>Cross-repository API relationships</strong><span>Static evidence only · {apiRelationshipMap.mode.replaceAll("-", " ")}</span></div><span>{apiRelationshipMap.repositories_analyzed} repositories analyzed</span></div>
+              <div className="architecture-analysis-metrics">
+                <article><span>Candidate links</span><strong>{apiRelationshipMap.relationships.length}</strong></article>
+                <article><span>Repositories analyzed</span><strong>{apiRelationshipMap.repositories_analyzed}</strong></article>
+                <article><span>Repositories skipped</span><strong>{apiRelationshipMap.repositories_skipped.length}</strong></article>
+              </div>
+              {apiRelationshipMap.relationships.length ? <div className="architecture-module-list">
+                {apiRelationshipMap.relationships.map((relationship, index) => <div key={relationship.caller.project_id + relationship.provider.project_id + relationship.target + index}>
+                  <strong>{relationship.caller.name}</strong><span>→</span><strong>{relationship.provider.name}</strong>
+                  <code>{relationship.method} {relationship.route}</code>
+                  <span>Target: {relationship.target}</span>
+                  <span>Caller evidence: {relationship.caller_evidence}</span>
+                  <span>Provider evidence: {relationship.provider_evidence}</span>
+                  <span>{relationship.confidence.replaceAll("-", " ")}</span>
+                  <a href={relationship.caller.repository_url + "/blob/" + relationship.caller.indexed_commit + "/" + relationship.caller_evidence} target="_blank" rel="noreferrer">Open caller evidence</a>
+                  <a href={relationship.provider.repository_url + "/blob/" + relationship.provider.indexed_commit + "/" + relationship.provider_evidence} target="_blank" rel="noreferrer">Open provider evidence</a>
+                </div>)}
+              </div> : <div className="empty-state">No exact static API relationships were identified. This does not prove that repositories have no integrations; dynamic configuration and gateway routing may be invisible.</div>}
+              {!!apiRelationshipMap.repositories_skipped.length && <div className="architecture-analysis-findings"><strong>Repositories skipped</strong>{apiRelationshipMap.repositories_skipped.map((item) => <p key={item.project_id}>{item.name}: {item.reason}</p>)}</div>}
+              <div className="architecture-analysis-limitations">{apiRelationshipMap.limitations.map((limitation) => <span key={limitation}>{limitation}</span>)}</div>
+            </section>}
             <div className="architecture-list">
               {architectures.filter((item) => (architectureStatusFilter === "all" || item.architecture_status === architectureStatusFilter) && architectureSearchText(item).includes(architectureSearch.toLowerCase())).map((item) => (
                 <details className="architecture-card" key={item.project_id}>
