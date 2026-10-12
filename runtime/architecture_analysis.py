@@ -111,7 +111,7 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
                     entrypoints.append({"path": path, "reason": "Conventional Python application entrypoint filename"})
             except (SyntaxError, ValueError) as exc:
                 parse_failures.append(path)
-            for match in re.finditer(r"@(?:[A-Za-z_]\w*(?:app|router|api|bp|blueprint)\w*)\.(get|post|put|patch|delete|options|route)\s*\(\s*['\"]([^'\"]+)", text, re.I):
+            for match in re.finditer(r"@(?:app|router|api|bp|blueprint|[A-Za-z_]\w*(?:app|router|api|bp|blueprint)\w*)\.(get|post|put|patch|delete|options|route)\s*\(\s*['\"]([^'\"]+)", text, re.I):
                 routes.append({"method": match.group(1).upper(), "path": match.group(2), "source": path})
             for match in re.finditer(r"\b(?:include_router|register_blueprint)\s*\(\s*([A-Za-z_][\w.]*)", text):
                 routes.append({"method": "MOUNT", "path": match.group(1), "source": path})
