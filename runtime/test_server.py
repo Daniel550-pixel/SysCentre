@@ -181,7 +181,7 @@ class RuntimeTests(unittest.TestCase):
             database_path = Path(temporary) / "analysis.db"
             sources = {
                 "main.py": "from fastapi import FastAPI\nimport sqlite3\nfrom api import router\napp = FastAPI()\napp.include_router(router)\n@app.get('/health')\ndef health():\n    return {'ok': True}\nconn = sqlite3.connect('app.db')\n",
-                "api.py": "from fastapi import APIRouter\nrouter = APIRouter()\n@router.post('/items')\ndef create_item():\n    return {'ok': True}\n",
+                "api.py": "from fastapi import APIRouter\nrouter = APIRouter()\n@router.post('/items')\ndef create_item():\n    return {'ok': True}\n@items_router.get('/v2/items')\ndef list_items(): return []\nurlpatterns = [path('django-items/', views.items)]\n",
                 "requirements.txt": "fastapi==0.115.0\n",
                 "webapp/src/App.tsx": "import Card from './components/Card';\\nexport default function App() { return <Card />; }\\n",
                 "webapp/src/components/Card.tsx": "export default function Card() { return <div>Card</div>; }\\n",
@@ -213,6 +213,8 @@ class RuntimeTests(unittest.TestCase):
         self.assertEqual(result["project"]["indexed_commit"], "abc123")
         self.assertEqual(analysis["source_files_analyzed"], 6)
         self.assertGreaterEqual(analysis["routes_detected"], 2)
+        self.assertTrue(any(item["path"] == "/v2/items" and item["method"] == "GET" for item in analysis["api_routes"]))
+        self.assertTrue(any(item["path"] == "django-items/" and item["method"] == "ANY" for item in analysis["api_routes"]))
         self.assertIn("main.py", analysis["entrypoints"])
         self.assertTrue(any(item["name"] == "fastapi" for item in analysis["framework_signals"]))
         self.assertTrue(any(item["name"] == "SQLite" for item in analysis["data_store_signals"]))
