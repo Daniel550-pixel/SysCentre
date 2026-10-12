@@ -126,7 +126,7 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
                     framework_counts["react"] += 1
                 elif module in {"express", "fastify", "koa", "hono", "next"}:
                     framework_counts[module] += 1
-            for match in re.finditer(r"\b(?:app|router|server)\.(get|post|put|patch|delete|all|use)\s*\(\s*['\"]([^'\"]+)", text, re.I):
+            for match in re.finditer(r"\b(?:app|router|server|api|[A-Za-z_$][\w$]*(?:app|router|server|api))\.(get|post|put|patch|delete|all|use)\s*\(\s*['\"]([^'\"]+)", text, re.I):
                 routes.append({"method": match.group(1).upper(), "path": match.group(2), "source": path})
             if PurePosixPath(path).name in {"main.ts", "main.tsx", "index.ts", "index.tsx", "index.js", "index.jsx", "App.tsx", "App.jsx"}:
                 entrypoints.append({"path": path, "reason": "Conventional frontend/application entrypoint filename"})
