@@ -313,6 +313,12 @@ class Handler(BaseHTTPRequestHandler):
                 self._send_json(200, search_index(query, limit=int(params.get("limit", ["50"])[0])))
             except (ValueError, TypeError) as exc:
                 self._send_json(400, {"ok": False, "error": str(exc)})
+        elif path == "/api/architecture/api-map":
+            from architecture_analysis import build_api_relationship_map
+            try:
+                self._send_json(200, build_api_relationship_map())
+            except RuntimeError as exc:
+                self._send_json(422, {"ok": False, "error": str(exc)})
         elif path.startswith("/api/repositories/") and path.endswith("/architecture-analysis"):
             from architecture_analysis import analyze_indexed_repository
             project_id = unquote(path[len("/api/repositories/"):-len("/architecture-analysis")].strip("/"))
