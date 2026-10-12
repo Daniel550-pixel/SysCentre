@@ -11,6 +11,7 @@ import re
 from collections import Counter
 from pathlib import PurePosixPath
 from typing import Any
+from urllib.parse import urlsplit
 
 import server
 
@@ -253,6 +254,114 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
         },
     }
 
+
+
+
+def build_api_relationship_map() -> dict[str, Any]:
+    """Build conservative, evidence-backed API relationship candidates across indexed repositories."""
+    from repository_ingest import _db_executescript
+    _db_executescript()
+    with server._DB_LOCK:
+        with server._database() as connection:
+            projects = connection.execute(
+                "SELECT project_id, name, repository_url, latest_commit, status FROM projects ORDER BY name"
+            ).fetchall()
+
+    analyzed: list[dict[str, Any]] = []
+    skipped: list[dict[str, str]] = []
+    for project in projects:
+        try:
+            result = analyze_indexed_repository(project["project_id"])
+        except (ValueError, RuntimeError) as exc:
+            skipped.append({"project_id": project["project_id"], "name": project["name"], "reason": str(exc)})
+            continue
+        analysis = result["analysis"]
+        analyzed.append({
+            "project": result["project"],
+            "routes": analysis["api_routes"],
+            "calls": analysis["outbound_api_calls"],
+        })
+
+    providers: list[dict[str, Any]] = []
+    for item in analyzed:
+        for base in item["calls"]:
+            if base["client"] != "base-url configuration":
+                continue
+            parsed = urlsplit(base["target"])
+            if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+                continue
+            providers.append({
+                "project": item["project"],
+                "base": base,
+                "origin": f"{parsed.scheme.lower()}://{parsed.netloc.lower()}",
+                "base_path": parsed.path.rstrip("/"),
+                "routes": item["routes"],
+            })
+
+    relationships: list[dict[str, Any]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+    for caller in analyzed:
+        for call in caller["calls"]:
+            if call["client"] == "base-url configuration":
+                continue
+            parsed = urlsplit(call["target"])
+            if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+                continue
+            target_path = parsed.path or "/"
+            for provider in providers:
+                if provider["project"]["project_id"] == caller["project"]["project_id"]:
+                    continue
+                if f"{parsed.scheme.lower()}://{parsed.netloc.lower()}" != provider["origin"]:
+                    continue
+                base_path = provider["base_path"]
+                if base_path and not (target_path == base_path or target_path.startswith(base_path + "/")):
+                    continue
+                relative_path = target_path[len(base_path):] if base_path else target_path
+                relative_path = "/" + relative_path.lstrip("/")
+                matched_routes = [
+                    route for route in provider["routes"]
+                    if route["method"] != "MOUNT" and route["path"].rstrip("/") == relative_path.rstrip("/")
+                ]
+                for route in matched_routes:
+                    key = (caller["project"]["project_id"], provider["project"]["project_id"], call["source"], route["source"])
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    relationships.append({
+                        "caller": {
+                            "project_id": caller["project"]["project_id"],
+                            "name": caller["project"]["name"],
+                            "repository_url": caller["project"]["repository_url"],
+                            "indexed_commit": caller["project"]["indexed_commit"],
+                        },
+                        "provider": {
+                            "project_id": provider["project"]["project_id"],
+                            "name": provider["project"]["name"],
+                            "repository_url": provider["project"]["repository_url"],
+                            "indexed_commit": provider["project"]["indexed_commit"],
+                        },
+                        "target": call["target"],
+                        "method": route["method"],
+                        "route": route["path"],
+                        "caller_evidence": call["source"],
+                        "provider_evidence": route["source"],
+                        "confidence": "static-exact-host-and-route-match",
+                        "evidence": "Static URL target matches another indexed repository's configured API base URL and declared route; runtime traffic is not verified.",
+                    })
+
+    return {
+        "ok": True,
+        "mode": "static-cross-repository-api-map",
+        "repositories_analyzed": len(analyzed),
+        "repositories_skipped": skipped,
+        "relationships": relationships[:500],
+        "limitations": [
+            "Only already-indexed repositories are considered; this endpoint does not fetch or execute repository code.",
+            "A relationship is reported only when a static outbound URL matches another indexed repository's configured API base URL and an exactly matching declared route.",
+            "Dynamic URLs, environment-expanded URLs, proxies, API gateways, aliases, and route parameters may be missed.",
+            "A static match is a candidate integration, not proof of deployment, reachability, authentication, or live network traffic.",
+        ],
+    }
 
 
 def _resolve_local_import(
