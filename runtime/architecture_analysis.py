@@ -330,9 +330,15 @@ def build_api_relationship_map() -> dict[str, Any]:
                     continue
                 relative_path = target_path[len(base_path):] if base_path else target_path
                 relative_path = "/" + relative_path.lstrip("/")
+                expected_method = {
+                    "get": "GET", "post": "POST", "put": "PUT",
+                    "patch": "PATCH", "delete": "DELETE",
+                }.get(call["client"].split(".")[-1].lower())
                 matched_routes = [
                     route for route in provider["routes"]
-                    if route["method"] != "MOUNT" and route["path"].rstrip("/") == relative_path.rstrip("/")
+                    if route["method"] != "MOUNT"
+                    and route["path"].rstrip("/") == relative_path.rstrip("/")
+                    and (expected_method is None or route["method"] == expected_method)
                 ]
                 for route in matched_routes:
                     matched_call_keys.add((caller["project"]["project_id"], call["source"], call["target"]))
