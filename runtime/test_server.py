@@ -183,7 +183,7 @@ class RuntimeTests(unittest.TestCase):
                 "main.py": "from fastapi import FastAPI\nimport sqlite3\nfrom api import router\napp = FastAPI()\napp.include_router(router)\n@app.get('/health')\ndef health():\n    return {'ok': True}\nconn = sqlite3.connect('app.db')\n",
                 "api.py": "from fastapi import APIRouter\nrouter = APIRouter()\n@router.post('/items')\ndef create_item():\n    return {'ok': True}\n@items_router.get('/v2/items')\ndef list_items(): return []\nurlpatterns = [path('django-items/', views.items)]\n",
                 "requirements.txt": "fastapi==0.115.0\n",
-                "webapp/src/App.tsx": "import Card from './components/Card';\\nexport default function App() { return <Card />; }\\n",
+                "webapp/src/App.tsx": "import Card from './components/Card';\\napiRouter.get('/v3/items', handler);\\nexport default function App() { return <Card />; }\\n",
                 "webapp/src/components/Card.tsx": "export default function Card() { return <div>Card</div>; }\\n",
                 "client.py": "import requests\nrequests.get('https://api.example.test/v1/items')\n",
             }
@@ -220,6 +220,7 @@ class RuntimeTests(unittest.TestCase):
         self.assertTrue(any(item["name"] == "SQLite" for item in analysis["data_store_signals"]))
         self.assertTrue(any(edge["from"] == "main.py" and edge["to"] == "api.py" for edge in analysis["dependency_edges"]))
         self.assertTrue(any(edge["from"] == "webapp/src/App.tsx" and edge["to"] == "webapp/src/components/Card.tsx" for edge in analysis["dependency_edges"]))
+        self.assertTrue(any(item["path"] == "/v3/items" and item["method"] == "GET" for item in analysis["api_routes"]))
         self.assertTrue(any(item["target"] == "https://api.example.test/v1/items" and item["source"] == "client.py" for item in analysis["outbound_api_calls"]))
         self.assertTrue(any("never" in item.lower() or "static" in item.lower() for item in analysis["limitations"]))
 
