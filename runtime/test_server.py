@@ -260,6 +260,7 @@ class RuntimeTests(unittest.TestCase):
 
         self.assertEqual(result["repositories_analyzed"], 2)
         self.assertEqual(len(result["relationships"]), 1)
+        self.assertEqual(result["unmatched_outbound_calls"], [])
         relationship = result["relationships"][0]
         self.assertEqual(relationship["caller"]["project_id"], "api-consumer")
         self.assertEqual(relationship["provider"]["project_id"], "api-provider")
