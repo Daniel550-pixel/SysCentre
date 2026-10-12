@@ -265,7 +265,7 @@ class RuntimeTests(unittest.TestCase):
         self.assertEqual(relationship["provider"]["project_id"], "api-provider")
         self.assertEqual(relationship["route"], "/v1/items")
         self.assertEqual(relationship["confidence"], "static-exact-host-and-route-match")
-        self.assertIn("not proof", relationship["evidence"])
+        self.assertIn("runtime traffic is not verified", relationship["evidence"])
 
     def test_static_architecture_analyzer_requires_indexed_repository(self):
         with self.assertRaisesRegex(ValueError, "has not been indexed"):
