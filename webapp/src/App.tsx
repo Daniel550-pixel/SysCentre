@@ -27,7 +27,13 @@ type ApiRelationship = {
   target: string; method: string; route: string; caller_evidence: string; provider_evidence: string;
   confidence: string; evidence: string;
 };
-type ApiRelationshipMap = { ok: boolean; mode: string; repositories_analyzed: number; repositories_skipped: Array<{ project_id: string; name: string; reason: string }>; relationships: ApiRelationship[]; limitations: string[] };
+type ApiRelationshipMap = {
+  ok: boolean; mode: string; repositories_analyzed: number;
+  repositories_skipped: Array<{ project_id: string; name: string; reason: string }>;
+  relationships: ApiRelationship[];
+  unmatched_outbound_calls: Array<{ caller: { project_id: string; name: string; repository_url: string; indexed_commit: string }; client: string; target: string; source: string; reason: string }>;
+  limitations: string[];
+};
 type ArchitectureAnalysis = {
   ok: boolean;
   project: { project_id: string; name: string; indexed_commit: string; indexed_at: string; index_status: string };
@@ -486,7 +492,7 @@ export default function App() {
               <div className="architecture-analysis-metrics">
                 <article><span>Candidate links</span><strong>{apiRelationshipMap.relationships.length}</strong></article>
                 <article><span>Repositories analyzed</span><strong>{apiRelationshipMap.repositories_analyzed}</strong></article>
-                <article><span>Repositories skipped</span><strong>{apiRelationshipMap.repositories_skipped.length}</strong></article>
+                <article><span>Repositories skipped</span><strong>{apiRelationshipMap.repositories_skipped.length}</strong></article>\n                <article><span>Unmatched outbound calls</span><strong>{apiRelationshipMap.unmatched_outbound_calls.length}</strong></article>
               </div>
               {apiRelationshipMap.relationships.length ? <div className="architecture-module-list">
                 {apiRelationshipMap.relationships.map((relationship, index) => <div key={relationship.caller.project_id + relationship.provider.project_id + relationship.target + index}>
@@ -500,6 +506,15 @@ export default function App() {
                   <a href={relationship.provider.repository_url + "/blob/" + relationship.provider.indexed_commit + "/" + relationship.provider_evidence} target="_blank" rel="noreferrer">Open provider evidence</a>
                 </div>)}
               </div> : <div className="empty-state">No exact static API relationships were identified. This does not prove that repositories have no integrations; dynamic configuration and gateway routing may be invisible.</div>}
+              {!!apiRelationshipMap.unmatched_outbound_calls.length && <details className="architecture-module-details">
+                <summary>Outbound API targets without an exact repository match ({apiRelationshipMap.unmatched_outbound_calls.length})</summary>
+                <div className="architecture-module-list">
+                  {apiRelationshipMap.unmatched_outbound_calls.map((call, index) => <div key={call.caller.project_id + call.source + call.target + index}>
+                    <strong>{call.caller.name}</strong><code>{call.client}</code><span>{call.target}</span><span>Evidence: {call.source}</span><span>{call.reason}</span>
+                    <a href={call.caller.repository_url + "/blob/" + call.caller.indexed_commit + "/" + call.source} target="_blank" rel="noreferrer">Open caller evidence</a>
+                  </div>)}
+                </div>
+              </details>}
               {!!apiRelationshipMap.repositories_skipped.length && <div className="architecture-analysis-findings"><strong>Repositories skipped</strong>{apiRelationshipMap.repositories_skipped.map((item) => <p key={item.project_id}>{item.name}: {item.reason}</p>)}</div>}
               <div className="architecture-analysis-limitations">{apiRelationshipMap.limitations.map((limitation) => <span key={limitation}>{limitation}</span>)}</div>
             </section>}
