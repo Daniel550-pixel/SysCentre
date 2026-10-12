@@ -299,6 +299,7 @@ def build_api_relationship_map() -> dict[str, Any]:
             })
 
     relationships: list[dict[str, Any]] = []
+    matched_call_keys: set[tuple[str, str, str]] = set()
     seen: set[tuple[str, str, str, str]] = set()
     for caller in analyzed:
         for call in caller["calls"]:
@@ -323,6 +324,7 @@ def build_api_relationship_map() -> dict[str, Any]:
                     if route["method"] != "MOUNT" and route["path"].rstrip("/") == relative_path.rstrip("/")
                 ]
                 for route in matched_routes:
+                    matched_call_keys.add((caller["project"]["project_id"], call["source"], call["target"]))
                     key = (caller["project"]["project_id"], provider["project"]["project_id"], call["source"], route["source"])
                     if key in seen:
                         continue
@@ -349,12 +351,37 @@ def build_api_relationship_map() -> dict[str, Any]:
                         "evidence": "Static URL target matches another indexed repository's configured API base URL and declared route; runtime traffic is not verified.",
                     })
 
+    unmatched_outbound_calls: list[dict[str, Any]] = []
+    for caller in analyzed:
+        for call in caller["calls"]:
+            if call["client"] == "base-url configuration":
+                continue
+            parsed = urlsplit(call["target"])
+            if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+                continue
+            key = (caller["project"]["project_id"], call["source"], call["target"])
+            if key in matched_call_keys:
+                continue
+            unmatched_outbound_calls.append({
+                "caller": {
+                    "project_id": caller["project"]["project_id"],
+                    "name": caller["project"]["name"],
+                    "repository_url": caller["project"]["repository_url"],
+                    "indexed_commit": caller["project"]["indexed_commit"],
+                },
+                "client": call["client"],
+                "target": call["target"],
+                "source": call["source"],
+                "reason": "No exact host, configured API base URL, and declared route match was found in another indexed repository.",
+            })
+
     return {
         "ok": True,
         "mode": "static-cross-repository-api-map",
         "repositories_analyzed": len(analyzed),
         "repositories_skipped": skipped,
         "relationships": relationships[:500],
+        "unmatched_outbound_calls": unmatched_outbound_calls[:500],
         "limitations": [
             "Only already-indexed repositories are considered; this endpoint does not fetch or execute repository code.",
             "A relationship is reported only when a static outbound URL matches another indexed repository's configured API base URL and an exactly matching declared route.",
