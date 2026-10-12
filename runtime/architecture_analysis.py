@@ -310,7 +310,7 @@ def build_api_relationship_map() -> dict[str, Any]:
             })
 
     relationships: list[dict[str, Any]] = []
-    matched_call_keys: set[tuple[str, str, str]] = set()
+    matched_call_keys: set[tuple[str, str, str, str]] = set()
     seen: set[tuple[str, str, str, str]] = set()
     for caller in analyzed:
         for call in caller["calls"]:
@@ -341,7 +341,7 @@ def build_api_relationship_map() -> dict[str, Any]:
                     and (expected_method is None or route["method"] == expected_method)
                 ]
                 for route in matched_routes:
-                    matched_call_keys.add((caller["project"]["project_id"], call["source"], call["target"]))
+                    matched_call_keys.add((caller["project"]["project_id"], call["client"], call["source"], call["target"]))
                     key = (caller["project"]["project_id"], provider["project"]["project_id"], call["source"], route["source"])
                     if key in seen:
                         continue
@@ -376,7 +376,7 @@ def build_api_relationship_map() -> dict[str, Any]:
             parsed = _parse_http_url(call["target"])
             if parsed is None:
                 continue
-            key = (caller["project"]["project_id"], call["source"], call["target"])
+            key = (caller["project"]["project_id"], call["client"], call["source"], call["target"])
             if key in matched_call_keys:
                 continue
             unmatched_outbound_calls.append({
