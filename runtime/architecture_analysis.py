@@ -257,6 +257,17 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
 
 
 
+def _parse_http_url(value: str):
+    """Parse only well-formed absolute HTTP(S) URLs; malformed source strings are ignored."""
+    try:
+        parsed = urlsplit(value)
+    except ValueError:
+        return None
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        return None
+    return parsed
+
+
 def build_api_relationship_map() -> dict[str, Any]:
     """Build conservative, evidence-backed API relationship candidates across indexed repositories."""
     from repository_ingest import _db_executescript
@@ -287,8 +298,8 @@ def build_api_relationship_map() -> dict[str, Any]:
         for base in item["calls"]:
             if base["client"] != "base-url configuration":
                 continue
-            parsed = urlsplit(base["target"])
-            if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            parsed = _parse_http_url(base["target"])
+            if parsed is None:
                 continue
             providers.append({
                 "project": item["project"],
@@ -305,8 +316,8 @@ def build_api_relationship_map() -> dict[str, Any]:
         for call in caller["calls"]:
             if call["client"] == "base-url configuration":
                 continue
-            parsed = urlsplit(call["target"])
-            if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            parsed = _parse_http_url(call["target"])
+            if parsed is None:
                 continue
             target_path = parsed.path or "/"
             for provider in providers:
@@ -356,8 +367,8 @@ def build_api_relationship_map() -> dict[str, Any]:
         for call in caller["calls"]:
             if call["client"] == "base-url configuration":
                 continue
-            parsed = urlsplit(call["target"])
-            if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            parsed = _parse_http_url(call["target"])
+            if parsed is None:
                 continue
             key = (caller["project"]["project_id"], call["source"], call["target"])
             if key in matched_call_keys:
