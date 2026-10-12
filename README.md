@@ -54,6 +54,7 @@ Open **http://127.0.0.1:5173**. The runtime API is **http://127.0.0.1:8765**.
 - `GET /api/runtime-projects` — runtime adapter configuration/readiness for all registered repository records
 - `GET /api/repository-architectures` — 28 evidence-backed architecture records with stack, entrypoints, layers, data/state, integrations, snapshot SHAs and limitations
 - `GET /api/repositories/{project_id}/architecture-analysis` — static analysis of locally indexed source: imports, heuristic local dependency edges, framework signals, conventional entrypoints, inbound route patterns, outbound HTTP-client targets, data-store signals, module inventory and limitations; outbound targets and route patterns are source evidence only, not verified network traffic or live endpoints, and project code is never executed
+- `GET /api/architecture/api-map` — conservative cross-repository API relationship candidates when an outbound static URL matches another indexed repository’s configured API base URL and an exact declared route; no network calls are made and candidates are not proof of live integrations
 - `GET /api/repositories/{project_id}/files?path=term&limit=100` — indexed file records and source text (maximum 200 per response)
 - `GET /api/search?q=policy&limit=50` — search indexed source across projects (maximum 100 matches)
 - `POST /api/repositories/ingest` with `{"project_id":"networklab"}` — index one catalogued repository
