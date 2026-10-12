@@ -226,10 +226,10 @@ class RuntimeTests(unittest.TestCase):
             database_path = Path(temporary) / "api-map.db"
             sources_by_project = {
                 "api-provider": {
-                    "server.py": "from fastapi import FastAPI\\napp = FastAPI()\\nAPI_BASE_URL = 'https://api.example.test'\\n@app.get('/v1/items')\\ndef items(): return []\\n",
+                    "server.py": "from fastapi import FastAPI\napp = FastAPI()\nAPI_BASE_URL = 'https://api.example.test'\n@app.get('/v1/items')\ndef items(): return []\n",
                 },
                 "api-consumer": {
-                    "client.py": "import requests\\nrequests.get('https://api.example.test/v1/items')\\n",
+                    "client.py": "import requests\nrequests.get('https://api.example.test/v1/items')\n",
                 },
             }
             with patch.object(server, "DB_PATH", database_path):
