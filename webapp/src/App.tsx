@@ -492,7 +492,8 @@ export default function App() {
               <div className="architecture-analysis-metrics">
                 <article><span>Candidate links</span><strong>{apiRelationshipMap.relationships.length}</strong></article>
                 <article><span>Repositories analyzed</span><strong>{apiRelationshipMap.repositories_analyzed}</strong></article>
-                <article><span>Repositories skipped</span><strong>{apiRelationshipMap.repositories_skipped.length}</strong></article>\n                <article><span>Unmatched outbound calls</span><strong>{apiRelationshipMap.unmatched_outbound_calls.length}</strong></article>
+                <article><span>Repositories skipped</span><strong>{apiRelationshipMap.repositories_skipped.length}</strong></article>
+                <article><span>Unmatched outbound calls</span><strong>{apiRelationshipMap.unmatched_outbound_calls.length}</strong></article>
               </div>
               {apiRelationshipMap.relationships.length ? <div className="architecture-module-list">
                 {apiRelationshipMap.relationships.map((relationship, index) => <div key={relationship.caller.project_id + relationship.provider.project_id + relationship.target + index}>
