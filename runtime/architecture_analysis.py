@@ -114,9 +114,9 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
             for match in re.finditer(r"@(?:[A-Za-z_]\w*(?:app|router|api|bp|blueprint)\w*)\.(get|post|put|patch|delete|options|route)\s*\(\s*['\"]([^'\"]+)", text, re.I):
                 routes.append({"method": match.group(1).upper(), "path": match.group(2), "source": path})
             for match in re.finditer(r"\b(?:include_router|register_blueprint)\s*\(\s*([A-Za-z_][\w.]*)", text):
+                routes.append({"method": "MOUNT", "path": match.group(1), "source": path})
             for match in re.finditer(r"\b(?:path|re_path)\s*\(\s*['\"]([^'\"]+)", text):
                 routes.append({"method": "ANY", "path": match.group(1), "source": path})
-                routes.append({"method": "MOUNT", "path": match.group(1), "source": path})
         if suffix in {".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"}:
             for match in re.finditer(r"\bimport\s+(?:[^;\n]*?\s+from\s+)?['\"]([^'\"]+)['\"]|\brequire\s*\(\s*['\"]([^'\"]+)['\"]\s*\)", text):
                 module = match.group(1) or match.group(2)
