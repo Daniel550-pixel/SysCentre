@@ -24,14 +24,14 @@ type ArchitectureFinding = {
 type ApiRelationship = {
   caller: { project_id: string; name: string; repository_url: string; indexed_commit: string };
   provider: { project_id: string; name: string; repository_url: string; indexed_commit: string };
-  target: string; method: string; route: string; caller_evidence: string; provider_evidence: string;
+  target: string; method: string; route: string; caller_evidence: string; caller_line: string; provider_evidence: string; provider_line: string;
   confidence: string; evidence: string;
 };
 type ApiRelationshipMap = {
   ok: boolean; mode: string; repositories_analyzed: number;
   repositories_skipped: Array<{ project_id: string; name: string; reason: string }>;
   relationships: ApiRelationship[];
-  unmatched_outbound_calls: Array<{ caller: { project_id: string; name: string; repository_url: string; indexed_commit: string }; client: string; target: string; source: string; reason: string }>;
+  unmatched_outbound_calls: Array<{ caller: { project_id: string; name: string; repository_url: string; indexed_commit: string }; client: string; target: string; source: string; line: string; reason: string }>;
   limitations: string[];
 };
 type ArchitectureAnalysis = {
@@ -500,19 +500,19 @@ export default function App() {
                   <strong>{relationship.caller.name}</strong><span>→</span><strong>{relationship.provider.name}</strong>
                   <code>{relationship.method} {relationship.route}</code>
                   <span>Target: {relationship.target}</span>
-                  <span>Caller evidence: {relationship.caller_evidence}</span>
-                  <span>Provider evidence: {relationship.provider_evidence}</span>
+                  <span>Caller evidence: {relationship.caller_evidence}:{relationship.caller_line || "?"}</span>
+                  <span>Provider evidence: {relationship.provider_evidence}:{relationship.provider_line || "?"}</span>
                   <span>{relationship.confidence.replaceAll("-", " ")}</span>
-                  <a href={relationship.caller.repository_url + "/blob/" + relationship.caller.indexed_commit + "/" + relationship.caller_evidence} target="_blank" rel="noreferrer">Open caller evidence</a>
-                  <a href={relationship.provider.repository_url + "/blob/" + relationship.provider.indexed_commit + "/" + relationship.provider_evidence} target="_blank" rel="noreferrer">Open provider evidence</a>
+                  <a href={relationship.caller.repository_url + "/blob/" + relationship.caller.indexed_commit + "/" + relationship.caller_evidence + (relationship.caller_line ? "#L" + relationship.caller_line : "")} target="_blank" rel="noreferrer">Open caller evidence</a>
+                  <a href={relationship.provider.repository_url + "/blob/" + relationship.provider.indexed_commit + "/" + relationship.provider_evidence + (relationship.provider_line ? "#L" + relationship.provider_line : "")} target="_blank" rel="noreferrer">Open provider evidence</a>
                 </div>)}
               </div> : <div className="empty-state">No exact static API relationships were identified. This does not prove that repositories have no integrations; dynamic configuration and gateway routing may be invisible.</div>}
               {!!apiRelationshipMap.unmatched_outbound_calls.length && <details className="architecture-module-details">
                 <summary>Outbound API targets without an exact repository match ({apiRelationshipMap.unmatched_outbound_calls.length})</summary>
                 <div className="architecture-module-list">
                   {apiRelationshipMap.unmatched_outbound_calls.map((call, index) => <div key={call.caller.project_id + call.source + call.target + index}>
-                    <strong>{call.caller.name}</strong><code>{call.client}</code><span>{call.target}</span><span>Evidence: {call.source}</span><span>{call.reason}</span>
-                    <a href={call.caller.repository_url + "/blob/" + call.caller.indexed_commit + "/" + call.source} target="_blank" rel="noreferrer">Open caller evidence</a>
+                    <strong>{call.caller.name}</strong><code>{call.client}</code><span>{call.target}</span><span>Evidence: {call.source}:{call.line || "?"}</span><span>{call.reason}</span>
+                    <a href={call.caller.repository_url + "/blob/" + call.caller.indexed_commit + "/" + call.source + (call.line ? "#L" + call.line : "")} target="_blank" rel="noreferrer">Open caller evidence</a>
                   </div>)}
                 </div>
               </details>}
@@ -547,8 +547,8 @@ export default function App() {
                         <article><strong>Framework signals</strong>{architectureAnalyses[item.project_id].analysis.framework_signals.length ? architectureAnalyses[item.project_id].analysis.framework_signals.slice(0, 12).map((signal) => <span key={signal.name}>{signal.name} · {signal.evidence_count} signals</span>) : <span>No framework signals detected</span>}</article>
                         <article><strong>Entry points</strong>{architectureAnalyses[item.project_id].analysis.entrypoints.length ? architectureAnalyses[item.project_id].analysis.entrypoints.map((path) => <a key={path} href={item.repository_url + "/blob/" + (architectureAnalyses[item.project_id].project.indexed_commit || item.default_branch) + "/" + path} target="_blank" rel="noreferrer">{path}</a>) : <span>No conventional entrypoint identified</span>}</article>
                         <article><strong>Data-store signals</strong>{architectureAnalyses[item.project_id].analysis.data_store_signals.length ? architectureAnalyses[item.project_id].analysis.data_store_signals.slice(0, 12).map((signal, index) => <span key={signal.name + signal.source + index}>{signal.name} <small>· {signal.source}</small></span>) : <span>No supported data-store patterns detected</span>}</article>
-                        <article><strong>API / route patterns</strong>{architectureAnalyses[item.project_id].analysis.api_routes.length ? architectureAnalyses[item.project_id].analysis.api_routes.slice(0, 20).map((route, index) => <span key={route.method + route.path + route.source + index}><code>{route.method}</code> {route.path} <small>· {route.source}</small></span>) : <span>No supported route patterns detected</span>}</article>
-                        <article><strong>Outbound API calls</strong>{architectureAnalyses[item.project_id].analysis.outbound_api_calls.length ? architectureAnalyses[item.project_id].analysis.outbound_api_calls.slice(0, 20).map((call, index) => <span key={call.client + call.target + call.source + index}><code>{call.client}</code> {call.target} <small>· {call.source}</small></span>) : <span>No supported outbound HTTP-client targets detected</span>}</article>
+                        <article><strong>API / route patterns</strong>{architectureAnalyses[item.project_id].analysis.api_routes.length ? architectureAnalyses[item.project_id].analysis.api_routes.slice(0, 20).map((route, index) => <a key={route.method + route.path + route.source + index} href={item.repository_url + "/blob/" + (architectureAnalyses[item.project_id].project.indexed_commit || item.default_branch) + "/" + route.source + (route.line ? "#L" + route.line : "")} target="_blank" rel="noreferrer"><code>{route.method}</code> {route.path} <small>· {route.source}:{route.line || "?"}</small></a>) : <span>No supported route patterns detected</span>}</article>
+                        <article><strong>Outbound API calls</strong>{architectureAnalyses[item.project_id].analysis.outbound_api_calls.length ? architectureAnalyses[item.project_id].analysis.outbound_api_calls.slice(0, 20).map((call, index) => <a key={call.client + call.target + call.source + index} href={item.repository_url + "/blob/" + (architectureAnalyses[item.project_id].project.indexed_commit || item.default_branch) + "/" + call.source + (call.line ? "#L" + call.line : "")} target="_blank" rel="noreferrer"><code>{call.client}</code> {call.target} <small>· {call.source}:{call.line || "?"}</small></a>) : <span>No supported outbound HTTP-client targets detected</span>}</article>
                       </div>
                       <details className="architecture-module-details"><summary>Module inventory ({architectureAnalyses[item.project_id].analysis.modules.length}) and dependency edges ({architectureAnalyses[item.project_id].analysis.dependency_edges.length})</summary>
                         <div className="architecture-module-list">{architectureAnalyses[item.project_id].analysis.modules.slice(0, 80).map((module) => <div key={module.path}><code>{module.path}</code><span>{module.role} · {module.lines} lines · {module.imports} imports</span></div>)}</div>
