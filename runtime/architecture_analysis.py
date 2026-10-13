@@ -131,14 +131,7 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
             if PurePosixPath(path).name in {"main.ts", "main.tsx", "index.ts", "index.tsx", "index.js", "index.jsx", "App.tsx", "App.jsx"}:
                 entrypoints.append({"path": path, "reason": "Conventional frontend/application entrypoint filename"})
 
-        outbound_pattern = r"""\b(fetch|axios\.(?:get|post|put|patch|delete)|requests\.(?:get|post|put|patch|delete)|httpx\.(?:get|post|put|patch|delete)|urlopen)\s*\(\s*[fFrRuUbB]*['"]([^'"]+)['"]"""
-        for match in re.finditer(outbound_pattern, text, re.I):
-            outbound_api_calls.append({
-                "client": match.group(1),
-                "target": match.group(2),
-                "source": path,
-                "evidence": "Static HTTP-client call target; runtime request is not verified",
-            })
+        outbound_api_calls.extend(_detect_outbound_api_calls(path, text))
         base_url_pattern = r"""\b(?:API_BASE_URL|BASE_URL|API_URL)\s*[:=]\s*['"]([^'"]+)['"]"""
         for match in re.finditer(base_url_pattern, text, re.I):
             outbound_api_calls.append({
@@ -259,6 +252,95 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
 
 
 
+
+def _detect_outbound_api_calls(path: str, text: str) -> list[dict[str, str]]:
+    """Identify literal HTTP targets across common stacks without executing source."""
+    records: list[dict[str, str]] = []
+    patterns: list[tuple[str, str, int]] = [
+        (r"""\b(fetch|axios\.(?:get|post|put|patch|delete)|requests\.(?:get|post|put|patch|delete)|httpx\.(?:get|post|put|patch|delete)|urlopen)\s*\(\s*[fFrRuUbB]*['"]([^'"]+)['"]""", "capture", 2),
+        (r"""\bhttp\.(Get|Head|Post|PostForm)\s*\(\s*['"]([^'"]+)['"]""", "go-http", 2),
+        (r"""\bhttp\.NewRequest\s*\(\s*['"](GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)['"]\s*,\s*['"]([^'"]+)['"]""", "go-new-request", 2),
+        (r"""\b[A-Za-z_]\w*\.(GetAsync|PostAsync|PutAsync|PatchAsync|DeleteAsync|GetStringAsync|GetByteArrayAsync)\s*\(\s*['"]([^'"]+)['"]""", "dotnet-httpclient", 2),
+        (r"""new\s+HttpRequestMessage\s*\(\s*HttpMethod\.(Get|Post|Put|Patch|Delete|Head|Options)\s*,\s*['"]([^'"]+)['"]""", "dotnet-request-message", 2),
+        (r"""\b[A-Za-z_]\w*\.(getForObject|getForEntity|postForObject|postForEntity|put|delete|exchange)\s*\(\s*['"]([^'"]+)['"]""", "spring-rest-template", 2),
+        (r"""\bHttpRequest\.newBuilder\s*\(\s*URI\.create\s*\(\s*['"]([^'"]+)['"]""", "java-http-request", 1),
+        (r"""\bcurl_init\s*\(\s*['"]([^'"]+)['"]""", "php-curl", 1),
+        (r"""\bHttp::(get|post|put|patch|delete)\s*\(\s*['"]([^'"]+)['"]""", "laravel-http", 2),
+        (r"""\b(?:HTTParty|Faraday)\.(get|post|put|patch|delete)\s*\(\s*['"]([^'"]+)['"]""", "ruby-http", 2),
+        (r"""\breqwest::(?:get|Client::new\(\)\.(?:get|post|put|patch|delete))\s*\(\s*['"]([^'"]+)['"]""", "rust-reqwest", 1),
+    ]
+    for pattern, kind, target_group in patterns:
+        for match in re.finditer(pattern, text, re.I):
+            if kind == "capture":
+                client, target = match.group(1), match.group(2)
+            elif kind == "go-http":
+                client, target = "http." + match.group(1), match.group(2)
+            elif kind == "go-new-request":
+                client, target = "http.NewRequest." + match.group(1).lower(), match.group(2)
+            elif kind == "dotnet-httpclient":
+                client, target = "HttpClient." + match.group(1), match.group(2)
+            elif kind == "dotnet-request-message":
+                client, target = "HttpClient." + match.group(1).lower(), match.group(2)
+            elif kind == "spring-rest-template":
+                client, target = "RestTemplate." + match.group(1), match.group(2)
+            elif kind == "java-http-request":
+                client, target = "HttpRequest.newBuilder", match.group(1)
+            elif kind == "php-curl":
+                client, target = "curl_init", match.group(1)
+            elif kind == "laravel-http":
+                client, target = "Http." + match.group(1), match.group(2)
+            elif kind == "ruby-http":
+                client, target = match.group(1), match.group(2)
+            else:
+                client, target = "reqwest." + match.group(0).split("(")[0].split("::")[-1].strip(), match.group(1)
+            records.append({
+                "client": client,
+                "target": target,
+                "source": path,
+                "evidence": "Static HTTP-client call target; runtime request is not verified",
+            })
+
+    for line in text.splitlines():
+        ps_match = re.search(r"\b(Invoke-RestMethod|Invoke-WebRequest)\b[^\r\n]*?-Uri\s+['"]([^'"]+)['"]", line, re.I)
+        if not ps_match:
+            continue
+        method_match = re.search(r"\s-Method\s+['"]?(Get|Post|Put|Patch|Delete|Head|Options)\b", line, re.I)
+        method = (method_match.group(1) if method_match else "Get").lower()
+        records.append({
+            "client": ps_match.group(1) + "." + method,
+            "target": ps_match.group(2),
+            "source": path,
+            "evidence": "Static PowerShell web-request target; runtime request is not verified",
+        })
+
+    unique: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for record in records:
+        key = (record["client"], record["target"], record["source"])
+        if key not in seen:
+            seen.add(key)
+            unique.append(record)
+    return unique
+
+
+def _expected_http_method(client: str) -> str | None:
+    """Infer a verb only from recognizable client method names; otherwise return None."""
+    name = client.split(".")[-1].lower()
+    if name in {"get", "getasync", "getstringasync", "getbytearrayasync", "getforobject", "getforentity"}:
+        return "GET"
+    if name in {"post", "postasync", "postforobject", "postforentity"}:
+        return "POST"
+    if name in {"put", "putasync"}:
+        return "PUT"
+    if name in {"patch", "patchasync"}:
+        return "PATCH"
+    if name in {"delete", "deleteasync"}:
+        return "DELETE"
+    if name in {"head", "options"}:
+        return name.upper()
+    return None
+
+
 def _parse_http_url(value: str):
     """Parse only well-formed absolute HTTP(S) URLs; malformed source strings are ignored."""
     try:
@@ -332,10 +414,7 @@ def build_api_relationship_map() -> dict[str, Any]:
                     continue
                 relative_path = target_path[len(base_path):] if base_path else target_path
                 relative_path = "/" + relative_path.lstrip("/")
-                expected_method = {
-                    "get": "GET", "post": "POST", "put": "PUT",
-                    "patch": "PATCH", "delete": "DELETE",
-                }.get(call["client"].split(".")[-1].lower())
+                expected_method = _expected_http_method(call["client"])
                 matched_routes = [
                     route for route in provider["routes"]
                     if route["method"] != "MOUNT"
