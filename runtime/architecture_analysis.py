@@ -133,13 +133,13 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
 
         if suffix == ".java":
             spring_methods = {"getmapping": "GET", "postmapping": "POST", "putmapping": "PUT", "patchmapping": "PATCH", "deletemapping": "DELETE", "requestmapping": "ANY"}
-            for match in re.finditer(r"@(GetMapping|PostMapping|PutMapping|PatchMapping|DeleteMapping|RequestMapping)\\s*\\(\\s*(?:value\\s*=\\s*)?['\\\"]([^'\\\"]+)", text, re.I):
-                routes.append({"method": spring_methods[match.group(1).lower()], "path": match.group(2), "source": path, "line": str(text.count("\\n", 0, match.start()) + 1)})
+            for match in re.finditer(r"@(GetMapping|PostMapping|PutMapping|PatchMapping|DeleteMapping|RequestMapping)\s*\(\s*(?:value\s*=\s*)?['\"]([^'\"]+)", text, re.I):
+                routes.append({"method": spring_methods[match.group(1).lower()], "path": match.group(2), "source": path, "line": str(text.count("\n", 0, match.start()) + 1)})
         if suffix == ".go":
-            for match in re.finditer(r"\\b([A-Za-z_]\\w*)\\.(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)\\s*\\(\\s*['\\\"]([^'\\\"]+)", text, re.I):
-                routes.append({"method": match.group(2).upper(), "path": match.group(3), "source": path, "line": str(text.count("\\n", 0, match.start()) + 1)})
-            for match in re.finditer(r"\\b(?:HandleFunc|Handle)\\s*\\(\\s*['\\\"]([^'\\\"]+)", text):
-                routes.append({"method": "ANY", "path": match.group(1), "source": path, "line": str(text.count("\\n", 0, match.start()) + 1)})
+            for match in re.finditer(r"\b([A-Za-z_]\w*)\.(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)\s*\(\s*['\"]([^'\"]+)", text, re.I):
+                routes.append({"method": match.group(2).upper(), "path": match.group(3), "source": path, "line": str(text.count("\n", 0, match.start()) + 1)})
+            for match in re.finditer(r"\b(?:HandleFunc|Handle)\s*\(\s*['\"]([^'\"]+)", text):
+                routes.append({"method": "ANY", "path": match.group(1), "source": path, "line": str(text.count("\n", 0, match.start()) + 1)})
 
         outbound_api_calls.extend(_detect_outbound_api_calls(path, text))
         base_url_pattern = r"""\b(?:API_BASE_URL|BASE_URL|API_URL)\s*[:=]\s*['"]([^'"]+)['"]"""
