@@ -189,6 +189,8 @@ class RuntimeTests(unittest.TestCase):
                 "client.go": 'package client\nimport "net/http"\nfunc load() { http.Get("https://api.example.test/v1/items") }\n',
                 "Service.cs": 'using System.Net.Http;\nclass Service { async Task load() { await httpClient.GetAsync("https://api.example.test/v1/items"); } }\n',
                 "probe.ps1": "Invoke-RestMethod -Uri 'https://api.example.test/v1/items' -Method Get\n",
+                "ItemsController.java": '@RestController\nclass ItemsController {\n@GetMapping("/java/items")\nObject list() { return null; }\n}',
+                "routes.go": 'package routes\nfunc register(router *gin.Engine) {\nrouter.GET("/go/items", handler)\n}',
             }
             with patch.object(server, "DB_PATH", database_path):
                 from repository_ingest import _db_executescript
@@ -214,7 +216,7 @@ class RuntimeTests(unittest.TestCase):
 
         analysis = result["analysis"]
         self.assertEqual(result["project"]["indexed_commit"], "abc123")
-        self.assertEqual(analysis["source_files_analyzed"], 9)
+        self.assertEqual(analysis["source_files_analyzed"], 11)
         self.assertGreaterEqual(analysis["routes_detected"], 2)
         self.assertTrue(any(item["path"] == "/v2/items" and item["method"] == "GET" for item in analysis["api_routes"]))
         self.assertTrue(any(item["path"] == "django-items/" and item["method"] == "ANY" for item in analysis["api_routes"]))
@@ -225,6 +227,8 @@ class RuntimeTests(unittest.TestCase):
         self.assertTrue(any(edge["from"] == "webapp/src/App.tsx" and edge["to"] == "webapp/src/components/Card.tsx" for edge in analysis["dependency_edges"]))
         self.assertTrue(any(item["path"] == "/v3/items" and item["method"] == "GET" for item in analysis["api_routes"]))
         self.assertTrue(any(item["path"] == "/v3/items" and item["line"] == "2" for item in analysis["api_routes"]))
+        self.assertTrue(any(item["path"] == "/java/items" and item["method"] == "GET" and item["source"] == "ItemsController.java" for item in analysis["api_routes"]))
+        self.assertTrue(any(item["path"] == "/go/items" and item["method"] == "GET" and item["source"] == "routes.go" for item in analysis["api_routes"]))
         self.assertTrue(any(item["target"] == "https://api.example.test/v1/items" and item["source"] == "client.py" for item in analysis["outbound_api_calls"]))
         self.assertTrue(any(item["client"] == "http.Get" and item["target"] == "https://api.example.test/v1/items" and item["source"] == "client.go" for item in analysis["outbound_api_calls"]))
         self.assertTrue(any(item["client"] == "HttpClient.GetAsync" and item["target"] == "https://api.example.test/v1/items" and item["source"] == "Service.cs" for item in analysis["outbound_api_calls"]))
