@@ -149,7 +149,8 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
                 if re.search(r"\b" + re.escape(framework) + r"\b", lower):
                     framework_counts[framework] += 1
         if _matches(path, (r"(^|/)(\.env|config|settings)", r"database", r"schema\.sql$")) or _matches(text, (r"sqlite3?\.", r"create_engine\s*\(", r"MongoClient", r"mongoose\.", r"PrismaClient", r"localStorage", r"sessionStorage", r"indexedDB", r"redis\.", r"CREATE TABLE", r"\bDATABASE_URL\b")):
-            signals = []
+            signals: list[str] = []
+            signal_lines: dict[str, int] = {}
             for label, patterns in (
                 ("SQLite", (r"sqlite3?\.", r"sqlite://")),
                 ("SQLAlchemy / SQL database", (r"create_engine\s*\(", r"SQLAlchemy", r"postgresql://", r"mysql://", r"\bDATABASE_URL\b")),
@@ -161,8 +162,9 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
             ):
                 if _matches(path + "\n" + text, patterns):
                     signals.append(label)
+                    signal_lines[label] = next((i for i, source_line in enumerate(lines, 1) if _matches(source_line, patterns)), 1)
             for signal in signals:
-                storage.append({"name": signal, "source": path, "line": str(next((i for i, line in enumerate(lines, 1) if _matches(line, (r"sqlite3?\\.", r"create_engine\\s*\\(", r"MongoClient", r"mongoose\\.", r"PrismaClient", r"localStorage", r"sessionStorage", r"indexedDB", r"redis\\.", r"CREATE TABLE", r"\\bDATABASE_URL\\b"))), 1)), "evidence": "Pattern match in indexed source; runtime connectivity is not verified"})
+                storage.append({"name": signal, "source": path, "line": str(signal_lines[signal]), "evidence": "Pattern match in indexed source; runtime connectivity is not verified"})
         for module in module_imports:
             candidate = _resolve_local_import(path, module, paths, paths_by_stem)
             if candidate and candidate != path:
