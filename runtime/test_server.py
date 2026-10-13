@@ -224,6 +224,7 @@ class RuntimeTests(unittest.TestCase):
         self.assertTrue(any(edge["from"] == "main.py" and edge["to"] == "api.py" for edge in analysis["dependency_edges"]))
         self.assertTrue(any(edge["from"] == "webapp/src/App.tsx" and edge["to"] == "webapp/src/components/Card.tsx" for edge in analysis["dependency_edges"]))
         self.assertTrue(any(item["path"] == "/v3/items" and item["method"] == "GET" for item in analysis["api_routes"]))
+        self.assertTrue(any(item["path"] == "/v3/items" and item["line"] == "2" for item in analysis["api_routes"]))
         self.assertTrue(any(item["target"] == "https://api.example.test/v1/items" and item["source"] == "client.py" for item in analysis["outbound_api_calls"]))
         self.assertTrue(any(item["client"] == "http.Get" and item["target"] == "https://api.example.test/v1/items" and item["source"] == "client.go" for item in analysis["outbound_api_calls"]))
         self.assertTrue(any(item["client"] == "HttpClient.GetAsync" and item["target"] == "https://api.example.test/v1/items" and item["source"] == "Service.cs" for item in analysis["outbound_api_calls"]))
@@ -275,6 +276,8 @@ class RuntimeTests(unittest.TestCase):
         self.assertEqual(relationship["caller"]["project_id"], "api-consumer")
         self.assertEqual(relationship["provider"]["project_id"], "api-provider")
         self.assertEqual(relationship["route"], "/v1/items")
+        self.assertEqual(relationship["caller_line"], "2")
+        self.assertEqual(relationship["provider_line"], "4")
         self.assertEqual(relationship["confidence"], "static-exact-host-and-route-match")
         self.assertIn("runtime traffic is not verified", relationship["evidence"])
 
