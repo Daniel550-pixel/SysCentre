@@ -42,8 +42,8 @@ type ArchitectureAnalysis = {
     code_files: number; lines_of_source: number; imports_detected: number; local_dependency_edges: number;
     functions_detected: number; classes_detected: number; routes_detected: number; entrypoints: string[];
     framework_signals: Array<{ name: string; evidence_count: number }>;
-    api_routes: Array<{ method: string; path: string; source: string }>;
-    outbound_api_calls: Array<{ client: string; target: string; source: string; evidence: string }>;
+    api_routes: Array<{ method: string; path: string; source: string; line?: string }>;
+    outbound_api_calls: Array<{ client: string; target: string; source: string; evidence: string; line?: string }>;
     data_store_signals: Array<{ name: string; source: string; evidence: string }>;
     modules: Array<{ path: string; language: string; lines: number; imports: number; role: string }>;
     dependency_edges: Array<{ from: string; to: string; kind: string }>;
