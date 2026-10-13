@@ -191,6 +191,9 @@ class RuntimeTests(unittest.TestCase):
                 "probe.ps1": "Invoke-RestMethod -Uri 'https://api.example.test/v1/items' -Method Get\n",
                 "ItemsController.java": '@RestController\nclass ItemsController {\n@GetMapping("/java/items")\nObject list() { return null; }\n}',
                 "routes.go": 'package routes\nfunc register(router *gin.Engine) {\nrouter.GET("/go/items", handler)\n}',
+                "ItemsController.cs": '[HttpGet("/cs/items")]\npublic IActionResult List() => Ok();',
+                "routes.php": "Route::get('/php/items', [ItemController::class, 'index']);",
+                "routes.rb": "get '/ruby/items' do\n  'ok'\nend",
             }
             with patch.object(server, "DB_PATH", database_path):
                 from repository_ingest import _db_executescript
@@ -216,7 +219,7 @@ class RuntimeTests(unittest.TestCase):
 
         analysis = result["analysis"]
         self.assertEqual(result["project"]["indexed_commit"], "abc123")
-        self.assertEqual(analysis["source_files_analyzed"], 11)
+        self.assertEqual(analysis["source_files_analyzed"], 14)
         self.assertGreaterEqual(analysis["routes_detected"], 2)
         self.assertTrue(any(item["path"] == "/v2/items" and item["method"] == "GET" for item in analysis["api_routes"]))
         self.assertTrue(any(item["path"] == "django-items/" and item["method"] == "ANY" for item in analysis["api_routes"]))
@@ -229,6 +232,9 @@ class RuntimeTests(unittest.TestCase):
         self.assertTrue(any(item["path"] == "/v3/items" and item["line"] == "2" for item in analysis["api_routes"]))
         self.assertTrue(any(item["path"] == "/java/items" and item["method"] == "GET" and item["source"] == "ItemsController.java" for item in analysis["api_routes"]))
         self.assertTrue(any(item["path"] == "/go/items" and item["method"] == "GET" and item["source"] == "routes.go" for item in analysis["api_routes"]))
+        self.assertTrue(any(item["path"] == "/cs/items" and item["method"] == "GET" and item["source"] == "ItemsController.cs" for item in analysis["api_routes"]))
+        self.assertTrue(any(item["path"] == "/php/items" and item["method"] == "GET" and item["source"] == "routes.php" for item in analysis["api_routes"]))
+        self.assertTrue(any(item["path"] == "/ruby/items" and item["method"] == "GET" and item["source"] == "routes.rb" for item in analysis["api_routes"]))
         self.assertTrue(any(item["target"] == "https://api.example.test/v1/items" and item["source"] == "client.py" for item in analysis["outbound_api_calls"]))
         self.assertTrue(any(item["client"] == "http.Get" and item["target"] == "https://api.example.test/v1/items" and item["source"] == "client.go" for item in analysis["outbound_api_calls"]))
         self.assertTrue(any(item["client"] == "HttpClient.GetAsync" and item["target"] == "https://api.example.test/v1/items" and item["source"] == "Service.cs" for item in analysis["outbound_api_calls"]))
