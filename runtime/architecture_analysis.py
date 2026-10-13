@@ -140,6 +140,19 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
                 routes.append({"method": match.group(2).upper(), "path": match.group(3), "source": path, "line": str(text.count("\n", 0, match.start()) + 1)})
             for match in re.finditer(r"\b(?:HandleFunc|Handle)\s*\(\s*['\"]([^'\"]+)", text):
                 routes.append({"method": "ANY", "path": match.group(1), "source": path, "line": str(text.count("\n", 0, match.start()) + 1)})
+        if suffix == ".cs":
+            for match in re.finditer(r"\[(HttpGet|HttpPost|HttpPut|HttpPatch|HttpDelete|Route)\s*(?:\(\s*['\"]([^'\"]*)['\"]\s*\))?\]", text, re.I):
+                method = {"httpget": "GET", "httppost": "POST", "httpput": "PUT", "httppatch": "PATCH", "httpdelete": "DELETE", "route": "ANY"}[match.group(1).lower()]
+                route_path = match.group(2) or ""
+                if route_path:
+                    routes.append({"method": method, "path": route_path, "source": path, "line": str(text.count("\n", 0, match.start()) + 1)})
+        if suffix == ".php":
+            for match in re.finditer(r"\bRoute::(get|post|put|patch|delete|any)\s*\(\s*['\"]([^'\"]+)", text, re.I):
+                routes.append({"method": match.group(1).upper(), "path": match.group(2), "source": path, "line": str(text.count("\n", 0, match.start()) + 1)})
+        if suffix == ".rb":
+            for match in re.finditer(r"^\s*(get|post|put|patch|delete)\s+['\"]([^'\"]+)['\"]", text, re.I | re.M):
+                routes.append({"method": match.group(1).upper(), "path": match.group(2), "source": path, "line": str(text.count("\n", 0, match.start()) + 1)})
+
 
         outbound_api_calls.extend(_detect_outbound_api_calls(path, text))
         base_url_pattern = r"""\b(?:API_BASE_URL|BASE_URL|API_URL)\s*[:=]\s*['"]([^'"]+)['"]"""
