@@ -183,7 +183,7 @@ class RuntimeTests(unittest.TestCase):
                 "main.py": "from fastapi import FastAPI\nimport sqlite3\nfrom api import router\napp = FastAPI()\napp.include_router(router)\n@app.get('/health')\ndef health():\n    return {'ok': True}\nconn = sqlite3.connect('app.db')\n",
                 "api.py": "from fastapi import APIRouter\nrouter = APIRouter()\n@router.post('/items')\ndef create_item():\n    return {'ok': True}\n@items_router.get('/v2/items')\ndef list_items(): return []\nurlpatterns = [path('django-items/', views.items)]\n",
                 "requirements.txt": "fastapi==0.115.0\n",
-                "webapp/src/App.tsx": "import Card from './components/Card';\\napiRouter.get('/v3/items', handler);\\nexport default function App() { return <Card />; }\\n",
+                "webapp/src/App.tsx": "import Card from './components/Card';\napiRouter.get('/v3/items', handler);\nexport default function App() { return <Card />; }\n",
                 "webapp/src/components/Card.tsx": "export default function Card() { return <div>Card</div>; }\\n",
                 "client.py": "import requests\nrequests.get('https://api.example.test/v1/items')\n",
                 "client.go": 'package client\nimport "net/http"\nfunc load() { http.Get("https://api.example.test/v1/items") }\n',
