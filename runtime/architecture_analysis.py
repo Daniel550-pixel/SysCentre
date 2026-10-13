@@ -112,22 +112,22 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
             except (SyntaxError, ValueError) as exc:
                 parse_failures.append(path)
             for match in re.finditer(r"@(?:app|router|api|bp|blueprint|[A-Za-z_]\w*(?:app|router|api|bp|blueprint)\w*)\.(get|post|put|patch|delete|options|route)\s*\(\s*['\"]([^'\"]+)", text, re.I):
-                routes.append({"method": match.group(1).upper(), "path": match.group(2), "source": path, "line": str(text.count("\\n", 0, match.start()) + 1)})
+                routes.append({"method": match.group(1).upper(), "path": match.group(2), "source": path, "line": str(text.count("\n", 0, match.start()) + 1)})
             for match in re.finditer(r"\b(?:include_router|register_blueprint)\s*\(\s*([A-Za-z_][\w.]*)", text):
-                routes.append({"method": "MOUNT", "path": match.group(1), "source": path, "line": str(text.count("\\n", 0, match.start()) + 1)})
+                routes.append({"method": "MOUNT", "path": match.group(1), "source": path, "line": str(text.count("\n", 0, match.start()) + 1)})
             for match in re.finditer(r"\b(?:path|re_path)\s*\(\s*['\"]([^'\"]+)", text):
-                routes.append({"method": "ANY", "path": match.group(1), "source": path, "line": str(text.count("\\n", 0, match.start()) + 1)})
+                routes.append({"method": "ANY", "path": match.group(1), "source": path, "line": str(text.count("\n", 0, match.start()) + 1)})
         if suffix in {".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"}:
             for match in re.finditer(r"\bimport\s+(?:[^;\n]*?\s+from\s+)?['\"]([^'\"]+)['\"]|\brequire\s*\(\s*['\"]([^'\"]+)['\"]\s*\)", text):
                 module = match.group(1) or match.group(2)
-                imports.append({"source": path, "module": module, "kind": "javascript-import"})
+                imports.append({"source": path, "line": str(text.count("\n", 0, match.start()) + 1), "module": module, "kind": "javascript-import"})
                 module_imports.append(module)
                 if module in {"react", "react-dom"}:
                     framework_counts["react"] += 1
                 elif module in {"express", "fastify", "koa", "hono", "next"}:
                     framework_counts[module] += 1
             for match in re.finditer(r"\b(?:app|router|server|api|[A-Za-z_$][\w$]*(?:app|router|server|api))\.(get|post|put|patch|delete|all|use)\s*\(\s*['\"]([^'\"]+)", text, re.I):
-                routes.append({"method": match.group(1).upper(), "path": match.group(2), "source": path})
+                routes.append({"method": match.group(1).upper(), "path": match.group(2), "source": path, "line": str(text.count("\n", 0, match.start()) + 1)})
             if PurePosixPath(path).name in {"main.ts", "main.tsx", "index.ts", "index.tsx", "index.js", "index.jsx", "App.tsx", "App.jsx"}:
                 entrypoints.append({"path": path, "reason": "Conventional frontend/application entrypoint filename"})
 
@@ -138,6 +138,7 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
                 "client": "base-url configuration",
                 "target": match.group(1),
                 "source": path,
+                "line": str(text.count("\n", 0, match.start()) + 1),
                 "evidence": "Static API base URL configuration; runtime request is not verified",
             })
 
@@ -297,10 +298,11 @@ def _detect_outbound_api_calls(path: str, text: str) -> list[dict[str, str]]:
                 "client": client,
                 "target": target,
                 "source": path,
+                "line": str(text.count("\n", 0, match.start()) + 1),
                 "evidence": "Static HTTP-client call target; runtime request is not verified",
             })
 
-    for line in text.splitlines():
+    for line_number, line in enumerate(text.splitlines(), 1):
         ps_match = re.search(r"""\b(Invoke-RestMethod|Invoke-WebRequest)\b[^\r\n]*?-Uri\s+['"]([^'"]+)['"]""", line, re.I)
         if not ps_match:
             continue
@@ -310,6 +312,7 @@ def _detect_outbound_api_calls(path: str, text: str) -> list[dict[str, str]]:
             "client": ps_match.group(1) + "." + method,
             "target": ps_match.group(2),
             "source": path,
+            "line": str(line_number),
             "evidence": "Static PowerShell web-request target; runtime request is not verified",
         })
 
