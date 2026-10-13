@@ -301,10 +301,10 @@ def _detect_outbound_api_calls(path: str, text: str) -> list[dict[str, str]]:
             })
 
     for line in text.splitlines():
-        ps_match = re.search(r"\b(Invoke-RestMethod|Invoke-WebRequest)\b[^\r\n]*?-Uri\s+['"]([^'"]+)['"]", line, re.I)
+        ps_match = re.search(r"""\b(Invoke-RestMethod|Invoke-WebRequest)\b[^\r\n]*?-Uri\s+['"]([^'"]+)['"]""", line, re.I)
         if not ps_match:
             continue
-        method_match = re.search(r"\s-Method\s+['"]?(Get|Post|Put|Patch|Delete|Head|Options)\b", line, re.I)
+        method_match = re.search(r"""\s-Method\s+['"]?(Get|Post|Put|Patch|Delete|Head|Options)\b""", line, re.I)
         method = (method_match.group(1) if method_match else "Get").lower()
         records.append({
             "client": ps_match.group(1) + "." + method,
