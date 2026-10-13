@@ -103,7 +103,7 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
                         module = node.module
                         module_imports.append(module)
                     if module:
-                        imports.append({"source": path, "module": module, "kind": "python-import"})
+                        imports.append({"source": path, "line": str(getattr(node, "lineno", 1)), "module": module, "kind": "python-import"})
                         top = module.split(".")[0]
                         if top in {"fastapi", "flask", "django", "streamlit", "gradio", "nicegui"}:
                             framework_counts[top] += 1
@@ -112,11 +112,11 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
             except (SyntaxError, ValueError) as exc:
                 parse_failures.append(path)
             for match in re.finditer(r"@(?:app|router|api|bp|blueprint|[A-Za-z_]\w*(?:app|router|api|bp|blueprint)\w*)\.(get|post|put|patch|delete|options|route)\s*\(\s*['\"]([^'\"]+)", text, re.I):
-                routes.append({"method": match.group(1).upper(), "path": match.group(2), "source": path})
+                routes.append({"method": match.group(1).upper(), "path": match.group(2), "source": path, "line": str(text.count("\\n", 0, match.start()) + 1)})
             for match in re.finditer(r"\b(?:include_router|register_blueprint)\s*\(\s*([A-Za-z_][\w.]*)", text):
-                routes.append({"method": "MOUNT", "path": match.group(1), "source": path})
+                routes.append({"method": "MOUNT", "path": match.group(1), "source": path, "line": str(text.count("\\n", 0, match.start()) + 1)})
             for match in re.finditer(r"\b(?:path|re_path)\s*\(\s*['\"]([^'\"]+)", text):
-                routes.append({"method": "ANY", "path": match.group(1), "source": path})
+                routes.append({"method": "ANY", "path": match.group(1), "source": path, "line": str(text.count("\\n", 0, match.start()) + 1)})
         if suffix in {".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"}:
             for match in re.finditer(r"\bimport\s+(?:[^;\n]*?\s+from\s+)?['\"]([^'\"]+)['\"]|\brequire\s*\(\s*['\"]([^'\"]+)['\"]\s*\)", text):
                 module = match.group(1) or match.group(2)
@@ -161,7 +161,7 @@ def analyze_indexed_repository(project_id: str) -> dict[str, Any]:
                 if _matches(path + "\n" + text, patterns):
                     signals.append(label)
             for signal in signals:
-                storage.append({"name": signal, "source": path, "evidence": "Pattern match in indexed source; runtime connectivity is not verified"})
+                storage.append({"name": signal, "source": path, "line": str(next((i for i, line in enumerate(lines, 1) if _matches(line, (r"sqlite3?\\.", r"create_engine\\s*\\(", r"MongoClient", r"mongoose\\.", r"PrismaClient", r"localStorage", r"sessionStorage", r"indexedDB", r"redis\\.", r"CREATE TABLE", r"\\bDATABASE_URL\\b"))), 1)), "evidence": "Pattern match in indexed source; runtime connectivity is not verified"})
         for module in module_imports:
             candidate = _resolve_local_import(path, module, paths, paths_by_stem)
             if candidate and candidate != path:
