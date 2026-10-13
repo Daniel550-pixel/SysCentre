@@ -186,6 +186,9 @@ class RuntimeTests(unittest.TestCase):
                 "webapp/src/App.tsx": "import Card from './components/Card';\\napiRouter.get('/v3/items', handler);\\nexport default function App() { return <Card />; }\\n",
                 "webapp/src/components/Card.tsx": "export default function Card() { return <div>Card</div>; }\\n",
                 "client.py": "import requests\nrequests.get('https://api.example.test/v1/items')\n",
+                "client.go": 'package client\nimport "net/http"\nfunc load() { http.Get("https://api.example.test/v1/items") }\n',
+                "Service.cs": 'using System.Net.Http;\nclass Service { async Task load() { await httpClient.GetAsync("https://api.example.test/v1/items"); } }\n',
+                "probe.ps1": "Invoke-RestMethod -Uri 'https://api.example.test/v1/items' -Method Get\n",
             }
             with patch.object(server, "DB_PATH", database_path):
                 from repository_ingest import _db_executescript
@@ -211,7 +214,7 @@ class RuntimeTests(unittest.TestCase):
 
         analysis = result["analysis"]
         self.assertEqual(result["project"]["indexed_commit"], "abc123")
-        self.assertEqual(analysis["source_files_analyzed"], 6)
+        self.assertEqual(analysis["source_files_analyzed"], 9)
         self.assertGreaterEqual(analysis["routes_detected"], 2)
         self.assertTrue(any(item["path"] == "/v2/items" and item["method"] == "GET" for item in analysis["api_routes"]))
         self.assertTrue(any(item["path"] == "django-items/" and item["method"] == "ANY" for item in analysis["api_routes"]))
@@ -222,6 +225,9 @@ class RuntimeTests(unittest.TestCase):
         self.assertTrue(any(edge["from"] == "webapp/src/App.tsx" and edge["to"] == "webapp/src/components/Card.tsx" for edge in analysis["dependency_edges"]))
         self.assertTrue(any(item["path"] == "/v3/items" and item["method"] == "GET" for item in analysis["api_routes"]))
         self.assertTrue(any(item["target"] == "https://api.example.test/v1/items" and item["source"] == "client.py" for item in analysis["outbound_api_calls"]))
+        self.assertTrue(any(item["client"] == "http.Get" and item["target"] == "https://api.example.test/v1/items" and item["source"] == "client.go" for item in analysis["outbound_api_calls"]))
+        self.assertTrue(any(item["client"] == "HttpClient.GetAsync" and item["target"] == "https://api.example.test/v1/items" and item["source"] == "Service.cs" for item in analysis["outbound_api_calls"]))
+        self.assertTrue(any(item["client"] == "Invoke-RestMethod.get" and item["target"] == "https://api.example.test/v1/items" and item["source"] == "probe.ps1" for item in analysis["outbound_api_calls"]))
         self.assertTrue(any("never" in item.lower() or "static" in item.lower() for item in analysis["limitations"]))
 
     def test_cross_repository_api_map_requires_static_host_and_route_match(self):
