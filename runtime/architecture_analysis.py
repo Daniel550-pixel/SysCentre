@@ -447,7 +447,9 @@ def build_api_relationship_map() -> dict[str, Any]:
                         "method": route["method"],
                         "route": route["path"],
                         "caller_evidence": call["source"],
+                        "caller_line": call.get("line", ""),
                         "provider_evidence": route["source"],
+                        "provider_line": route.get("line", ""),
                         "confidence": "static-exact-host-and-route-match",
                         "evidence": "Static URL target matches another indexed repository's configured API base URL and declared route; runtime traffic is not verified.",
                     })
@@ -473,6 +475,7 @@ def build_api_relationship_map() -> dict[str, Any]:
                 "client": call["client"],
                 "target": call["target"],
                 "source": call["source"],
+                "line": call.get("line", ""),
                 "reason": "No exact host, configured API base URL, and declared route match was found in another indexed repository.",
             })
 
