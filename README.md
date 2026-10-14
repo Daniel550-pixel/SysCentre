@@ -32,16 +32,30 @@ The indexer deliberately excludes sensitive-looking paths (for example, `.env`, 
 - Node.js 20 or newer (npm included)
 - Windows PowerShell 5.1 or PowerShell 7
 
-## Start on Windows
+## Start and synchronize on Windows
 
-From the repository root:
+**Recommended: one-command activation.** From a clean clone of the repository, open PowerShell in the repository root and run:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process Bypass
-.\scripts\Start-SysCentre.ps1
+.\scripts\Activate-SysCentre.ps1
 ```
 
-Open **http://127.0.0.1:5173**. The runtime API is **http://127.0.0.1:8765**.
+The activation script checks Git, Python 3.11+, Node.js 20+, the expected `origin`, and the `main` branch; refuses to pull over uncommitted local changes; refreshes `main` with `git pull --rebase`; installs the locked webapp dependencies with `npm ci`; runs the production build; starts the runtime and Vite webapp; checks their local HTTP endpoints; and opens a separate PowerShell window for the Git sync watcher. It never force-pushes. Dependency or build failures stop activation before service startup.
+
+- Dashboard: **http://127.0.0.1:5173**
+- Runtime API: **http://127.0.0.1:8765**
+- Health check: **http://127.0.0.1:8765/api/health**
+
+The watcher checks every 60 seconds by default. It pulls with rebase before pushing and retries bounded non-fast-forward races. Auto-commit is **off by default**: uncommitted local changes pause sync to protect work. To explicitly allow the watcher to commit and push all local changes, run activation with `-AutoCommitSync` only after reviewing that behavior. You can adjust the watcher interval with `-SyncIntervalSeconds 120`, skip opening the watcher with `-NoGitWatcher`, or skip opening the browser with `-NoBrowser`.
+
+For manual service startup without the activation checks, `.`scripts\Start-SysCentre.ps1` remains available. To run the watcher alone from the repository root:
+
+```powershell
+.\scripts\SysCentre-GitSync.ps1 -Watch -IntervalSeconds 60
+```
+
+The local services and watcher run only while the host computer is powered on and the relevant PowerShell processes remain open. This workflow does not turn on a sleeping or powered-off computer.
 
 ## Runtime API
 
