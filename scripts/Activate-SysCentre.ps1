@@ -113,7 +113,7 @@ try {
 
     Write-Host "[4/5] Starting runtime and webapp..." -ForegroundColor Cyan
     if (-not (Test-Listener -Port 8765) -or -not (Test-Listener -Port 5173)) {
-        $startArgs = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "Start-SysCentre.ps1"), "-NoBrowser")
+        $startArgs = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ('"' + (Join-Path $PSScriptRoot "Start-SysCentre.ps1") + '"'), "-NoBrowser")
         Start-Process -FilePath "powershell.exe" -ArgumentList $startArgs -WorkingDirectory $ProjectRoot
     } else {
         Write-Host "Both service ports already have listeners; duplicate startup skipped." -ForegroundColor DarkGray
@@ -146,7 +146,7 @@ try {
 
     Write-Host "[5/5] Git push/pull watcher..." -ForegroundColor Cyan
     if (-not $NoGitWatcher) {
-        $watchArgs = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $GitSyncScript, "-RepoPath", $ProjectRoot, "-IntervalSeconds", $SyncIntervalSeconds, "-Watch")
+        $watchArgs = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ('"' + $GitSyncScript + '"'), "-RepoPath", ('"' + $ProjectRoot + '"'), "-IntervalSeconds", $SyncIntervalSeconds, "-Watch")
         if ($AutoCommitSync) { $watchArgs += "-AutoCommit" }
         Start-Process -FilePath "powershell.exe" -ArgumentList $watchArgs -WorkingDirectory $ProjectRoot
         Write-Host "Dedicated Git sync terminal opened (interval: $SyncIntervalSeconds seconds)." -ForegroundColor Green
