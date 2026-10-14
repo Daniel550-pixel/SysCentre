@@ -25,6 +25,31 @@ jobs:
         with:
           node-version: "20"
       - name: Install dependencies
-        run: npm --prefix webapp install
+        run: npm --prefix webapp ci
       - name: Type-check and build webapp
         run: npm --prefix webapp run build
+
+  powershell-script-parse:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse PowerShell scripts without executing them
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          $files = Get-ChildItem -Path scripts -Filter "*.ps1" -File
+          if (-not $files) { throw "No PowerShell scripts found." }
+          foreach ($file in $files) {
+            $tokens = $null
+            $parseErrors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              $file.FullName,
+              [ref]$tokens,
+              [ref]$parseErrors
+            ) | Out-Null
+            if ($parseErrors.Count -gt 0) {
+              $parseErrors | ForEach-Object { Write-Error "$($file.Name): $($_.Message) at line $($_.Extent.StartLineNumber)" }
+              throw "PowerShell parser validation failed for $($file.Name)."
+            }
+            Write-Host "PASS $($file.Name)"
+          }
