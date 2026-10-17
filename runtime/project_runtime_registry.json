@@ -532,23 +532,24 @@
       "target_market": "ICT students, lab operators, and small IT infrastructure teams",
       "portfolio_role": "Infrastructure operations tool",
       "lifecycle_stage": "Local-first operational project",
-      "adapter_type": "unconfigured",
-      "runtime_mode": "not_configured",
+      "adapter_type": "local_process",
+      "runtime_mode": "local_process",
       "deployment_url": "",
       "healthcheck_url": "",
       "start_action": null,
       "stop_action": null,
       "restart_action": null,
-      "execution_state": "not_configured",
+      "execution_state": "configured",
       "permissions": [
         "read_metadata",
-        "health_check_when_configured"
+        "start_stop_restart",
+        "health_check"
       ],
-      "risk_level": "unknown_until_assessed",
+      "risk_level": "medium",
       "requires_approval": true,
       "last_health_check": null,
       "last_started_at": null,
-      "notes": "No launch command or deployment endpoint is assumed. Configure and verify a project-specific adapter before execution."
+      "notes": "Reviewed localhost-only Python standard-library web server at 127.0.0.1:8501. Starting the dashboard does not automatically create/configure VirtualBox networks or VMs and does not invoke NetworkLab POST actions. Those infrastructure operations remain separate, explicit user actions. Requires isolated workspace provisioning and Python 3.11+."
     },
     {
       "project_id": "secureos",
