@@ -82,6 +82,21 @@ def _profile(project_id: str) -> dict[str, Any]:
         raise LifecycleError("Launch profile cwd escapes the project workspace.")
     if not cwd.is_dir():
         raise LifecycleError("Launch profile working directory does not exist.")
+    required_paths = profile.get("required_paths", [])
+    if not isinstance(required_paths, list) or not all(isinstance(item, str) and item for item in required_paths):
+        raise LifecycleError("Launch profile required_paths must be an array of relative paths.")
+    missing_paths = []
+    for item in required_paths:
+        relative = Path(item)
+        if relative.is_absolute():
+            raise LifecycleError("Required paths must remain inside the project workspace.")
+        required_path = (workspace / relative).resolve()
+        if required_path != workspace and workspace not in required_path.parents:
+            raise LifecycleError("Required path escapes the project workspace.")
+        if not required_path.exists():
+            missing_paths.append(item)
+    if missing_paths:
+        raise LifecycleError("Project workspace is missing required files or dependencies: " + ", ".join(missing_paths))
     healthcheck_url = profile.get("healthcheck_url", "")
     display_url = profile.get("display_url", healthcheck_url)
     for field_name, candidate in (("healthcheck_url", healthcheck_url), ("display_url", display_url)):
@@ -115,12 +130,23 @@ def list_sessions() -> dict[str, Any]:
             running = bool(proc and proc.poll() is None)
             profile = profiles.get(project_id)
             configured = isinstance(profile, dict) and profile.get("enabled") is True
-            state = "running" if running else ("stopped" if configured else "not_configured")
-            health = _probe_health(profile.get("healthcheck_url", "")) if running and isinstance(profile, dict) else ("stopped" if configured else "not_configured")
+            ready = False
+            readiness_reason = "Project is not launch-configured."
+            if configured:
+                try:
+                    _profile(project_id)
+                    ready = True
+                    readiness_reason = ""
+                except LifecycleError as exc:
+                    readiness_reason = str(exc)
+            state = "running" if running else ("stopped" if ready else ("setup_required" if configured else "not_configured"))
+            health = _probe_health(profile.get("healthcheck_url", "")) if running and isinstance(profile, dict) else ("stopped" if ready else ("setup_required" if configured else "not_configured"))
             sessions.append({
                 "project_id": project_id,
                 "name": project.get("name", project_id),
                 "configured": configured,
+                "ready": ready,
+                "readiness_reason": readiness_reason,
                 "state": state,
                 "health": health,
                 "pid": proc.pid if running else None,
