@@ -78,6 +78,18 @@ class ProjectLifecycleTests(unittest.TestCase):
         self.assertTrue(result["sessions"][0]["configured"])
         self.assertEqual(result["sessions"][0]["state"], "stopped")
 
+    def test_missing_required_dependency_blocks_launch_and_disables_readiness(self):
+        self.write_profile({"enabled": True, "adapter_type": "local_process",
+                            "argv": ["node", "node_modules/next/dist/bin/next"], "cwd": ".",
+                            "required_paths": ["node_modules/next/dist/bin/next"]})
+        result = lifecycle.list_sessions()["sessions"][0]
+        self.assertTrue(result["configured"])
+        self.assertFalse(result["ready"])
+        self.assertEqual(result["state"], "setup_required")
+        self.assertIn("missing required files", result["readiness_reason"])
+        with self.assertRaisesRegex(lifecycle.LifecycleError, "missing required files"):
+            lifecycle.start_project("demo-project")
+
     def test_absolute_executable_paths_are_rejected(self):
         self.write_profile({"enabled": True, "adapter_type": "local_process",
                             "argv": ["/usr/bin/python", "-V"], "cwd": "."})
