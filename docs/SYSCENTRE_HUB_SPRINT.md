@@ -66,9 +66,11 @@ Turn SysCentre from a portfolio inventory into the single entry point for every 
 - [x] Per-project runtime adapter slots and readiness UI exist.
 - [x] Source indexing, architecture analysis, cross-repository search, and audit events exist.
 - [x] Initial unified project hub launchpad with repository/source/index/architecture access (live deployments and runnable adapters remain unverified).
-- [x] Policy-gated lifecycle API skeleton: session inventory plus start/stop/restart routes, allowlisted executable names, isolated workspaces, shell disabled, and per-project logs.
-- [x] Lifecycle API documentation and unit tests for unconfigured projects, workspace traversal, executable policy, and session state.
-- [ ] Wire lifecycle session state and controls into the hub UI.
-- [ ] Source-backed launch profiles and setup checklists for implemented projects.
-- [ ] HTTP health checks, process recovery/adoption, and stronger lifecycle integration tests.
+- [x] Policy-gated lifecycle API: session inventory plus start/stop/restart routes, allowlisted executable names, isolated workspaces, shell disabled, and per-project logs.
+- [x] Hub UI lifecycle controls, process/health state, and Open app link.
+- [x] First source-backed launch profile for Localhost-webapp, with a dedicated PowerShell workspace provisioning script and locked dependency installation opt-in.
+- [x] Loopback-only HTTP health probes and tests for unsafe health URLs and healthy-session reporting.
+- [ ] Run Localhost-webapp on a user's machine and confirm end-to-end startup, health, stop, and restart behavior.
+- [ ] Process recovery/adoption after SysCentre restarts.
+- [ ] Source-backed launch profiles and setup checklists for remaining implemented projects.
 - [ ] Full 28-project readiness report and final smoke-test results.
