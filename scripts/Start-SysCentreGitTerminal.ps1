@@ -38,11 +38,13 @@ function Invoke-Git {
 }
 
 function Get-CurrentBranch {
-    $branch = (& git -C $script:RepoRoot branch --show-current 2>$null | Select-Object -First 1)
-    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($branch)) {
-        throw 'HEAD is detached. Check out a branch before using push/pull.'
+    # Capture the native exit code immediately; a PowerShell pipeline can obscure it.
+    $branch = & git -C $script:RepoRoot branch --show-current 2>$null
+    $gitExitCode = $LASTEXITCODE
+    if ($gitExitCode -ne 0 -or [string]::IsNullOrWhiteSpace(($branch -join '').Trim())) {
+        throw 'HEAD is detached or Git could not resolve the current branch. Run: git status --short --branch'
     }
-    return $branch.Trim()
+    return ($branch -join '').Trim()
 }
 
 function Test-WorkingTreeClean {
