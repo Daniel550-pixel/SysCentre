@@ -14,7 +14,8 @@ type Project = { project_id: string; name: string; repository_url: string; defau
 type SourceResult = { project_id: string; project_name: string; repository_url: string; path: string; blob_sha: string; size_bytes: number; excerpt: string };
 type InventoryProject = { id: string; name: string; status: string; category: string; candidate_repositories: string[]; description?: string; origin?: string; created_at?: string };
 type RuntimeProject = { project_id: string; name: string; repository_url: string; adapter_type: string; runtime_mode: string; execution_state: string; requires_approval: boolean; notes: string; system_type?: string; sector?: string; market_category?: string };
-type RuntimeSession = { project_id: string; name: string; configured: boolean; ready?: boolean; readiness_reason?: string; state: "running" | "stopped" | "not_configured" | "setup_required" | string; health?: string; pid: number | null; started_at: number | null; log_path: string | null; url?: string | null };
+type HostingProject = { project_id: string; name: string; repository_url: string; category?: string; hosting: { adapter_type: string; configured: boolean; ready: boolean; state: string; health: string; readiness_reason?: string; url?: string | null; healthcheck_url?: string; required_paths?: string[]; workspace?: string | null; pid?: number | null; started_at?: number | null; log_path?: string | null; available_actions: string[] } };
+type HostingOverview = { ok: boolean; subsystem: string; schema_version: number; workspace_root: string; counts: { total: number; configured: number; ready: number; running: number; setup_required: number; not_configured: number; unhealthy: number }; projects: HostingProject[] };
 type IngestJob = { project_id: string; target_commit: string; branch: string; started_at: string; updated_at: string; status: string; files_seen: number; files_processed: number; files_indexed: number; files_skipped: number; error: string };
 type ArchitectureLayer = { name: string; role: string; components: string; evidence_paths: string[] };
 type ArchitectureFinding = {
@@ -120,7 +121,7 @@ export default function App() {
   const [ingestJobs, setIngestJobs] = useState<IngestJob[]>([]);
   const [inventoryProjects, setInventoryProjects] = useState<InventoryProject[]>([]);
   const [runtimeProjects, setRuntimeProjects] = useState<RuntimeProject[]>([]);
-  const [runtimeSessions, setRuntimeSessions] = useState<RuntimeSession[]>([]);
+  const [hostingProjects, setHostingProjects] = useState<HostingProject[]>([]);
   const [runtimeActionBusy, setRuntimeActionBusy] = useState<string | null>(null);
   const [architectures, setArchitectures] = useState<RepositoryArchitecture[]>([]);
   const [architectureAnalyses, setArchitectureAnalyses] = useState<Record<string, ArchitectureAnalysis>>({});
@@ -156,7 +157,7 @@ export default function App() {
         fetch(API + "/api/ingest-status", { signal: AbortSignal.timeout(5000) }),
         fetch(API + "/api/runtime-projects", { signal: AbortSignal.timeout(5000) }),
         fetch(API + "/api/repository-architectures", { signal: AbortSignal.timeout(5000) }),
-        fetch(API + "/api/runtime-sessions", { signal: AbortSignal.timeout(5000) }),
+        fetch(API + "/api/hosting/projects", { signal: AbortSignal.timeout(5000) }),
       ]);
       if (!responses[0].ok || !responses[1].ok) throw new Error("Runtime API returned an error");
       const nextStatus = (await responses[0].json()) as RuntimeStatus;
@@ -166,7 +167,7 @@ export default function App() {
       if (responses[4].ok) { const ingestStatus = (await responses[4].json()) as { jobs: IngestJob[] }; setIngestJobs(ingestStatus.jobs ?? []); }
       if (responses[5].ok) { const registry = (await responses[5].json()) as { projects: RuntimeProject[] }; setRuntimeProjects(registry.projects ?? []); }
       if (responses[6].ok) { const inventory = (await responses[6].json()) as { repositories: RepositoryArchitecture[] }; setArchitectures(inventory.repositories ?? []); }
-      if (responses[7].ok) { const sessions = (await responses[7].json()) as { sessions: RuntimeSession[] }; setRuntimeSessions(sessions.sessions ?? []); }
+      if (responses[7].ok) { const hosting = (await responses[7].json()) as HostingOverview; setHostingProjects(hosting.projects ?? []); }
       setStatus(nextStatus);
       setEvents(nextEvents.events ?? []);
       setConnected(true);
@@ -188,7 +189,7 @@ export default function App() {
     setRuntimeActionBusy(projectId + ":" + action);
     setProjectMessage("");
     try {
-      const response = await fetch(API + "/api/runtime-projects/" + encodeURIComponent(projectId) + "/" + action, {
+      const response = await fetch(API + "/api/hosting/projects/" + encodeURIComponent(projectId) + "/" + action, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({}),
@@ -196,8 +197,19 @@ export default function App() {
       });
       const data = (await response.json()) as { ok?: boolean; error?: string; state?: string };
       if (!response.ok || !data.ok) throw new Error(data.error || "Lifecycle action failed");
-      setProjectMessage(projectId + ": " + action + " requested; state = " + (data.state || "unknown") + ".");
       await refresh();
+      const readbackResponse = await fetch(API + "/api/hosting/projects", { signal: AbortSignal.timeout(5000) });
+      if (!readbackResponse.ok) throw new Error("Action was accepted, but hosting state could not be verified.");
+      const readback = (await readbackResponse.json()) as HostingOverview;
+      setHostingProjects(readback.projects ?? []);
+      const project = readback.projects?.find((item) => item.project_id === projectId);
+      if (!project) throw new Error("Action was accepted, but the project is missing from the hosting read-back.");
+      const actualState = project.hosting.state;
+      const expectedState = action === "stop" ? "stopped" : "running";
+      const verified = actualState === expectedState && (action === "stop" || project.hosting.health === "healthy");
+      setProjectMessage(verified
+        ? `${project.name}: ${action} verified — state ${actualState}${action === "stop" ? "." : `, health ${project.hosting.health}.`}`
+        : `${project.name}: ${action} was accepted, but verification is incomplete — state ${actualState}, health ${project.hosting.health}.`);
     } catch (error) {
       setProjectMessage(projectId + ": " + (error instanceof Error ? error.message : "Lifecycle request failed"));
     } finally {
@@ -383,7 +395,7 @@ export default function App() {
         <div className="page-wrap">
           <section className="page-heading">
             <div><div className="eyebrow"><span className="eyebrow-line" /> EXECUTIVE CONTROL PLANE / 001</div><h1>Executive portfolio</h1><p className="page-description">One decision layer across 28 independent systems: business-model hypotheses, system roles, sectors, and target markets.</p></div>
-            <div className="heading-actions"><span className={"connection-pill " + (connected ? "connected" : "disconnected")}>{connected ? <Check size={14} /> : <WifiOff size={14} />}{connected ? "All systems operational" : "Runtime unavailable"}</span><button className="secondary-button" onClick={() => void refresh()}><RefreshCw size={15} /> Refresh</button></div>
+            <div className="heading-actions"><span className={"connection-pill " + (connected ? "connected" : "disconnected")}>{connected ? <Check size={14} /> : <WifiOff size={14} />}{connected ? "Runtime connected" : "Runtime unavailable"}</span><button className="secondary-button" onClick={() => void refresh()}><RefreshCw size={15} /> Refresh</button></div>
           </section>
 
           {!connected && <div className="connection-alert"><WifiOff size={18} /><div><strong>Runtime not detected</strong><p>Start the Python runtime to populate live system data. The dashboard will reconnect automatically.</p></div><code>python .\runtime\server.py</code></div>}
@@ -675,29 +687,33 @@ export default function App() {
             </form>
           </section>
           <section className="panel projects-panel runtime-adapters-panel" id="runtime-adapters">
-            <div className="panel-header"><div><div className="panel-kicker">EXECUTION READINESS</div><h2>Runtime adapter registry</h2></div><span className="project-count">{runtimeProjects.filter((project) => project.adapter_type !== "unconfigured" && project.runtime_mode !== "not_configured").length} / {runtimeProjects.length} configured</span></div>
-            <p className="panel-description">All registered repositories have an explicit runtime profile slot. A project is not considered runnable until its adapter, target, health check, and allowed actions are verified. SysCentre never invents launch commands or executes source code during indexing.</p>
+            <div className="panel-header"><div><div className="panel-kicker">EXECUTION READINESS</div><h2>Project hosting</h2></div><span className="project-count">{hostingProjects.filter((project) => project.hosting.configured).length} / {hostingProjects.length} configured</span></div>
+            <p className="panel-description">Live hosting data comes from the project-hosting subsystem. Runtime connectivity, launch readiness, process state and health are shown separately. Actions are only reported as verified after reading the resulting state back from the runtime.</p>
             <div className="runtime-adapter-list">
-              {runtimeProjects.map((project) => {
-                const session = runtimeSessions.find((item) => item.project_id === project.project_id);
-                const configured = Boolean(session?.configured);
-                const ready = Boolean(session?.ready);
-                const running = session?.state === "running";
+              {hostingProjects.map((project) => {
+                const hosting = project.hosting;
+                const configured = hosting.configured;
+                const ready = hosting.ready;
+                const running = hosting.state === "running";
+                const canStart = hosting.available_actions.includes("start") && !running;
+                const canStop = hosting.available_actions.includes("stop") && running;
+                const canRestart = hosting.available_actions.includes("restart");
+                const statusClass = hosting.health === "healthy" ? "configured" : hosting.health === "unhealthy" ? "unconfigured" : "";
                 return <article className="runtime-adapter-row" key={project.project_id}>
-                  <div className="runtime-adapter-name"><strong>{project.name}</strong><span>{project.system_type || project.project_id}</span></div>
-                  <div className="runtime-adapter-context"><span>{project.sector || "Sector unclassified"}</span><span>{project.market_category || "Market unclassified"}</span></div>
+                  <div className="runtime-adapter-name"><strong>{project.name}</strong><span>{project.project_id} · {hosting.adapter_type}</span></div>
+                  <div className="runtime-adapter-context"><span>{hosting.workspace || "Workspace not provisioned"}</span><span title={hosting.readiness_reason || undefined}>{hosting.readiness_reason || (ready ? "Required paths verified" : "Readiness not verified")}</span></div>
                   <span className={"runtime-adapter-status " + (ready ? "configured" : "unconfigured")}>{!configured ? "Not configured" : ready ? "Ready to launch" : "Setup required"}</span>
-                  <span className="runtime-adapter-status" title={session?.readiness_reason || undefined}>{session?.state?.replaceAll("_", " ") || "State unavailable"}{session?.health ? " · " + session.health : ""}</span>
+                  <span className={"runtime-adapter-status " + statusClass} title={hosting.healthcheck_url || undefined}>{hosting.state.replaceAll("_", " ")} · {hosting.health}</span>
                   <div className="runtime-adapter-actions">
-                    <button className="secondary-button" type="button" disabled={!ready || running || Boolean(runtimeActionBusy)} onClick={() => void runRuntimeAction(project.project_id, "start")}>{runtimeActionBusy === project.project_id + ":start" ? "Starting…" : "Start"}</button>
-                    <button className="secondary-button" type="button" disabled={!configured || !running || Boolean(runtimeActionBusy)} onClick={() => void runRuntimeAction(project.project_id, "stop")}>{runtimeActionBusy === project.project_id + ":stop" ? "Stopping…" : "Stop"}</button>
-                    <button className="secondary-button" type="button" disabled={!ready || Boolean(runtimeActionBusy)} onClick={() => void runRuntimeAction(project.project_id, "restart")}>Restart</button>
+                    <button className="secondary-button" type="button" disabled={!canStart || Boolean(runtimeActionBusy)} onClick={() => void runRuntimeAction(project.project_id, "start")}>{runtimeActionBusy === project.project_id + ":start" ? "Starting…" : "Start"}</button>
+                    <button className="secondary-button" type="button" disabled={!canStop || Boolean(runtimeActionBusy)} onClick={() => void runRuntimeAction(project.project_id, "stop")}>{runtimeActionBusy === project.project_id + ":stop" ? "Stopping…" : "Stop"}</button>
+                    <button className="secondary-button" type="button" disabled={!canRestart || Boolean(runtimeActionBusy)} onClick={() => void runRuntimeAction(project.project_id, "restart")}>{runtimeActionBusy === project.project_id + ":restart" ? "Restarting…" : "Restart"}</button>
                   </div>
-                  {running && session?.url && <a href={session.url} target="_blank" rel="noreferrer">Open app ↗</a>}
-                  <a href={project.repository_url} target="_blank" rel="noreferrer">Source ↗</a>
+                  {running && hosting.url && <a href={hosting.url} target="_blank" rel="noreferrer">Open app ↗</a>}
+                  {project.repository_url && <a href={project.repository_url} target="_blank" rel="noreferrer">Source ↗</a>}
                 </article>;
               })}
-              {!runtimeProjects.length && <div className="empty-state">Runtime registry unavailable. Restart the local runtime after pulling the latest changes.</div>}
+              {!hostingProjects.length && <div className="empty-state">Hosting data unavailable. Confirm the local runtime is updated and reachable.</div>}
             </div>
             {projectMessage && <p className="panel-description" role="status">{projectMessage}</p>}
           </section>
@@ -745,7 +761,7 @@ export default function App() {
           </div>
 
           <section className="panel policy-panel" id="security">
-            <div className="panel-header"><div><div className="panel-kicker">TRUST BOUNDARY</div><h2>Policy & execution controls</h2></div><span className="policy-status"><ShieldCheck size={14} /> POLICY GATE ENABLED</span></div>
+            <div className="panel-header"><div><div className="panel-kicker">TRUST BOUNDARY</div><h2>Policy & execution controls</h2></div><span className={"policy-status " + (status?.policy_gate === "enabled" ? "configured" : "unconfigured")}><ShieldCheck size={14} /> {status?.policy_gate === "enabled" ? "POLICY GATE ENABLED" : "POLICY GATE STATUS UNVERIFIED"}</span></div>
             <p className="panel-description">SysCentre separates decision-making from execution. Requests are validated before any runtime operation is permitted.</p>
             <div className="policy-flow">
               <div className="policy-step"><span className="step-icon"><Bot size={18} /></span><div><strong>Request</strong><span>Input received</span></div></div><div className="flow-arrow"><ChevronRight size={18} /></div>
