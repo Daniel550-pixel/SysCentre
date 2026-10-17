@@ -121,13 +121,13 @@
 .runtime-adapter-row:last-child{border-bottom:0}
 .runtime-adapter-name{display:flex;flex-direction:column;gap:4px;min-width:0}
 .runtime-adapter-name strong{font-size:10px;color:#e2e8f3;overflow-wrap:anywhere}
-.runtime-adapter-name span,.runtime-adapter-context span{font-size:8px;color:#7f8ba2;line-height:1.5;overflow-wrap:anywhere}
+.runtime-adapter-name span,.runtime-adapter-context span{font-size:10px;color:#8f9bb0;line-height:1.55;overflow-wrap:anywhere}
 .runtime-adapter-context{display:flex;flex-direction:column;gap:4px;min-width:0}
-.runtime-adapter-status{font-size:8px;white-space:nowrap;padding:5px 7px;border-radius:5px}
+.runtime-adapter-status{font-size:10px;white-space:normal;line-height:1.35;padding:5px 7px;border-radius:5px}
 .runtime-adapter-status.unconfigured{color:#ffd18b;background:#352a1a;border:1px solid #5b4427}
 .runtime-adapter-status.configured{color:#91e2b9;background:#19352b;border:1px solid #2d5946}
 .runtime-adapter-actions{display:flex;flex-wrap:wrap;gap:5px}
-.runtime-adapter-actions .secondary-button{font-size:9px;padding:6px 7px}
+.runtime-adapter-actions .secondary-button{font-size:10px;padding:7px 8px}
 .runtime-adapter-row>a{font-size:9px;color:#aaa0ff;white-space:nowrap}
 @media(max-width:1100px){.runtime-adapter-row{grid-template-columns:minmax(130px,1fr) minmax(130px,1fr) auto auto}.runtime-adapter-actions{grid-column:1 / -1}.runtime-adapter-row>a{grid-column:4;grid-row:1}}
 @media(max-width:800px){.runtime-adapter-row{grid-template-columns:minmax(0,1fr) auto}.runtime-adapter-context{grid-column:1}.runtime-adapter-actions{grid-column:1 / -1}.runtime-adapter-row>a{grid-column:2;grid-row:1}}
@@ -267,3 +267,8 @@
 .hub-project-actions .project-index-button { margin-left: auto; }
 @media (max-width: 900px) { .hub-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .hub-project-grid { grid-template-columns: 1fr; } }
 @media (max-width: 480px) { .hub-metrics { gap: 8px; } .hub-metrics article { padding: 12px; } .hub-project-card { padding: 12px; } .hub-project-card-head { flex-direction: column; } .hub-project-actions .project-index-button { margin-left: 0; } }
+
+
+/* Runtime truth: policy status must not look enforced when it is unverified. */
+.policy-status.configured{color:#91e2b9;background:#19352b;border-color:#2d5946}
+.policy-status.unconfigured{color:#ffd18b;background:#352a1a;border-color:#5b4427}
