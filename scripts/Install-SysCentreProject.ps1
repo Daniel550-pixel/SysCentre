@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet("localhost-webapp")]
+    [ValidateSet("localhost-webapp", "networklab")]
     [string]$ProjectId,
     [switch]$InstallDependencies
 )
@@ -20,6 +20,11 @@ $Projects = @{
         Branch = "main"
         PackageName = "localhost-webapp"
     }
+    "networklab" = @{
+        Repository = "https://github.com/Daniel550-pixel/NetworkLab.git"
+        Branch = "main"
+        RequiredPaths = @("app/server.py", "web/index.html", "web/app.js")
+    }
 }
 
 function Require-Command {
@@ -30,7 +35,7 @@ function Require-Command {
 }
 
 Require-Command "git.exe"
-if ($InstallDependencies) {
+if ($InstallDependencies -and $ProjectId -eq "localhost-webapp") {
     Require-Command "node.exe"
     Require-Command "npm.cmd"
     $NodeVersion = (& node.exe --version).Trim()
@@ -66,27 +71,48 @@ if (-not (Test-Path -LiteralPath $Workspace)) {
     Write-Host "Existing verified checkout found; no pull or reset was performed." -ForegroundColor Yellow
 }
 
-$PackagePath = Join-Path $Workspace "package.json"
-$LockPath = Join-Path $Workspace "package-lock.json"
-if (-not (Test-Path -LiteralPath $PackagePath -PathType Leaf) -or -not (Test-Path -LiteralPath $LockPath -PathType Leaf)) {
-    throw "Expected package.json and package-lock.json are missing. Project is not ready for Node provisioning."
-}
-$Package = Get-Content -LiteralPath $PackagePath -Raw | ConvertFrom-Json
-if ($Package.name -ne $Project.PackageName) {
-    throw "Unexpected package name '$($Package.name)'; expected '$($Project.PackageName)'."
-}
+if ($ProjectId -eq "localhost-webapp") {
+    $PackagePath = Join-Path $Workspace "package.json"
+    $LockPath = Join-Path $Workspace "package-lock.json"
+    if (-not (Test-Path -LiteralPath $PackagePath -PathType Leaf) -or -not (Test-Path -LiteralPath $LockPath -PathType Leaf)) {
+        throw "Expected package.json and package-lock.json are missing. Project is not ready for Node provisioning."
+    }
+    $Package = Get-Content -LiteralPath $PackagePath -Raw | ConvertFrom-Json
+    if ($Package.name -ne $Project.PackageName) {
+        throw "Unexpected package name '$($Package.name)'; expected '$($Project.PackageName)'."
+    }
 
-if ($InstallDependencies) {
-    Write-Host "Installing locked dependencies with npm ci. npm lifecycle scripts may execute." -ForegroundColor Yellow
-    Push-Location $Workspace
-    try {
-        & npm.cmd ci
-        if ($LASTEXITCODE -ne 0) { throw "npm ci failed (exit $LASTEXITCODE)." }
-    } finally { Pop-Location }
-} else {
-    Write-Host "Dependencies were not installed. Re-run with -InstallDependencies after reviewing the repository." -ForegroundColor Yellow
+    if ($InstallDependencies) {
+        Write-Host "Installing locked dependencies with npm ci. npm lifecycle scripts may execute." -ForegroundColor Yellow
+        Push-Location $Workspace
+        try {
+            & npm.cmd ci
+            if ($LASTEXITCODE -ne 0) { throw "npm ci failed (exit $LASTEXITCODE)." }
+        } finally { Pop-Location }
+    } else {
+        Write-Host "Dependencies were not installed. Re-run with -InstallDependencies after reviewing the repository." -ForegroundColor Yellow
+    }
+    Write-Host "Workspace ready: $Workspace" -ForegroundColor Green
+    Write-Host "SysCentre can manage this project at http://127.0.0.1:4180 after dependencies are installed."
+} elseif ($ProjectId -eq "networklab") {
+    foreach ($RelativePath in $Project.RequiredPaths) {
+        $RequiredPath = Join-Path $Workspace $RelativePath
+        if (-not (Test-Path -LiteralPath $RequiredPath -PathType Leaf)) {
+            throw "NetworkLab is missing required entrypoint: $RelativePath"
+        }
+    }
+    $PythonCommand = Get-Command python.exe -ErrorAction SilentlyContinue
+    if (-not $PythonCommand) {
+        throw "Python was not found on PATH. NetworkLab requires Python to run."
+    }
+    $PythonVersion = & python.exe --version 2>&1
+    if ($LASTEXITCODE -ne 0 -or $PythonVersion -notmatch "Python 3\.(\d+)") {
+        throw "Could not determine Python version."
+    }
+    if ([int]$Matches[1] -lt 11) {
+        throw "NetworkLab integration requires Python 3.11 or newer. Found $PythonVersion."
+    }
+    Write-Host "NetworkLab uses the Python standard library; no package installation was run." -ForegroundColor Cyan
+    Write-Host "Workspace ready: $Workspace" -ForegroundColor Green
+    Write-Host "SysCentre can manage the localhost UI at http://127.0.0.1:8501."
 }
-
-Write-Host ""
-Write-Host "Workspace ready: $Workspace" -ForegroundColor Green
-Write-Host "SysCentre can manage this project at http://127.0.0.1:4180 after dependencies are installed."
