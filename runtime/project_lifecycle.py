@@ -85,18 +85,22 @@ def _profile(project_id: str) -> dict[str, Any]:
 def list_sessions() -> dict[str, Any]:
     with _LOCK:
         sessions = []
+        profiles = _load_json(PROFILES_PATH).get("profiles", {})
+        if not isinstance(profiles, dict):
+            profiles = {}
         for project in _load_json(REGISTRY_PATH).get("projects", []):
             project_id = project.get("project_id")
             proc_info = _PROCESSES.get(project_id)
             proc = proc_info.get("process") if proc_info else None
             running = bool(proc and proc.poll() is None)
+            configured = isinstance(profiles.get(project_id), dict) and profiles[project_id].get("enabled") is True
             sessions.append({
                 "project_id": project_id,
                 "name": project.get("name", project_id),
-                "configured": bool(proc_info and proc_info.get("configured")),
-                "state": "running" if running else ("stopped" if proc_info else "not_configured"),
+                "configured": configured,
+                "state": "running" if running else ("stopped" if configured else "not_configured"),
                 "pid": proc.pid if running else None,
-                "started_at": proc_info.get("started_at") if running else None,
+                "started_at": proc_info.get("started_at") if running and proc_info else None,
                 "log_path": proc_info.get("log_path") if proc_info else None,
             })
         return {"sessions": sessions, "count": len(sessions), "workspace_root": str(WORKSPACES_ROOT)}
