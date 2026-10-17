@@ -121,7 +121,7 @@ export default function App() {
   const [ingestJobs, setIngestJobs] = useState<IngestJob[]>([]);
   const [inventoryProjects, setInventoryProjects] = useState<InventoryProject[]>([]);
   const [runtimeProjects, setRuntimeProjects] = useState<RuntimeProject[]>([]);
-  const [hostingProjects, setHostingProjects] = useState<HostingProject[]>([]);
+  const [hostingProjects, setHostingProjects] = useState<HostingProject[]>([]);\n  const [hostingSearch, setHostingSearch] = useState("");\n  const [hostingFilter, setHostingFilter] = useState("all");
   const [runtimeActionBusy, setRuntimeActionBusy] = useState<string | null>(null);
   const [architectures, setArchitectures] = useState<RepositoryArchitecture[]>([]);
   const [architectureAnalyses, setArchitectureAnalyses] = useState<Record<string, ArchitectureAnalysis>>({});
@@ -691,8 +691,39 @@ export default function App() {
           <section className="panel projects-panel runtime-adapters-panel" id="runtime-adapters">
             <div className="panel-header"><div><div className="panel-kicker">EXECUTION READINESS</div><h2>Project hosting</h2></div><span className="project-count">{hostingProjects.filter((project) => project.hosting.configured).length} / {hostingProjects.length} configured</span></div>
             <p className="panel-description">Live hosting data comes from the project-hosting subsystem. Runtime connectivity, launch readiness, process state and health are shown separately. Actions are only reported as verified after reading the resulting state back from the runtime.</p>
+            <div className="hosting-toolbar">
+              <input className="project-filter" value={hostingSearch} onChange={(event) => setHostingSearch(event.target.value)} placeholder="Search project, workspace or readiness reason…" aria-label="Search hosted projects" />
+              <select value={hostingFilter} onChange={(event) => setHostingFilter(event.target.value)} aria-label="Filter hosting state">
+                <option value="all">All states</option>
+                <option value="running">Running</option>
+                <option value="ready">Ready to launch</option>
+                <option value="setup">Setup required</option>
+                <option value="unhealthy">Unhealthy</option>
+              </select>
+              <span className="project-count">{hostingProjects.filter((project) => {
+                const query = hostingSearch.trim().toLowerCase();
+                const h = project.hosting;
+                const matchesSearch = !query || [project.name, project.project_id, h.workspace || "", h.readiness_reason || "", h.adapter_type, h.state, h.health].join(" ").toLowerCase().includes(query);
+                const matchesFilter = hostingFilter === "all"
+                  || (hostingFilter === "running" && h.state === "running")
+                  || (hostingFilter === "ready" && h.ready)
+                  || (hostingFilter === "setup" && (!h.configured || !h.ready))
+                  || (hostingFilter === "unhealthy" && h.health === "unhealthy");
+                return matchesSearch && matchesFilter;
+              }).length} shown</span>
+            </div>
             <div className="runtime-adapter-list">
-              {hostingProjects.map((project) => {
+              {hostingProjects.filter((project) => {
+                const query = hostingSearch.trim().toLowerCase();
+                const h = project.hosting;
+                const matchesSearch = !query || [project.name, project.project_id, h.workspace || "", h.readiness_reason || "", h.adapter_type, h.state, h.health].join(" ").toLowerCase().includes(query);
+                const matchesFilter = hostingFilter === "all"
+                  || (hostingFilter === "running" && h.state === "running")
+                  || (hostingFilter === "ready" && h.ready)
+                  || (hostingFilter === "setup" && (!h.configured || !h.ready))
+                  || (hostingFilter === "unhealthy" && h.health === "unhealthy");
+                return matchesSearch && matchesFilter;
+              }).map((project) => {
                 const hosting = project.hosting;
                 const configured = hosting.configured;
                 const ready = hosting.ready;
@@ -715,7 +746,7 @@ export default function App() {
                   {project.repository_url && <a href={project.repository_url} target="_blank" rel="noreferrer">Source ↗</a>}
                 </article>;
               })}
-              {!hostingProjects.length && <div className="empty-state">Hosting data unavailable. Confirm the local runtime is updated and reachable.</div>}
+              {!hostingProjects.length && <div className="empty-state">Hosting data unavailable. Confirm the local runtime is updated and reachable.</div>}\n              {hostingProjects.length > 0 && !hostingProjects.some((project) => { const query = hostingSearch.trim().toLowerCase(); const h = project.hosting; const matchesSearch = !query || [project.name, project.project_id, h.workspace || "", h.readiness_reason || "", h.adapter_type, h.state, h.health].join(" ").toLowerCase().includes(query); const matchesFilter = hostingFilter === "all" || (hostingFilter === "running" && h.state === "running") || (hostingFilter === "ready" && h.ready) || (hostingFilter === "setup" && (!h.configured || !h.ready)) || (hostingFilter === "unhealthy" && h.health === "unhealthy"); return matchesSearch && matchesFilter; }) && <div className="empty-state">No projects match these hosting filters. Clear the search or choose “All states”.</div>}
             </div>
             {projectMessage && <p className="panel-description" role="status">{projectMessage}</p>}
           </section>
