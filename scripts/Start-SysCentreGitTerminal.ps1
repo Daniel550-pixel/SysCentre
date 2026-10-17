@@ -153,11 +153,14 @@ if ([string]::IsNullOrWhiteSpace($RepositoryPath)) {
     $RepositoryPath = Join-Path $PSScriptRoot '..'
 }
 $resolvedPath = (Resolve-Path -LiteralPath $RepositoryPath).Path
-$root = (& git -C $resolvedPath rev-parse --show-toplevel 2>$null | Select-Object -First 1)
-if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($root)) {
-    throw "The specified path is not inside a Git repository: $resolvedPath"
+# Capture Git's exit code before running any other PowerShell command or pipeline.
+$rootOutput = & git -C $resolvedPath rev-parse --show-toplevel 2>$null
+$rootExitCode = $LASTEXITCODE
+$root = ($rootOutput -join '').Trim()
+if ($rootExitCode -ne 0 -or [string]::IsNullOrWhiteSpace($root)) {
+    throw "The specified path is not inside a Git repository (git rev-parse exit $rootExitCode): $resolvedPath"
 }
-$script:RepoRoot = $root.Trim()
+$script:RepoRoot = $root
 
 try {
     $null = Invoke-Git -GitArgs @('--version')
