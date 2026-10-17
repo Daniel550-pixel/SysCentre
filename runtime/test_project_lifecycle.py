@@ -123,6 +123,23 @@ class ProjectLifecycleTests(unittest.TestCase):
         self.assertEqual(session["health"], "healthy")
         self.assertEqual(session["url"], "http://127.0.0.1:4180/")
 
+    def test_networklab_launch_profile_is_explicit_and_loopback_only(self):
+        runtime_dir = Path(__file__).resolve().parent
+        profiles = json.loads((runtime_dir / "launch_profiles.json").read_text(encoding="utf-8"))
+        registry = json.loads((runtime_dir / "project_runtime_registry.json").read_text(encoding="utf-8"))
+        profile = profiles["profiles"]["networklab"]
+        project = next(item for item in registry["projects"] if item["project_id"] == "networklab")
+
+        self.assertIs(profile["enabled"], True)
+        self.assertEqual(profile["adapter_type"], "local_process")
+        self.assertEqual(profile["argv"], ["python", "-m", "app.server"])
+        self.assertEqual(profile["healthcheck_url"], "http://127.0.0.1:8501/healthz")
+        self.assertEqual(profile["display_url"], "http://127.0.0.1:8501/")
+        self.assertEqual(profile["required_paths"], ["app/server.py", "web/index.html", "web/app.js"])
+        self.assertEqual(project["runtime_mode"], "local_process")
+        self.assertTrue(project["requires_approval"])
+        self.assertIn("does not automatically create/configure VirtualBox", project["notes"])
+
 
 if __name__ == "__main__":
     unittest.main()
