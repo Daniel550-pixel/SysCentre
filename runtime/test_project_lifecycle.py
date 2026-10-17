@@ -71,6 +71,19 @@ class ProjectLifecycleTests(unittest.TestCase):
         self.assertEqual(result["sessions"][0]["state"], "not_configured")
         self.assertEqual(result["sessions"][0]["pid"], None)
 
+    def test_configured_profile_is_stopped_until_explicitly_started(self):
+        self.write_profile({"enabled": True, "adapter_type": "local_process",
+                            "argv": ["python", "-V"], "cwd": "."})
+        result = lifecycle.list_sessions()
+        self.assertTrue(result["sessions"][0]["configured"])
+        self.assertEqual(result["sessions"][0]["state"], "stopped")
+
+    def test_absolute_executable_paths_are_rejected(self):
+        self.write_profile({"enabled": True, "adapter_type": "local_process",
+                            "argv": ["/usr/bin/python", "-V"], "cwd": "."})
+        with self.assertRaisesRegex(lifecycle.LifecycleError, "command name"):
+            lifecycle.start_project("demo-project")
+
 
 if __name__ == "__main__":
     unittest.main()
