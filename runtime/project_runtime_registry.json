@@ -712,23 +712,24 @@
       "target_market": "Not classifiable until a distinct product purpose is established",
       "portfolio_role": "Unassessed scaffold",
       "lifecycle_stage": "Starter scaffold",
-      "adapter_type": "unconfigured",
-      "runtime_mode": "not_configured",
+      "adapter_type": "local_process",
+      "runtime_mode": "local_process",
       "deployment_url": "",
       "healthcheck_url": "",
       "start_action": null,
       "stop_action": null,
       "restart_action": null,
-      "execution_state": "not_configured",
+      "execution_state": "configured",
       "permissions": [
         "read_metadata",
-        "health_check_when_configured"
+        "start_stop_restart",
+        "health_check"
       ],
-      "risk_level": "unknown_until_assessed",
+      "risk_level": "low",
       "requires_approval": true,
       "last_health_check": null,
       "last_started_at": null,
-      "notes": "No launch command or deployment endpoint is assumed. Configure and verify a project-specific adapter before execution."
+      "notes": "First reviewed integration target. Next.js starter with package-lock.json; workspace provisioning is handled by scripts/Install-SysCentreProject.ps1. Requires explicit dependency installation before launch. Local-only on 127.0.0.1:4180; no external integrations or credentials configured."
     },
     {
       "project_id": "business-os",
