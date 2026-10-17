@@ -11,7 +11,7 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$RepositoryPath = $PSScriptRoot | Split-Path -Parent
+    [string]$RepositoryPath = (Split-Path -Parent $PSScriptRoot)
 )
 
 $ErrorActionPreference = 'Stop'
@@ -86,7 +86,7 @@ function Invoke-Pull {
         throw "No upstream is configured for '$branch'. Use Push to publish this branch and set its upstream."
     }
     Write-Host "Fast-forward-only pull from $upstream..." -ForegroundColor Cyan
-    Invoke-Git -GitArgs @('pull', '--ff-only', '--prune')
+    Invoke-Git -GitArgs @('pull', '--ff-only')
     Write-Host 'Pull completed.' -ForegroundColor Green
 }
 
