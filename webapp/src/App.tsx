@@ -14,6 +14,7 @@ type Project = { project_id: string; name: string; repository_url: string; defau
 type SourceResult = { project_id: string; project_name: string; repository_url: string; path: string; blob_sha: string; size_bytes: number; excerpt: string };
 type InventoryProject = { id: string; name: string; status: string; category: string; candidate_repositories: string[]; description?: string; origin?: string; created_at?: string };
 type RuntimeProject = { project_id: string; name: string; repository_url: string; adapter_type: string; runtime_mode: string; execution_state: string; requires_approval: boolean; notes: string; system_type?: string; sector?: string; market_category?: string };
+type RuntimeSession = { project_id: string; name: string; configured: boolean; state: "running" | "stopped" | "not_configured" | string; pid: number | null; started_at: number | null; log_path: string | null };
 type IngestJob = { project_id: string; target_commit: string; branch: string; started_at: string; updated_at: string; status: string; files_seen: number; files_processed: number; files_indexed: number; files_skipped: number; error: string };
 type ArchitectureLayer = { name: string; role: string; components: string; evidence_paths: string[] };
 type ArchitectureFinding = {
@@ -119,6 +120,8 @@ export default function App() {
   const [ingestJobs, setIngestJobs] = useState<IngestJob[]>([]);
   const [inventoryProjects, setInventoryProjects] = useState<InventoryProject[]>([]);
   const [runtimeProjects, setRuntimeProjects] = useState<RuntimeProject[]>([]);
+  const [runtimeSessions, setRuntimeSessions] = useState<RuntimeSession[]>([]);
+  const [runtimeActionBusy, setRuntimeActionBusy] = useState<string | null>(null);
   const [architectures, setArchitectures] = useState<RepositoryArchitecture[]>([]);
   const [architectureAnalyses, setArchitectureAnalyses] = useState<Record<string, ArchitectureAnalysis>>({});
   const [analyzingArchitecture, setAnalyzingArchitecture] = useState<string | null>(null);
@@ -153,6 +156,7 @@ export default function App() {
         fetch(API + "/api/ingest-status", { signal: AbortSignal.timeout(5000) }),
         fetch(API + "/api/runtime-projects", { signal: AbortSignal.timeout(5000) }),
         fetch(API + "/api/repository-architectures", { signal: AbortSignal.timeout(5000) }),
+        fetch(API + "/api/runtime-sessions", { signal: AbortSignal.timeout(5000) }),
       ]);
       if (!responses[0].ok || !responses[1].ok) throw new Error("Runtime API returned an error");
       const nextStatus = (await responses[0].json()) as RuntimeStatus;
@@ -162,6 +166,7 @@ export default function App() {
       if (responses[4].ok) { const ingestStatus = (await responses[4].json()) as { jobs: IngestJob[] }; setIngestJobs(ingestStatus.jobs ?? []); }
       if (responses[5].ok) { const registry = (await responses[5].json()) as { projects: RuntimeProject[] }; setRuntimeProjects(registry.projects ?? []); }
       if (responses[6].ok) { const inventory = (await responses[6].json()) as { repositories: RepositoryArchitecture[] }; setArchitectures(inventory.repositories ?? []); }
+      if (responses[7].ok) { const sessions = (await responses[7].json()) as { sessions: RuntimeSession[] }; setRuntimeSessions(sessions.sessions ?? []); }
       setStatus(nextStatus);
       setEvents(nextEvents.events ?? []);
       setConnected(true);
@@ -177,6 +182,28 @@ export default function App() {
     const timer = window.setInterval(() => void refresh(), 5000);
     return () => window.clearInterval(timer);
   }, [refresh]);
+
+  async function runRuntimeAction(projectId: string, action: "start" | "stop" | "restart") {
+    if (runtimeActionBusy) return;
+    setRuntimeActionBusy(projectId + ":" + action);
+    setProjectMessage("");
+    try {
+      const response = await fetch(API + "/api/runtime-projects/" + encodeURIComponent(projectId) + "/" + action, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+        signal: AbortSignal.timeout(10000),
+      });
+      const data = (await response.json()) as { ok?: boolean; error?: string; state?: string };
+      if (!response.ok || !data.ok) throw new Error(data.error || "Lifecycle action failed");
+      setProjectMessage(projectId + ": " + action + " requested; state = " + (data.state || "unknown") + ".");
+      await refresh();
+    } catch (error) {
+      setProjectMessage(projectId + ": " + (error instanceof Error ? error.message : "Lifecycle request failed"));
+    } finally {
+      setRuntimeActionBusy(null);
+    }
+  }
 
   async function runCommand(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -651,9 +678,27 @@ export default function App() {
             <div className="panel-header"><div><div className="panel-kicker">EXECUTION READINESS</div><h2>Runtime adapter registry</h2></div><span className="project-count">{runtimeProjects.filter((project) => project.adapter_type !== "unconfigured" && project.runtime_mode !== "not_configured").length} / {runtimeProjects.length} configured</span></div>
             <p className="panel-description">All registered repositories have an explicit runtime profile slot. A project is not considered runnable until its adapter, target, health check, and allowed actions are verified. SysCentre never invents launch commands or executes source code during indexing.</p>
             <div className="runtime-adapter-list">
-              {runtimeProjects.map((project) => { const configured = project.adapter_type !== "unconfigured" && project.runtime_mode !== "not_configured"; return <article className="runtime-adapter-row" key={project.project_id}><div className="runtime-adapter-name"><strong>{project.name}</strong><span>{project.system_type || project.project_id}</span></div><div className="runtime-adapter-context"><span>{project.sector || "Sector unclassified"}</span><span>{project.market_category || "Market unclassified"}</span></div><span className={"runtime-adapter-status " + (configured ? "configured" : "unconfigured")}>{configured ? "Adapter configured" : "Setup required"}</span><a href={project.repository_url} target="_blank" rel="noreferrer">Source ↗</a></article>; })}
+              {runtimeProjects.map((project) => {
+                const session = runtimeSessions.find((item) => item.project_id === project.project_id);
+                const configured = Boolean(session?.configured) && project.adapter_type !== "unconfigured" && project.runtime_mode !== "not_configured";
+                const running = session?.state === "running";
+                const actionBusy = runtimeActionBusy?.startsWith(project.project_id + ":") ?? false;
+                return <article className="runtime-adapter-row" key={project.project_id}>
+                  <div className="runtime-adapter-name"><strong>{project.name}</strong><span>{project.system_type || project.project_id}</span></div>
+                  <div className="runtime-adapter-context"><span>{project.sector || "Sector unclassified"}</span><span>{project.market_category || "Market unclassified"}</span></div>
+                  <span className={"runtime-adapter-status " + (configured ? "configured" : "unconfigured")}>{configured ? "Adapter configured" : "Setup required"}</span>
+                  <span className="runtime-adapter-status">{session?.state?.replaceAll("_", " ") || "State unavailable"}</span>
+                  <div className="runtime-adapter-actions">
+                    <button className="secondary-button" type="button" disabled={!configured || running || Boolean(runtimeActionBusy)} onClick={() => void runRuntimeAction(project.project_id, "start")}>{runtimeActionBusy === project.project_id + ":start" ? "Starting…" : "Start"}</button>
+                    <button className="secondary-button" type="button" disabled={!configured || !running || Boolean(runtimeActionBusy)} onClick={() => void runRuntimeAction(project.project_id, "stop")}>{runtimeActionBusy === project.project_id + ":stop" ? "Stopping…" : "Stop"}</button>
+                    <button className="secondary-button" type="button" disabled={!configured || Boolean(runtimeActionBusy)} onClick={() => void runRuntimeAction(project.project_id, "restart")}>Restart</button>
+                  </div>
+                  <a href={project.repository_url} target="_blank" rel="noreferrer">Source ↗</a>
+                </article>;
+              })}
               {!runtimeProjects.length && <div className="empty-state">Runtime registry unavailable. Restart the local runtime after pulling the latest changes.</div>}
             </div>
+            {projectMessage && <p className="panel-description" role="status">{projectMessage}</p>}
           </section>
           {inventoryProjects.length > 0 && <section className="panel projects-panel inventory-panel" id="inventory-audit">
             <div className="panel-header"><div><div className="panel-kicker">INVENTORY RECONCILIATION</div><h2>Historical projects awaiting repository match</h2></div><span className="project-count">{inventoryProjects.length} unresolved</span></div>
