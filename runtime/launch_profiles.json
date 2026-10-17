@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "purpose": "Reviewed, explicit launch profiles. Empty by default: repository metadata is never treated as an executable command.",
+  "policy": {
+    "shell": false,
+    "workspace_root_env": "SYSCENTRE_WORKSPACES",
+    "default_workspace_root": "~/.syscentre/workspaces",
+    "allowed_executables": ["python", "python3", "node", "npm", "npx", "powershell", "pwsh", "dotnet"],
+    "requirements": ["reviewed entrypoint", "dependencies installed", "isolated workspace", "documented port and health check where applicable"]
+  },
+  "profiles": {}
+}
