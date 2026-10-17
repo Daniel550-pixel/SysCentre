@@ -6,6 +6,17 @@ SysCentre is a standalone local-first systems control plane. It catalogs existin
 
 The active two-day hub sprint is tracked in [`docs/SYSCENTRE_HUB_SPRINT.md`](docs/SYSCENTRE_HUB_SPRINT.md). The goal is to make every known project reachable from SysCentre, expose a verified interface or source/setup path, and show truthful run-readiness. A repository is not marked runnable until its project-specific launch adapter and health check have been verified. Empty or unfinished projects remain accessible but are not presented as working applications.
 
+## Automated Git terminal
+
+Use the interactive PowerShell terminal to safely pull and push the current branch:
+
+```powershell
+Set-Location "$HOME\Downloads\SysCentre"
+.\scripts\Start-SysCentreGitTerminal.ps1
+```
+
+Menu actions include repository status, fast-forward-only pull, push, pull-then-push sync, fetch-only, and an explicit stage/commit/push flow. The helper never force-pushes, resets, or discards changes. Pull is blocked when the working tree is dirty, and commit/push requires confirmation.
+
 ## Core architecture
 
 - **WebApp:** React + TypeScript + Vite dashboard with a project registry and indexing controls.
