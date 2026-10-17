@@ -34,7 +34,7 @@ function Invoke-Git {
     if ($code -ne 0 -and -not $AllowFailure) {
         throw "Git command failed (exit $code): git $($GitArgs -join ' ')"
     }
-    return $code
+    if ($AllowFailure) { return $code }
 }
 
 function Get-CurrentBranch {
@@ -61,9 +61,14 @@ function Show-Status {
     $branch = Get-CurrentBranch
     Write-Host "Repository : $script:RepoRoot"
     Write-Host "Branch     : $branch"
-    $remote = (& git -C $script:RepoRoot remote get-url origin 2>$null | Select-Object -First 1)
-    if ($LASTEXITCODE -eq 0 -and $remote) { Write-Host "Origin     : $remote" }
-    else { Write-Host 'Origin     : not configured' -ForegroundColor Yellow }
+    $remote = & git -C $script:RepoRoot remote get-url origin 2>$null
+    $remoteExitCode = $LASTEXITCODE
+    $remoteText = ($remote -join '').Trim()
+    if ($remoteExitCode -eq 0 -and -not [string]::IsNullOrWhiteSpace($remoteText)) {
+        Write-Host "Origin     : $remoteText"
+    } else {
+        Write-Host 'Origin     : not configured' -ForegroundColor Yellow
+    }
     Write-Host ''
     Invoke-Git -GitArgs @('status', '--short', '--branch')
     Write-Host ''
