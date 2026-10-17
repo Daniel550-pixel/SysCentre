@@ -2,6 +2,10 @@
 
 SysCentre is a standalone local-first systems control plane. It catalogs existing projects, indexes repository metadata and readable source files into a local SQLite database, and preserves each project's independent repository and runtime boundary.
 
+## Current delivery target
+
+The active two-day hub sprint is tracked in [`docs/SYSCENTRE_HUB_SPRINT.md`](docs/SYSCENTRE_HUB_SPRINT.md). The goal is to make every known project reachable from SysCentre, expose a verified interface or source/setup path, and show truthful run-readiness. A repository is not marked runnable until its project-specific launch adapter and health check have been verified. Empty or unfinished projects remain accessible but are not presented as working applications.
+
 ## Core architecture
 
 - **WebApp:** React + TypeScript + Vite dashboard with a project registry and indexing controls.
