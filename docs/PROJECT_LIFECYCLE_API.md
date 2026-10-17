@@ -4,6 +4,10 @@ This API provides a controlled process lifecycle for projects whose launch comma
 
 ## Routes
 
+- `GET /api/hosting` and `GET /api/hosting/projects` — consolidated Project Hosting overview for all registered projects, including configuration, readiness, health, workspace, logs, and supported actions.
+- `POST /api/hosting/projects/{project_id}/start|stop|restart` — lifecycle actions through the hosting facade. Existing `/api/runtime-projects` and `/api/runtime-sessions` routes remain supported.
+- See [Project Hosting subsystem](PROJECT_HOSTING_SUBSYSTEM.md) for the response model and operating boundaries.
+
 - `GET /api/runtime-projects` — catalogued runtime adapter metadata.
 - `GET /api/runtime-sessions` — in-memory process state and log paths.
 - `POST /api/runtime-projects/{project_id}/start` — start an enabled profile.
