@@ -272,3 +272,13 @@
 /* Runtime truth: policy status must not look enforced when it is unverified. */
 .policy-status.configured{color:#91e2b9;background:#19352b;border-color:#2d5946}
 .policy-status.unconfigured{color:#ffd18b;background:#352a1a;border-color:#5b4427}
+
+
+/* Hosting controls: searchable, filterable, and responsive. */
+.hosting-toolbar{display:flex;align-items:center;gap:10px;margin:0 0 13px}
+.hosting-toolbar .project-filter{flex:1;min-width:180px}
+.hosting-toolbar select{min-height:36px;max-width:190px;padding:8px 10px;border:1px solid #2a3345;border-radius:7px;background:#111722;color:#c6cee0;font-size:11px}
+.hosting-toolbar .project-count{white-space:nowrap}
+.runtime-adapter-row>a:focus-visible,.hosting-toolbar select:focus-visible,.hosting-toolbar input:focus-visible{outline:2px solid #9b8cff;outline-offset:2px}
+@media(max-width:760px){.hosting-toolbar{align-items:stretch;flex-wrap:wrap}.hosting-toolbar .project-filter{flex-basis:100%;min-width:0}.hosting-toolbar select{flex:1;max-width:none}.hosting-toolbar .project-count{align-self:center}}
+@media(max-width:480px){.hosting-toolbar select{min-width:0}.runtime-adapter-actions .secondary-button{flex:1;justify-content:center}}
