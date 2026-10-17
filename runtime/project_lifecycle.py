@@ -60,13 +60,14 @@ def _profile(project_id: str) -> dict[str, Any]:
     if profile.get("adapter_type") != "local_process":
         raise LifecycleError("Only reviewed local_process profiles are supported by this lifecycle API.")
     argv = profile.get("argv")
-    if not isinstance(argv, list) or not argv or not all(isinstance(arg, str) and arg and "\\x00" not in arg for arg in argv):
+    if not isinstance(argv, list) or not argv or not all(isinstance(arg, str) and arg and "\x00" not in arg for arg in argv):
         raise LifecycleError("Launch profile argv must be a non-empty array of non-empty strings.")
-    executable = Path(argv[0]).name.lower()
+    # Do not accept paths to arbitrary executables, even if the basename is allowlisted.
+    executable = argv[0].lower()
     if executable.endswith(".exe"):
         executable = executable[:-4]
     if executable not in ALLOWED_EXECUTABLES:
-        raise LifecycleError("Executable is not on the SysCentre launch allowlist.")
+        raise LifecycleError("Executable must be an allowlisted command name, not an arbitrary path.")
     workspace = (WORKSPACES_ROOT / project_id).resolve()
     if workspace.parent != WORKSPACES_ROOT or not workspace.is_dir():
         raise LifecycleError("Project workspace is missing. Place reviewed source in its isolated workspace first.")
