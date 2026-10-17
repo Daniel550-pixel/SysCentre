@@ -71,8 +71,13 @@ def _profile(project_id: str) -> dict[str, Any]:
         executable = executable[:-4]
     if executable not in ALLOWED_EXECUTABLES:
         raise LifecycleError("Executable must be an allowlisted command name, not an arbitrary path.")
-    workspace = (WORKSPACES_ROOT / project_id).resolve()
-    if workspace.parent != WORKSPACES_ROOT or not workspace.is_dir():
+    # Normalize the configured root as well as the child. On Windows, tempfile
+    # and user paths can use different 8.3/long-path spellings; comparing a
+    # resolved child against an unresolved root incorrectly marks valid workspaces
+    # as missing or outside the workspace root.
+    workspace_root = WORKSPACES_ROOT.resolve()
+    workspace = (workspace_root / project_id).resolve()
+    if workspace.parent != workspace_root or not workspace.is_dir():
         raise LifecycleError("Project workspace is missing. Place reviewed source in its isolated workspace first.")
     cwd_value = profile.get("cwd", ".")
     if not isinstance(cwd_value, str) or Path(cwd_value).is_absolute():
