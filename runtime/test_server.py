@@ -1,4 +1,5 @@
 import json
+import io
 import tempfile
 import unittest
 from pathlib import Path
@@ -294,6 +295,69 @@ class RuntimeTests(unittest.TestCase):
     def test_static_architecture_analyzer_requires_indexed_repository(self):
         with self.assertRaisesRegex(ValueError, "has not been indexed"):
             analyze_indexed_repository("not-indexed-fixture")
+
+
+    def _make_http_handler(self, path, body=b""):
+        handler = object.__new__(server.Handler)
+        handler.path = path
+        handler.headers = {"Content-Length": str(len(body))}
+        handler.rfile = io.BytesIO(body)
+        handler.wfile = io.BytesIO()
+        handler.send_response = Mock()
+        handler.send_header = Mock()
+        handler.end_headers = Mock()
+        return handler
+
+    def test_hosting_post_route_requires_json_object_body(self):
+        handler = self._make_http_handler("/api/hosting/projects/networklab/start")
+        handler.headers["Content-Length"] = "0"
+
+        handler.do_POST()
+
+        handler.send_response.assert_called_once_with(400)
+        response = json.loads(handler.wfile.getvalue().decode("utf-8"))
+        self.assertFalse(response["ok"])
+        self.assertIn("Request body must be between 1 and 8192 bytes", response["error"])
+
+    def test_hosting_post_route_delegates_valid_json_body(self):
+        handler = self._make_http_handler(
+            "/api/hosting/projects/networklab/start",
+            body=b"{}",
+        )
+        expected = {
+            "ok": True,
+            "project_id": "networklab",
+            "state": "starting",
+            "subsystem": "syscentre-project-hosting",
+            "action": "start",
+        }
+
+        with patch("project_hosting.perform_hosting_action", return_value=expected) as action, \
+             patch.object(server, "record_event") as record_event:
+            handler.do_POST()
+
+        action.assert_called_once_with("networklab", "start")
+        record_event.assert_called_once()
+        handler.send_response.assert_called_once_with(200)
+        response = json.loads(handler.wfile.getvalue().decode("utf-8"))
+        self.assertEqual(response, expected)
+
+    def test_hosting_get_routes_share_overview_contract(self):
+        expected = {
+            "ok": True,
+            "subsystem": "syscentre-project-hosting",
+            "counts": {"total": 0},
+            "projects": [],
+        }
+        with patch("project_hosting.hosting_overview", return_value=expected) as overview:
+            for path in ("/api/hosting", "/api/hosting/projects"):
+                with self.subTest(path=path):
+                    handler = self._make_http_handler(path)
+                    handler.do_GET()
+                    handler.send_response.assert_called_once_with(200)
+                    response = json.loads(handler.wfile.getvalue().decode("utf-8"))
+                    self.assertEqual(response, expected)
+            self.assertEqual(overview.call_count, 2)
 
 
 if __name__ == "__main__":
