@@ -121,7 +121,8 @@ export default function App() {
   const [ingestJobs, setIngestJobs] = useState<IngestJob[]>([]);
   const [inventoryProjects, setInventoryProjects] = useState<InventoryProject[]>([]);
   const [runtimeProjects, setRuntimeProjects] = useState<RuntimeProject[]>([]);
-  const [hostingProjects, setHostingProjects] = useState<HostingProject[]>([]);\n  const [hostingSearch, setHostingSearch] = useState("");\n  const [hostingFilter, setHostingFilter] = useState("all");
+  const [hostingProjects, setHostingProjects] = useState<HostingProject[]>([]);
+  const [hostingSearch, setHostingSearch] = useState("");\n  const [hostingFilter, setHostingFilter] = useState("all");
   const [runtimeActionBusy, setRuntimeActionBusy] = useState<string | null>(null);
   const [architectures, setArchitectures] = useState<RepositoryArchitecture[]>([]);
   const [architectureAnalyses, setArchitectureAnalyses] = useState<Record<string, ArchitectureAnalysis>>({});
@@ -746,7 +747,8 @@ export default function App() {
                   {project.repository_url && <a href={project.repository_url} target="_blank" rel="noreferrer">Source ↗</a>}
                 </article>;
               })}
-              {!hostingProjects.length && <div className="empty-state">Hosting data unavailable. Confirm the local runtime is updated and reachable.</div>}\n              {hostingProjects.length > 0 && !hostingProjects.some((project) => { const query = hostingSearch.trim().toLowerCase(); const h = project.hosting; const matchesSearch = !query || [project.name, project.project_id, h.workspace || "", h.readiness_reason || "", h.adapter_type, h.state, h.health].join(" ").toLowerCase().includes(query); const matchesFilter = hostingFilter === "all" || (hostingFilter === "running" && h.state === "running") || (hostingFilter === "ready" && h.ready) || (hostingFilter === "setup" && (!h.configured || !h.ready)) || (hostingFilter === "unhealthy" && h.health === "unhealthy"); return matchesSearch && matchesFilter; }) && <div className="empty-state">No projects match these hosting filters. Clear the search or choose “All states”.</div>}
+              {!hostingProjects.length && <div className="empty-state">Hosting data unavailable. Confirm the local runtime is updated and reachable.</div>}
+              {hostingProjects.length > 0 && !hostingProjects.some((project) => { const query = hostingSearch.trim().toLowerCase(); const h = project.hosting; const matchesSearch = !query || [project.name, project.project_id, h.workspace || "", h.readiness_reason || "", h.adapter_type, h.state, h.health].join(" ").toLowerCase().includes(query); const matchesFilter = hostingFilter === "all" || (hostingFilter === "running" && h.state === "running") || (hostingFilter === "ready" && h.ready) || (hostingFilter === "setup" && (!h.configured || !h.ready)) || (hostingFilter === "unhealthy" && h.health === "unhealthy"); return matchesSearch && matchesFilter; }) && <div className="empty-state">No projects match these hosting filters. Clear the search or choose “All states”.</div>}
             </div>
             {projectMessage && <p className="panel-description" role="status">{projectMessage}</p>}
           </section>
