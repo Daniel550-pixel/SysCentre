@@ -117,7 +117,7 @@
 /* Runtime adapter readiness registry */
 .runtime-adapters-panel{scroll-margin-top:20px}
 .runtime-adapter-list{display:grid;border:1px solid #293142;border-radius:10px;overflow:hidden;background:#101722}
-.runtime-adapter-row{display:grid;grid-template-columns:minmax(145px,1.1fr) minmax(180px,1.5fr) auto auto;align-items:center;gap:14px;padding:11px 13px;border-bottom:1px solid #252c3a}
+.runtime-adapter-row{display:grid;grid-template-columns:minmax(145px,1.1fr) minmax(150px,1.2fr) auto auto minmax(180px,1.2fr) auto;align-items:center;gap:10px;padding:11px 13px;border-bottom:1px solid #252c3a}
 .runtime-adapter-row:last-child{border-bottom:0}
 .runtime-adapter-name{display:flex;flex-direction:column;gap:4px;min-width:0}
 .runtime-adapter-name strong{font-size:10px;color:#e2e8f3;overflow-wrap:anywhere}
@@ -126,9 +126,12 @@
 .runtime-adapter-status{font-size:8px;white-space:nowrap;padding:5px 7px;border-radius:5px}
 .runtime-adapter-status.unconfigured{color:#ffd18b;background:#352a1a;border:1px solid #5b4427}
 .runtime-adapter-status.configured{color:#91e2b9;background:#19352b;border:1px solid #2d5946}
+.runtime-adapter-actions{display:flex;flex-wrap:wrap;gap:5px}
+.runtime-adapter-actions .secondary-button{font-size:9px;padding:6px 7px}
 .runtime-adapter-row>a{font-size:9px;color:#aaa0ff;white-space:nowrap}
-@media(max-width:800px){.runtime-adapter-row{grid-template-columns:minmax(0,1fr) auto}.runtime-adapter-context{grid-column:1}.runtime-adapter-row>a{grid-column:2;grid-row:1}}
-@media(max-width:480px){.runtime-adapter-row{grid-template-columns:1fr}.runtime-adapter-context{grid-column:auto}.runtime-adapter-row>a{grid-column:auto;grid-row:auto}}
+@media(max-width:1100px){.runtime-adapter-row{grid-template-columns:minmax(130px,1fr) minmax(130px,1fr) auto auto}.runtime-adapter-actions{grid-column:1 / -1}.runtime-adapter-row>a{grid-column:4;grid-row:1}}
+@media(max-width:800px){.runtime-adapter-row{grid-template-columns:minmax(0,1fr) auto}.runtime-adapter-context{grid-column:1}.runtime-adapter-actions{grid-column:1 / -1}.runtime-adapter-row>a{grid-column:2;grid-row:1}}
+@media(max-width:480px){.runtime-adapter-row{grid-template-columns:1fr}.runtime-adapter-context{grid-column:auto}.runtime-adapter-actions{grid-column:auto}.runtime-adapter-row>a{grid-column:auto;grid-row:auto}}
 
 /* Evidence-backed per-repository application architecture explorer */
 .architecture-panel{scroll-margin-top:18px}
