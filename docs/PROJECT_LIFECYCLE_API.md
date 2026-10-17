@@ -27,6 +27,18 @@ The first command verifies/clones the repository into `~/.syscentre/workspaces/l
 
 If `SYSCENTRE_WORKSPACES` is set, the provisioning script and runtime use that workspace root.
 
+## Second integration: NetworkLab
+
+NetworkLab is provisioned to the isolated workspace `~/.syscentre/workspaces/networklab` and started as `python -m app.server` on `127.0.0.1:8501`. Its standard-library web layer needs no package installation. The `/healthz` endpoint verifies that the HTTP server responds; it does not certify VirtualBox, DHCP, guest operating systems, or end-to-end connectivity.
+
+From the SysCentre repository root in PowerShell:
+
+```powershell
+.\scripts\Install-SysCentreProject.ps1 -ProjectId networklab
+```
+
+Then use **Start** for NetworkLab in the hub and open `http://127.0.0.1:8501/`. The installer verifies the expected entrypoint files and Python 3.11+. It does not execute the project's own launcher or install packages. Starting/stopping this web server does not create or alter virtual networks or VMs. NetworkLab's separate POST API exposes infrastructure actions, so keep the interface local and trigger those actions only as deliberate, separately reviewed lab operations. The default port must be free.
+
 ## Enabling additional projects
 
 1. Review the repository and identify the real entrypoint and dependency instructions.
@@ -53,7 +65,7 @@ The example is illustrative. Use an actual command only after confirming its man
 
 ## Current limitations
 
-- Only Localhost-webapp has an enabled launch profile; the other catalogued projects remain disabled.
+- Localhost-webapp and NetworkLab have enabled launch profiles; the other catalogued projects remain disabled.
 - Supported lifecycle adapter: `local_process` only.
 - Process state is in memory and is lost when SysCentre restarts; child processes are not automatically adopted after restart.
 - Health is checked with a short HTTP request to the configured loopback URL. A process may need a few seconds after start before the health check passes.
