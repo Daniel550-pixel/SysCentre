@@ -44,6 +44,24 @@
         "package-lock.json",
         "node_modules/next/dist/bin/next"
       ]
+    },
+    "networklab": {
+      "enabled": true,
+      "adapter_type": "local_process",
+      "argv": [
+        "python",
+        "-m",
+        "app.server"
+      ],
+      "cwd": ".",
+      "healthcheck_url": "http://127.0.0.1:8501/healthz",
+      "display_url": "http://127.0.0.1:8501/",
+      "description": "Reviewed Python standard-library localhost server. Provision with the SysCentre installer; VM and network-changing actions are not triggered by starting the web process.",
+      "required_paths": [
+        "app/server.py",
+        "web/index.html",
+        "web/app.js"
+      ]
     }
   }
 }
