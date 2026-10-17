@@ -294,6 +294,12 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/api/runtime-sessions":
             from project_lifecycle import list_sessions
             self._send_json(200, list_sessions())
+        elif path in {"/api/hosting", "/api/hosting/projects"}:
+            from project_hosting import hosting_overview
+            try:
+                self._send_json(200, hosting_overview())
+            except RuntimeError as exc:
+                self._send_json(500, {"ok": False, "error": str(exc)})
         elif path == "/api/ingest-status":
             from repository_ingest import ingest_status
             params = parse_qs(parsed.query)
@@ -346,8 +352,9 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         parsed = urlsplit(self.path)
         lifecycle_match = re.fullmatch(r"/api/runtime-projects/([a-z0-9][a-z0-9-]{0,79})/(start|stop|restart)", parsed.path)
+        hosting_match = re.fullmatch(r"/api/hosting/projects/([a-z0-9][a-z0-9-]{0,79})/(start|stop|restart)", parsed.path)
         allowed_paths = {"/api/command", "/api/repositories/ingest", "/api/project-inventory"}
-        if parsed.path not in allowed_paths and not lifecycle_match:
+        if parsed.path not in allowed_paths and not lifecycle_match and not hosting_match:
             self._send_json(404, {"ok": False, "error": "Route not found"})
             return
         try:
@@ -357,16 +364,24 @@ class Handler(BaseHTTPRequestHandler):
             payload = json.loads(self.rfile.read(length).decode("utf-8"))
             if not isinstance(payload, dict):
                 raise ValueError("Request body must be a JSON object.")
-            if lifecycle_match:
-                from project_lifecycle import LifecycleError, restart_project, start_project, stop_project
-                project_id, action = lifecycle_match.groups()
-                actions = {"start": start_project, "stop": stop_project, "restart": restart_project}
+            if lifecycle_match or hosting_match:
+                if hosting_match:
+                    from project_hosting import perform_hosting_action
+                    from project_lifecycle import LifecycleError
+                    project_id, action = hosting_match.groups()
+                    action_runner = perform_hosting_action
+                else:
+                    from project_lifecycle import LifecycleError, restart_project, start_project, stop_project
+                    project_id, action = lifecycle_match.groups()
+                    actions = {"start": start_project, "stop": stop_project, "restart": restart_project}
+                    action_runner = lambda item_id, item_action: actions[item_action](item_id)
                 try:
-                    result = actions[action](project_id)
+                    result = action_runner(project_id, action)
                 except LifecycleError as exc:
                     self._send_json(409, {"ok": False, "error": str(exc)})
                     return
-                record_event("project.runtime_action", f"Project lifecycle action: {action}", {
+                record_event("project.hosting_action" if hosting_match else "project.runtime_action",
+                             f"Project lifecycle action: {action}", {
                     "project_id": project_id, "action": action, "state": result.get("state"),
                 })
                 self._send_json(200, result)
