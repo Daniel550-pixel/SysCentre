@@ -14,7 +14,7 @@ type Project = { project_id: string; name: string; repository_url: string; defau
 type SourceResult = { project_id: string; project_name: string; repository_url: string; path: string; blob_sha: string; size_bytes: number; excerpt: string };
 type InventoryProject = { id: string; name: string; status: string; category: string; candidate_repositories: string[]; description?: string; origin?: string; created_at?: string };
 type RuntimeProject = { project_id: string; name: string; repository_url: string; adapter_type: string; runtime_mode: string; execution_state: string; requires_approval: boolean; notes: string; system_type?: string; sector?: string; market_category?: string };
-type RuntimeSession = { project_id: string; name: string; configured: boolean; state: "running" | "stopped" | "not_configured" | string; health?: string; pid: number | null; started_at: number | null; log_path: string | null; url?: string | null };
+type RuntimeSession = { project_id: string; name: string; configured: boolean; ready?: boolean; readiness_reason?: string; state: "running" | "stopped" | "not_configured" | "setup_required" | string; health?: string; pid: number | null; started_at: number | null; log_path: string | null; url?: string | null };
 type IngestJob = { project_id: string; target_commit: string; branch: string; started_at: string; updated_at: string; status: string; files_seen: number; files_processed: number; files_indexed: number; files_skipped: number; error: string };
 type ArchitectureLayer = { name: string; role: string; components: string; evidence_paths: string[] };
 type ArchitectureFinding = {
@@ -681,16 +681,17 @@ export default function App() {
               {runtimeProjects.map((project) => {
                 const session = runtimeSessions.find((item) => item.project_id === project.project_id);
                 const configured = Boolean(session?.configured);
+                const ready = Boolean(session?.ready);
                 const running = session?.state === "running";
                 return <article className="runtime-adapter-row" key={project.project_id}>
                   <div className="runtime-adapter-name"><strong>{project.name}</strong><span>{project.system_type || project.project_id}</span></div>
                   <div className="runtime-adapter-context"><span>{project.sector || "Sector unclassified"}</span><span>{project.market_category || "Market unclassified"}</span></div>
-                  <span className={"runtime-adapter-status " + (configured ? "configured" : "unconfigured")}>{configured ? "Adapter configured" : "Setup required"}</span>
-                  <span className="runtime-adapter-status">{session?.state?.replaceAll("_", " ") || "State unavailable"}{session?.health ? " · " + session.health : ""}</span>
+                  <span className={"runtime-adapter-status " + (ready ? "configured" : "unconfigured")}>{!configured ? "Not configured" : ready ? "Ready to launch" : "Setup required"}</span>
+                  <span className="runtime-adapter-status" title={session?.readiness_reason || undefined}>{session?.state?.replaceAll("_", " ") || "State unavailable"}{session?.health ? " · " + session.health : ""}</span>
                   <div className="runtime-adapter-actions">
-                    <button className="secondary-button" type="button" disabled={!configured || running || Boolean(runtimeActionBusy)} onClick={() => void runRuntimeAction(project.project_id, "start")}>{runtimeActionBusy === project.project_id + ":start" ? "Starting…" : "Start"}</button>
+                    <button className="secondary-button" type="button" disabled={!ready || running || Boolean(runtimeActionBusy)} onClick={() => void runRuntimeAction(project.project_id, "start")}>{runtimeActionBusy === project.project_id + ":start" ? "Starting…" : "Start"}</button>
                     <button className="secondary-button" type="button" disabled={!configured || !running || Boolean(runtimeActionBusy)} onClick={() => void runRuntimeAction(project.project_id, "stop")}>{runtimeActionBusy === project.project_id + ":stop" ? "Stopping…" : "Stop"}</button>
-                    <button className="secondary-button" type="button" disabled={!configured || Boolean(runtimeActionBusy)} onClick={() => void runRuntimeAction(project.project_id, "restart")}>Restart</button>
+                    <button className="secondary-button" type="button" disabled={!ready || Boolean(runtimeActionBusy)} onClick={() => void runRuntimeAction(project.project_id, "restart")}>Restart</button>
                   </div>
                   {running && session?.url && <a href={session.url} target="_blank" rel="noreferrer">Open app ↗</a>}
                   <a href={project.repository_url} target="_blank" rel="noreferrer">Source ↗</a>
