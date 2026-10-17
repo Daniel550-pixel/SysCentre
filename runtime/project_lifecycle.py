@@ -12,6 +12,9 @@ import re
 import subprocess
 import threading
 import time
+from urllib.error import URLError
+from urllib.parse import urlsplit
+from urllib.request import urlopen
 from pathlib import Path
 from typing import Any
 
@@ -79,7 +82,24 @@ def _profile(project_id: str) -> dict[str, Any]:
         raise LifecycleError("Launch profile cwd escapes the project workspace.")
     if not cwd.is_dir():
         raise LifecycleError("Launch profile working directory does not exist.")
-    return {"argv": argv, "cwd": cwd, "healthcheck_url": profile.get("healthcheck_url", "")}
+    healthcheck_url = profile.get("healthcheck_url", "")
+    display_url = profile.get("display_url", healthcheck_url)
+    for field_name, candidate in (("healthcheck_url", healthcheck_url), ("display_url", display_url)):
+        if candidate:
+            parsed = urlsplit(candidate)
+            if parsed.scheme != "http" or parsed.hostname not in {"127.0.0.1", "localhost", "::1"} or not parsed.port:
+                raise LifecycleError(f"{field_name} must use an explicit HTTP loopback URL and port.")
+    return {"argv": argv, "cwd": cwd, "healthcheck_url": healthcheck_url, "display_url": display_url}
+
+
+def _probe_health(url: str) -> str:
+    if not url:
+        return "not_configured"
+    try:
+        with urlopen(url, timeout=0.5) as response:
+            return "healthy" if 200 <= response.status < 400 else "unhealthy"
+    except (OSError, URLError, ValueError):
+        return "unhealthy"
 
 
 def list_sessions() -> dict[str, Any]:
@@ -93,15 +113,20 @@ def list_sessions() -> dict[str, Any]:
             proc_info = _PROCESSES.get(project_id)
             proc = proc_info.get("process") if proc_info else None
             running = bool(proc and proc.poll() is None)
-            configured = isinstance(profiles.get(project_id), dict) and profiles[project_id].get("enabled") is True
+            profile = profiles.get(project_id)
+            configured = isinstance(profile, dict) and profile.get("enabled") is True
+            state = "running" if running else ("stopped" if configured else "not_configured")
+            health = _probe_health(profile.get("healthcheck_url", "")) if running and isinstance(profile, dict) else ("stopped" if configured else "not_configured")
             sessions.append({
                 "project_id": project_id,
                 "name": project.get("name", project_id),
                 "configured": configured,
-                "state": "running" if running else ("stopped" if configured else "not_configured"),
+                "state": state,
+                "health": health,
                 "pid": proc.pid if running else None,
                 "started_at": proc_info.get("started_at") if running and proc_info else None,
                 "log_path": proc_info.get("log_path") if proc_info else None,
+                "url": profile.get("display_url") if running and isinstance(profile, dict) else None,
             })
         return {"sessions": sessions, "count": len(sessions), "workspace_root": str(WORKSPACES_ROOT)}
 
@@ -112,7 +137,7 @@ def start_project(project_id: str) -> dict[str, Any]:
     with _LOCK:
         current = _PROCESSES.get(project_id)
         if current and current["process"].poll() is None:
-            return {"ok": True, "project_id": project_id, "state": "running", "pid": current["process"].pid, "already_running": True}
+            return {"ok": True, "project_id": project_id, "state": "running", "health": "pending", "url": profile["display_url"], "pid": current["process"].pid, "already_running": True}
         log_dir = Path.home() / ".syscentre" / "logs"
         log_dir.mkdir(parents=True, exist_ok=True)
         log_path = log_dir / f"{project_id}.log"
@@ -137,7 +162,7 @@ def start_project(project_id: str) -> dict[str, Any]:
             "process": process, "configured": True, "started_at": time.time(),
             "log_path": str(log_path), "project_name": project.get("name", project_id),
         }
-        return {"ok": True, "project_id": project_id, "state": "starting", "pid": process.pid, "log_path": str(log_path)}
+        return {"ok": True, "project_id": project_id, "state": "starting", "health": "pending", "url": profile["display_url"], "pid": process.pid, "log_path": str(log_path)}
 
 
 def stop_project(project_id: str) -> dict[str, Any]:
