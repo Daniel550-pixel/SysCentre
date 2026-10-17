@@ -11,7 +11,7 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$RepositoryPath = (Split-Path -Parent $PSScriptRoot)
+    [string]$RepositoryPath = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -142,7 +142,7 @@ function Invoke-CommitAndPush {
 }
 
 # Resolve the repository root and verify the Git CLI before showing the menu.
-$resolvedPath = (Resolve-Path -LiteralPath $RepositoryPath).Path
+if ([string]::IsNullOrWhiteSpace($RepositoryPath)) {`n    $RepositoryPath = Join-Path $PSScriptRoot '..'`n}`n$resolvedPath = (Resolve-Path -LiteralPath $RepositoryPath).Path
 $root = (& git -C $resolvedPath rev-parse --show-toplevel 2>$null | Select-Object -First 1)
 if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($root)) {
     throw "The specified path is not inside a Git repository: $resolvedPath"
