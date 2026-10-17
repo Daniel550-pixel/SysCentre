@@ -69,6 +69,8 @@ Turn SysCentre from a portfolio inventory into the single entry point for every 
 - [x] Policy-gated lifecycle API: session inventory plus start/stop/restart routes, allowlisted executable names, isolated workspaces, shell disabled, and per-project logs.
 - [x] Hub UI lifecycle controls, process/health state, and Open app link.
 - [x] First source-backed launch profile for Localhost-webapp, with a dedicated PowerShell workspace provisioning script and locked dependency installation opt-in.
+- [x] Second source-backed launch profile for NetworkLab: isolated workspace, Python standard-library server, loopback-only health check, and explicit boundary excluding automatic VirtualBox/network changes.
+- [ ] Run NetworkLab through SysCentre on the user's machine and confirm startup, health, stop, and restart behavior.
 - [x] Loopback-only HTTP health probes and tests for unsafe health URLs and healthy-session reporting.
 - [ ] Run Localhost-webapp on a user's machine and confirm end-to-end startup, health, stop, and restart behavior.
 - [ ] Process recovery/adoption after SysCentre restarts.
