@@ -5,8 +5,40 @@
     "shell": false,
     "workspace_root_env": "SYSCENTRE_WORKSPACES",
     "default_workspace_root": "~/.syscentre/workspaces",
-    "allowed_executables": ["python", "python3", "node", "npm", "npx", "powershell", "pwsh", "dotnet"],
-    "requirements": ["reviewed entrypoint", "dependencies installed", "isolated workspace", "documented port and health check where applicable"]
+    "allowed_executables": [
+      "python",
+      "python3",
+      "node",
+      "npm",
+      "npx",
+      "powershell",
+      "pwsh",
+      "dotnet"
+    ],
+    "requirements": [
+      "reviewed entrypoint",
+      "dependencies installed",
+      "isolated workspace",
+      "documented port and health check where applicable"
+    ]
   },
-  "profiles": {}
+  "profiles": {
+    "localhost-webapp": {
+      "enabled": true,
+      "adapter_type": "local_process",
+      "argv": [
+        "node",
+        "node_modules/next/dist/bin/next",
+        "dev",
+        "--hostname",
+        "127.0.0.1",
+        "--port",
+        "4180"
+      ],
+      "cwd": ".",
+      "healthcheck_url": "http://127.0.0.1:4180/",
+      "display_url": "http://127.0.0.1:4180/",
+      "description": "Verified Next.js starter repository; provision its isolated workspace and dependencies with scripts/Install-SysCentreProject.ps1 before starting."
+    }
+  }
 }
