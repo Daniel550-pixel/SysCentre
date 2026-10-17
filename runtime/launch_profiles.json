@@ -38,7 +38,12 @@
       "cwd": ".",
       "healthcheck_url": "http://127.0.0.1:4180/",
       "display_url": "http://127.0.0.1:4180/",
-      "description": "Verified Next.js starter repository; provision its isolated workspace and dependencies with scripts/Install-SysCentreProject.ps1 before starting."
+      "description": "Verified Next.js starter repository; provision its isolated workspace and dependencies with scripts/Install-SysCentreProject.ps1 before starting.",
+      "required_paths": [
+        "package.json",
+        "package-lock.json",
+        "node_modules/next/dist/bin/next"
+      ]
     }
   }
 }
