@@ -84,6 +84,33 @@ class ProjectLifecycleTests(unittest.TestCase):
         with self.assertRaisesRegex(lifecycle.LifecycleError, "command name"):
             lifecycle.start_project("demo-project")
 
+    def test_non_loopback_health_urls_are_rejected(self):
+        self.write_profile({"enabled": True, "adapter_type": "local_process",
+                            "argv": ["python", "-V"], "cwd": ".",
+                            "healthcheck_url": "http://example.com:80/"})
+        with self.assertRaisesRegex(lifecycle.LifecycleError, "loopback"):
+            lifecycle.start_project("demo-project")
+
+    def test_running_session_reports_http_health_and_open_url(self):
+        self.write_profile({"enabled": True, "adapter_type": "local_process",
+                            "argv": ["node", "server.js"], "cwd": ".",
+                            "healthcheck_url": "http://127.0.0.1:4180/",
+                            "display_url": "http://127.0.0.1:4180/"})
+        process = type("FakeProcess", (), {"poll": lambda self: None, "pid": 1234})()
+        lifecycle._PROCESSES["demo-project"] = {
+            "process": process, "configured": True, "started_at": 1.0,
+            "log_path": "demo.log",
+        }
+        response = type("FakeResponse", (), {
+            "status": 200,
+            "__enter__": lambda self: self,
+            "__exit__": lambda self, *args: None,
+        })()
+        with patch.object(lifecycle, "urlopen", return_value=response):
+            session = lifecycle.list_sessions()["sessions"][0]
+        self.assertEqual(session["health"], "healthy")
+        self.assertEqual(session["url"], "http://127.0.0.1:4180/")
+
 
 if __name__ == "__main__":
     unittest.main()
