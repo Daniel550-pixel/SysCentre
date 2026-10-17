@@ -65,7 +65,7 @@ Turn SysCentre from a portfolio inventory into the single entry point for every 
 - [x] Canonical 28-project catalog and architecture inventory exist.
 - [x] Per-project runtime adapter slots and readiness UI exist.
 - [x] Source indexing, architecture analysis, cross-repository search, and audit events exist.
-- [ ] Unified project launchpad with verified interface access.
+- [x] Initial unified project hub launchpad with repository/source/index/architecture access (live deployments and runnable adapters remain unverified).
 - [ ] Source-backed launch profiles and setup checklists for implemented projects.
 - [ ] Tested lifecycle adapters and per-project health checks.
 - [ ] Full 28-project readiness report and final smoke-test results.
