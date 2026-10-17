@@ -10,7 +10,7 @@ type RuntimeStatus = { name: string; state: string; host: string; port: number; 
 type RuntimeEvent = { id: string; timestamp: string; type: string; message: string; details: Record<string, unknown> };
 type CommandResponse = { ok: boolean; command: string; result?: unknown; error?: string };
 type PortfolioDimension = "business_model" | "system_type" | "sector" | "market_category";
-type Project = { project_id: string; name: string; repository_url: string; default_branch: string; description: string; latest_commit: string; indexed_at: string; file_count: number; text_file_count: number; skipped_file_count: number; status: string; category?: string; purpose?: string; capabilities?: string[]; interface_kind?: string; interface_status?: string; business_model?: string; system_type?: string; sector?: string; target_market?: string; market_segments?: string[]; market_category?: string; portfolio_role?: string; lifecycle_stage?: string; monetization_status?: string; market_validation?: string; classification_basis?: string; classification_note?: string };
+type Project = { project_id: string; name: string; repository_url: string; default_branch: string; description: string; latest_commit: string; indexed_at: string; file_count: number; text_file_count: number; skipped_file_count: number; status: string; category?: string; purpose?: string; capabilities?: string[]; interface_kind?: string; interface_status?: string; interface_source_url?: string; business_model?: string; system_type?: string; sector?: string; target_market?: string; market_segments?: string[]; market_category?: string; portfolio_role?: string; lifecycle_stage?: string; monetization_status?: string; market_validation?: string; classification_basis?: string; classification_note?: string };
 type SourceResult = { project_id: string; project_name: string; repository_url: string; path: string; blob_sha: string; size_bytes: number; excerpt: string };
 type InventoryProject = { id: string; name: string; status: string; category: string; candidate_repositories: string[]; description?: string; origin?: string; created_at?: string };
 type RuntimeProject = { project_id: string; name: string; repository_url: string; adapter_type: string; runtime_mode: string; execution_state: string; requires_approval: boolean; notes: string; system_type?: string; sector?: string; market_category?: string };
@@ -134,6 +134,7 @@ export default function App() {
   const [newProjectRepository, setNewProjectRepository] = useState("");
   const [registeringProject, setRegisteringProject] = useState(false);
   const [projectSearch, setProjectSearch] = useState("");
+  const [hubSearch, setHubSearch] = useState("");
   const [portfolioDimension, setPortfolioDimension] = useState<PortfolioDimension>("business_model");
   const [portfolioGroupFilter, setPortfolioGroupFilter] = useState("");
   const [portfolioFilters, setPortfolioFilters] = useState<Record<PortfolioDimension, string>>({ business_model: "", system_type: "", sector: "", market_category: "" });
@@ -300,6 +301,9 @@ export default function App() {
   }
 
   const uptime = status ? formatUptime(status.uptime_seconds) : "—";
+  const hubProjects = projects.filter((project) => [project.name, project.project_id, project.purpose, project.interface_kind, project.interface_status].some((value) => value?.toLowerCase().includes(hubSearch.trim().toLowerCase())));
+  const configuredAdapterCount = runtimeProjects.filter((project) => project.adapter_type !== "unconfigured" && project.runtime_mode !== "not_configured").length;
+  const sourceVerifiedCount = architectures.filter((item) => item.architecture_status === "source-verified").length;
   const portfolioGroups = projects.reduce<Record<string, Project[]>>((groups, project) => {
     const label = dimensionValue(project, portfolioDimension);
     (groups[label] ??= []).push(project);
@@ -324,7 +328,8 @@ export default function App() {
         </div>
         <div className="workspace-label">WORKSPACE</div>
         <nav className="nav-list" aria-label="Main navigation">
-          <a className="nav-item active" href="#portfolio"><Gauge size={17} /><span>Executive portfolio</span><ChevronRight className="nav-chevron" size={15} /></a>
+          <a className="nav-item active" href="#hub"><Layers3 size={17} /><span>Project hub</span><ChevronRight className="nav-chevron" size={15} /></a>
+          <a className="nav-item" href="#portfolio"><Gauge size={17} /><span>Executive portfolio</span></a>
           <a className="nav-item" href="#projects"><FolderGit2 size={17} /><span>Project registry</span></a>
           <a className="nav-item" href="#architectures"><Layers3 size={17} /><span>App architectures</span></a>
           <a className="nav-item" href="#runtime"><Cpu size={17} /><span>Runtime</span></a>
@@ -355,6 +360,39 @@ export default function App() {
           </section>
 
           {!connected && <div className="connection-alert"><WifiOff size={18} /><div><strong>Runtime not detected</strong><p>Start the Python runtime to populate live system data. The dashboard will reconnect automatically.</p></div><code>python .\runtime\server.py</code></div>}
+
+          <section className="panel projects-panel hub-panel" id="hub">
+            <div className="panel-header"><div><div className="panel-kicker">UNIFIED PROJECT ACCESS</div><h2>Project hub</h2></div><span className="project-count">{projects.length} projects</span></div>
+            <p className="panel-description">One entry point to every registered system. Open its source, inspect its architecture, index its code, and check whether a verified runtime adapter exists. A repository link is not a claim that the app is deployed or runnable.</p>
+            <div className="hub-metrics">
+              <article><span>Registered</span><strong>{projects.length}</strong><small>Canonical repositories</small></article>
+              <article><span>Source-verified</span><strong>{sourceVerifiedCount}</strong><small>Architecture evidence found</small></article>
+              <article><span>Runtime adapters configured</span><strong>{configuredAdapterCount}</strong><small>Does not imply health</small></article>
+              <article><span>Deployment URLs verified</span><strong>0</strong><small>Not yet confirmed in this hub</small></article>
+            </div>
+            <div className="project-toolbar"><input className="project-filter" value={hubSearch} onChange={(event) => setHubSearch(event.target.value)} placeholder="Find any project by name, purpose or interface…" aria-label="Search project hub" /><span className="project-count">{hubProjects.length} shown</span></div>
+            <div className="hub-project-grid">
+              {hubProjects.map((project) => {
+                const architecture = architectures.find((item) => item.project_id === project.project_id);
+                const adapter = runtimeProjects.find((item) => item.project_id === project.project_id);
+                const indexed = project.status !== "registered";
+                const configured = Boolean(adapter && adapter.adapter_type !== "unconfigured" && adapter.runtime_mode !== "not_configured");
+                return <article className="hub-project-card" key={project.project_id}>
+                  <div className="hub-project-card-head"><div><strong>{project.name}</strong><span>{project.interface_kind || project.category || "Project"}</span></div><span className={"hub-state " + (configured ? "configured" : indexed ? "indexed" : "setup")}>{configured ? "Adapter configured" : indexed ? "Source indexed" : "Setup required"}</span></div>
+                  <p>{project.purpose || "Purpose not yet documented in the canonical catalog."}</p>
+                  <div className="hub-project-meta"><span>Architecture: {architecture ? architecture.architecture_status.replaceAll("-", " ") : "Unavailable"}</span><span>Interface: {project.interface_status || "Not verified"}</span></div>
+                  <div className="hub-project-actions">
+                    <a href={project.repository_url} target="_blank" rel="noreferrer">Open repository ↗</a>
+                    {project.interface_source_url && <a href={project.interface_source_url} target="_blank" rel="noreferrer">Open UI source ↗</a>}
+                    <a href={"#architectures"} onClick={() => { setArchitectureSearch(project.name); setArchitectureStatusFilter("all"); }}>Architecture ↗</a>
+                    <button className="secondary-button project-index-button" disabled={ingesting !== null} onClick={() => void indexProject(project.project_id, project.name)}>{ingesting === project.project_id ? "Indexing…" : indexed ? "Re-index source" : "Index source"}</button>
+                  </div>
+                </article>;
+              })}
+              {!hubProjects.length && <div className="empty-state">No projects match this search.</div>}
+            </div>
+            <div className="project-disclaimer"><ShieldCheck size={14} /><span>Safety boundary: no arbitrary project code is executed from this hub. Launch controls remain disabled until a project-specific adapter and health check are verified.</span></div>
+          </section>
 
           <section className="executive-portfolio" id="portfolio">
             <div className="portfolio-header">
