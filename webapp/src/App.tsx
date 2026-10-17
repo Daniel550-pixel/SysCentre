@@ -168,6 +168,7 @@ export default function App() {
       if (responses[5].ok) { const registry = (await responses[5].json()) as { projects: RuntimeProject[] }; setRuntimeProjects(registry.projects ?? []); }
       if (responses[6].ok) { const inventory = (await responses[6].json()) as { repositories: RepositoryArchitecture[] }; setArchitectures(inventory.repositories ?? []); }
       if (responses[7].ok) { const hosting = (await responses[7].json()) as HostingOverview; setHostingProjects(hosting.projects ?? []); }
+      else { setHostingProjects([]); }
       setStatus(nextStatus);
       setEvents(nextEvents.events ?? []);
       setConnected(true);
@@ -175,6 +176,7 @@ export default function App() {
     } catch {
       setConnected(false);
       setStatus(null);
+      setHostingProjects([]);
     }
   }, []);
 
