@@ -682,7 +682,6 @@ export default function App() {
                 const session = runtimeSessions.find((item) => item.project_id === project.project_id);
                 const configured = Boolean(session?.configured) && project.adapter_type !== "unconfigured" && project.runtime_mode !== "not_configured";
                 const running = session?.state === "running";
-                const actionBusy = runtimeActionBusy?.startsWith(project.project_id + ":") ?? false;
                 return <article className="runtime-adapter-row" key={project.project_id}>
                   <div className="runtime-adapter-name"><strong>{project.name}</strong><span>{project.system_type || project.project_id}</span></div>
                   <div className="runtime-adapter-context"><span>{project.sector || "Sector unclassified"}</span><span>{project.market_category || "Market unclassified"}</span></div>
