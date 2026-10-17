@@ -291,6 +291,9 @@ class Handler(BaseHTTPRequestHandler):
                 registry = json.load(handle)
             projects = registry.get("projects", [])
             self._send_json(200, {"projects": projects, "count": len(projects), "runnable": sum(1 for item in projects if item.get("runtime_mode") != "not_configured" and item.get("adapter_type") != "unconfigured")})
+        elif path == "/api/runtime-sessions":
+            from project_lifecycle import list_sessions
+            self._send_json(200, list_sessions())
         elif path == "/api/ingest-status":
             from repository_ingest import ingest_status
             params = parse_qs(parsed.query)
@@ -342,7 +345,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         parsed = urlsplit(self.path)
-        if parsed.path not in {"/api/command", "/api/repositories/ingest", "/api/project-inventory"}:
+        lifecycle_match = re.fullmatch(r"/api/runtime-projects/([a-z0-9][a-z0-9-]{0,79})/(start|stop|restart)", parsed.path)
+        allowed_paths = {"/api/command", "/api/repositories/ingest", "/api/project-inventory"}
+        if parsed.path not in allowed_paths and not lifecycle_match:
             self._send_json(404, {"ok": False, "error": "Route not found"})
             return
         try:
@@ -352,7 +357,20 @@ class Handler(BaseHTTPRequestHandler):
             payload = json.loads(self.rfile.read(length).decode("utf-8"))
             if not isinstance(payload, dict):
                 raise ValueError("Request body must be a JSON object.")
-            if parsed.path == "/api/project-inventory":
+            if lifecycle_match:
+                from project_lifecycle import LifecycleError, restart_project, start_project, stop_project
+                project_id, action = lifecycle_match.groups()
+                actions = {"start": start_project, "stop": stop_project, "restart": restart_project}
+                try:
+                    result = actions[action](project_id)
+                except LifecycleError as exc:
+                    self._send_json(409, {"ok": False, "error": str(exc)})
+                    return
+                record_event("project.runtime_action", f"Project lifecycle action: {action}", {
+                    "project_id": project_id, "action": action, "state": result.get("state"),
+                })
+                self._send_json(200, result)
+            elif parsed.path == "/api/project-inventory":
                 self._send_json(201, register_inventory_project(payload))
             elif parsed.path == "/api/command":
                 if not isinstance(payload.get("command"), str):
